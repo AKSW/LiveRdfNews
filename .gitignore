@@ -9,3 +9,5 @@
 .settings
 */log
 */target
+rdflivenews-crawler/src/main/resources/config.ini
+rdflivenews-core/src/main/resources/config.ini

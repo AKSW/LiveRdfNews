@@ -1,2 +1,0 @@
-http://www.nytimes.com/services/xml/rss/nyt/GlobalHome.xml
-http://www.washingtonpost.com/rss/homepage

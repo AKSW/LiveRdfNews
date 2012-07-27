@@ -1,0 +1,17 @@
+[timeSlice]
+; the number of milliseconds a time slice should include
+duration = 100000
+
+[crawl]
+;timeout in milliseconds a crawler tries to get the page content  
+timeout = 100000
+;timeout after which the rss feeds get refreshed in ms (default 30mins)
+updateRssInterval = 1800000
+numberOfThreads = 10
+
+[rss]
+feedlist = rss-list.txt
+
+[database]
+directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
+cache = 10
