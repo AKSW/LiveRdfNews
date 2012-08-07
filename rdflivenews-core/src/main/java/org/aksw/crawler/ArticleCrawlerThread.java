@@ -8,14 +8,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 
 import org.aksw.NewsCrawler;
 import org.aksw.concurrency.QueueManager;
 import org.aksw.index.IndexManager;
-import org.aksw.index.NewsArticle;
-import org.aksw.nlp.ner.StanfordNLPNamedEntityRecognition;
-import org.aksw.nlp.pos.StanfordNLPPartOfSpeechTagger;
+import org.aksw.index.Sentence;
 import org.aksw.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
 import org.apache.log4j.Logger;
 
@@ -33,10 +31,6 @@ public class ArticleCrawlerThread extends Thread {
     private DateFormat format   = new SimpleDateFormat("yyyy/MM/dd");
     private Logger logger       = Logger.getLogger(ArticleCrawlerThread.class);
     
-    // every crawler gets a pos and ner tagger
-    private StanfordNLPPartOfSpeechTagger posTagger         = new StanfordNLPPartOfSpeechTagger();
-    private StanfordNLPNamedEntityRecognition nerTagger     = new StanfordNLPNamedEntityRecognition();
-    
     /**
      * 
      */
@@ -50,10 +44,10 @@ public class ArticleCrawlerThread extends Thread {
             if ( uri != null ) {
                 
                 logger.debug("Starting to crawl uri: " + uri);
-                NewsArticle article = crawlArticle(uri);
+                Set<Sentence> sentences = crawlArticle(uri);
                 
-                if ( article != null ) 
-                    IndexManager.getInstance().addNewsArticle(article);    
+                if ( sentences != null ) 
+                    IndexManager.getInstance().addSentences(sentences);    
             }
             // wait so that we dont run this method over and over if no rss feeds are avaiable
             try {
@@ -73,32 +67,33 @@ public class ArticleCrawlerThread extends Thread {
      * @param url
      * @return
      */
-    public NewsArticle crawlArticle(String url) {
+    public Set<Sentence> crawlArticle(String url) {
         
         // we need to save every article to the db because we need to know if 
         // we have crawled this article before
-        NewsArticle article = new NewsArticle();
+        Set<Sentence> sentences = new HashSet<Sentence>();
         
         try {
             
             JResult res = fetcher.fetchAndExtract(url, NewsCrawler.CONFIG.getIntegerSetting("crawl", "timeout"), true);
             
-            article.setArticleUrl(url);
-            article.setImageUrl(res.getImageUrl());
-            article.setTitle(res.getTitle());
             
-            // some articles are read protected
+            // some articles are read protected so they only show a small warning
             if ( res.getText() != null && res.getText().length() > 1000 ) {
 
-                article.setText(res.getText());
-                article.setNerTaggedText(nerTagger.getAnnotatedSentences(article.getText()));
-                article.setPosTaggedText(posTagger.getAnnotatedSentence(article.getText()));
+                for ( String sentenceText : StanfordNLPSentenceBoundaryDisambiguation.getSentences(res.getText())) {
+                    
+                    Sentence sentence = new Sentence();
+                    sentence.setArticleUrl(url);
+                    sentence.setText(sentenceText);
+                    sentence.setTimeSliceID(NewsCrawler.TIME_SLICE_ID);
+                    sentence.setExtractionDate(this.parseDate(res.getDate()));
+                    
+                    sentences.add(sentence);
+                }
             }
-            article.setTimeSliceID(NewsCrawler.TIME_SLICE_ID);
-            article.setExtractionDate(this.parseDate(res.getDate()));
-            article.setKeywords(res.getKeywords() != null ? new HashSet<String>(res.getKeywords()) : new HashSet<String>());
             
-            return article;
+            return sentences;
         }
         catch (IllegalArgumentException iae) {
             

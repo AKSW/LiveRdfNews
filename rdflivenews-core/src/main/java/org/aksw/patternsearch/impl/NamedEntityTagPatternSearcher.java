@@ -4,8 +4,12 @@
 package org.aksw.patternsearch.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.aksw.pair.Entity;
+import org.aksw.pair.EntityPair;
 import org.aksw.pattern.DefaultPattern;
 import org.aksw.pattern.Pattern;
 import org.aksw.patternsearch.PatternSearcher;
@@ -32,8 +36,9 @@ public class NamedEntityTagPatternSearcher implements PatternSearcher {
             else {
                 
                 Pattern pattern             = new DefaultPattern();
-                pattern.setArgumentOne(mergedSentence.get(i).substring(0, mergedSentence.get(i).lastIndexOf("_")));
-                pattern.setArgumentOneType(mergedSentence.get(i).substring(mergedSentence.get(i).lastIndexOf("_") + 1));
+                Entity firstEntity          = new Entity(mergedSentence.get(i).substring(0, mergedSentence.get(i).lastIndexOf("_")), 
+                                                         mergedSentence.get(i).substring(mergedSentence.get(i).lastIndexOf("_") + 1));
+                Entity secondEntity         = null;
                 
                 List<String> nlrWithoutTags = new ArrayList<String>();
                 List<String> nlrWithTags    = new ArrayList<String>();
@@ -51,8 +56,8 @@ public class NamedEntityTagPatternSearcher implements PatternSearcher {
                     // pattern is finished, so add the second argument
                     else {
 
-                        pattern.setArgumentTwo(argument2.substring(0, argument2.lastIndexOf("_")));
-                        pattern.setArgumentTwoType(argument2.substring(argument2.lastIndexOf("_") + 1));
+                        secondEntity = new Entity(argument2.substring(0, argument2.lastIndexOf("_")), 
+                                                  argument2.substring(argument2.lastIndexOf("_") + 1));
                         
                         i = j - 1;
                         break;
@@ -62,8 +67,9 @@ public class NamedEntityTagPatternSearcher implements PatternSearcher {
                 // the last pattern of a sentence will never have a closing argument
                 // also filter out empty patterns
                 if ( nlrWithoutTags != null && !nlrWithoutTags.isEmpty() && 
-                        pattern.getArgumentTwo() != null && !pattern.getArgumentTwo().isEmpty() ) {
+                        secondEntity != null && !secondEntity.getLabel().isEmpty() ) {
 
+                    pattern.addLearnedFromEntities(new EntityPair(firstEntity,secondEntity));
                     pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " "));
                     pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " "));
                     

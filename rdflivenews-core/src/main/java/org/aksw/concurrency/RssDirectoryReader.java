@@ -67,30 +67,19 @@ public class RssDirectoryReader {
                 reader = new XmlReader(new URL(feedUrl));
                 SyndFeed feed = new SyndFeedInput().build(reader);
 
-                for (Iterator i = feed.getEntries().iterator(); i.hasNext();) {
+                for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();) {
 
-                    String link = ((SyndEntry) i.next()).getLink();
+                    String link = syndEntryIterator.next().getLink();
 
-                    try {
+                    // we only want to add the uri if the uri is not already
+                    // in the queue or in the database
+                    if (!QueueManager.getInstance().isUriQueued(link) && IndexManager.getInstance().isNewArticle(link)) {
 
-                        // some news feeds give urls like this:
-                        // tncms-asset-3e78f173-9c8d-59f0-bb31-13307a60d373
-                        URL url = new URL(link);
-
-                        // we only want to add the uri if the uri is not already
-                        // in the queue or in the database
-                        if (!QueueManager.getInstance().isUriQueued(link) && IndexManager.getInstance().isNewArticle(link)) {
-
-                            QueueManager.getInstance().addArticleToCrawlQueue(link);
-                            logger.info("Added new entry to queue: " + link);
-                        }
-                        else
-                            logger.info("Article already known... skipping: " + link);
+                        QueueManager.getInstance().addArticleToCrawlQueue(link);
+                        logger.info("Added new entry to queue: " + link);
                     }
-                    catch (MalformedURLException mue) {
-
-                        logger.info("Discarding because not proper url: " + link);
-                    }
+                    else
+                        logger.info("Article already known... skipping: " + link);
                 }
             }
             catch (ParsingFeedException pfe) {

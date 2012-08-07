@@ -22,7 +22,7 @@ public final class StanfordNLPSentenceBoundaryDisambiguation {
      * @param text
      * @return
      */
-	public List<String> getSentences(String text) {
+	public static List<String> getSentences(String text) {
 
 		List<String> sentences = new ArrayList<String>();
 		

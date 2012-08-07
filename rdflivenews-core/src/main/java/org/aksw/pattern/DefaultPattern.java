@@ -3,6 +3,18 @@
  */
 package org.aksw.pattern;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.aksw.pair.Entity;
+import org.aksw.pair.EntityPair;
+import org.aksw.pair.Pair;
+
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -12,33 +24,46 @@ public class DefaultPattern implements Pattern {
 
     private String naturalLanguageRepresentation;
     private String naturalLanguageRepresentationWithTags;
-    private String argumentOne;
-    private String argumentTwo;
-    private String argumentOneType;
-    private String argumentTwoType;
     
+    private Map<Integer,EntityPair> entityPairs;
+    
+    private int totalOccurrence;
+    private Map<String, Integer> typesFirstEntity;
+    private Map<String, Integer> typesSecondEntity;
+    private String favouriteTypeSecondEntity;
+    private String favouriteTypeFirstEntity;
+    private Set<Integer> luceneSentenceIds;
+    
+    /**
+     * 
+     * @param patternString
+     */
     public DefaultPattern(String patternString) {
 
+        this.entityPairs = new HashMap<Integer,EntityPair>();
+        this.typesFirstEntity = new HashMap<String,Integer>();
+        this.typesSecondEntity = new HashMap<String,Integer>();
+        this.luceneSentenceIds = new HashSet<Integer>();
+        this.favouriteTypeFirstEntity = "";
+        this.favouriteTypeSecondEntity = "";
         this.naturalLanguageRepresentation = patternString;
+        this.totalOccurrence = 1;
     }
 
-    public DefaultPattern() {
-
-        // TODO Auto-generated constructor stub
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
+    /**
+     * 
      */
-    @Override
-    public String toString() {
+    public DefaultPattern() {
+        
+        this("N/A");
+    }
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("NLR: " +  naturalLanguageRepresentation);
-        builder.append("\nNLR-T: " + naturalLanguageRepresentationWithTags);
-        builder.append("\nARG1: " + argumentOne +"_"+ argumentOneType);
-        builder.append("\nARG2: " + argumentTwo +"_"+ argumentTwoType);
-        return builder.toString();
+    /**
+     * 
+     */
+    public void increaseOccurrence() {
+
+        this.totalOccurrence++;
     }
 
     /**
@@ -57,38 +82,153 @@ public class DefaultPattern implements Pattern {
         this.naturalLanguageRepresentationWithTags = patternStringWithTags;
     }
 
-    public void setArgumentOne(String argumentOne) {
-
-        this.argumentOne = argumentOne;
-    }
-
-    public void setArgumentTwo(String argumentTwo) {
-
-        this.argumentTwo = argumentTwo; 
-    }
-
-    public void setArgumentTwoType(String argumentTwoType) {
-
-        this.argumentTwoType = argumentTwoType;
-    }
-
-    public void setArgumentOneType(String argumentOneType) {
-
-        this.argumentOneType = argumentOneType;
-    }
-
-    public String getArgumentOne() {
-
-        return this.argumentOne;
-    }
-    
-    public String getArgumentTwo() {
-
-        return this.argumentTwo;
-    }
-
+    /**
+     * 
+     */
     public String getNaturalLanguageRepresentation() {
 
         return this.naturalLanguageRepresentation;
+    }
+    
+    /**
+     * 
+     */
+    public void setFavouriteTypeFirstEntity(String favouriteTypeFirstEntity) {
+
+        this.favouriteTypeFirstEntity = favouriteTypeFirstEntity;
+    }
+
+    /**
+     * 
+     */
+    public void setFavouriteTypeSecondEntity(String favouriteTypeSecondEntity) {
+
+        this.favouriteTypeSecondEntity = favouriteTypeSecondEntity;        
+    }
+
+    /**
+     * 
+     */
+    public Map<String, Integer> getTypesSecondEntity() {
+
+        return this.typesSecondEntity;
+    }
+
+    /**
+     * 
+     */
+    public Map<String, Integer> getTypesFirstEntity() {
+
+        return this.typesFirstEntity;
+    }
+    
+    /**
+     * 
+     * @param pair
+     */
+    public void addLearnedFromEntities(EntityPair pair) {
+
+        if ( this.entityPairs.containsKey(pair.hashCode()) ) ((EntityPair) this.entityPairs.get(pair.hashCode())).increaseOccurrence();
+        else this.entityPairs.put(pair.hashCode(), pair);
+    }
+    
+    /**
+     * 
+     * @param pair
+     */
+    public void addManyLearnedFromEntities(List<EntityPair> pairs) {
+
+        for ( EntityPair pair : pairs )
+            this.addLearnedFromEntities(pair);
+    }
+
+    /**
+     * 
+     */
+    public List<EntityPair> getLearnedFromEntities() {
+
+        return new ArrayList<EntityPair>(this.entityPairs.values());
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public List<EntityPair> getNewEntities(){
+        
+        List<EntityPair> pairs = new ArrayList<EntityPair>();
+        for ( EntityPair pair : this.entityPairs.values() ) if ( pair.isNew() ) pairs.add(pair);
+                
+        return pairs;
+    }
+    
+    /**
+     * 
+     */
+    public Set<Integer> getLuceneSentenceIds() {
+
+        return this.luceneSentenceIds;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Pattern: "      +  this.naturalLanguageRepresentation);
+        builder.append("\nTagged-Pattern: "  + this.naturalLanguageRepresentationWithTags);
+        builder.append("\nOccurrence: "    + this.totalOccurrence);
+        
+        int i = 1;
+        for ( Pair<Entity,Entity> pair : this.entityPairs.values() ) {
+            
+            builder.append("\n\t"+ i++ +": " + pair.getFirstEntity().getLabel() +" ("+ pair.getFirstEntity().getType() + ") - " + pair.getSecondEntity().getLabel() +" ("+ pair.getSecondEntity().getType() + ")");
+        }
+        return builder.append("\n").toString();
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((naturalLanguageRepresentation == null) ? 0 : naturalLanguageRepresentation.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultPattern other = (DefaultPattern) obj;
+        if (naturalLanguageRepresentation == null) {
+            if (other.naturalLanguageRepresentation != null)
+                return false;
+        }
+        else
+            if (!naturalLanguageRepresentation.equals(other.naturalLanguageRepresentation))
+                return false;
+        return true;
+    }
+
+    /**
+     * 
+     */
+    public int getTotalOccurrence() {
+
+        return this.entityPairs.size();
     }
 }

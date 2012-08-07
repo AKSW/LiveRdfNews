@@ -14,4 +14,9 @@ feedlist = rss-list.txt
 
 [database]
 directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
+test-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews/test
 cache = 10
+
+[search]
+; the method how we look for patterns: NER or POS possible
+method = NER

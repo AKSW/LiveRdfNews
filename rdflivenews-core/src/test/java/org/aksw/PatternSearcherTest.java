@@ -50,10 +50,12 @@ public class PatternSearcherTest extends TestCase {
         
         assertTrue(mergedSentence.equals(goldSentence));
         
-        List<Pattern> patterns = patternSearcher.extractPatterns(nerTestString);
+        long start = System.nanoTime();
+        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns(nerTestString));
+        System.out.println("NER Took " + (System.nanoTime() - start) + "ns");
         assertTrue(patterns.size() == 2);
-        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("of clean"));
-        assertTrue(patterns.get(1).getNaturalLanguageRepresentation().equals("by this"));
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("of clean") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("of clean"));
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("by this") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("by this"));
     }
     
     public void testPosPatternMerging() {
@@ -65,5 +67,12 @@ public class PatternSearcherTest extends TestCase {
         List<String> goldSentence   = new ArrayList<String>(Arrays.asList("Barack Obama_NNP", "was_VBD", "the_DT" ,"first_JJ", "President_NNP", "who_WDT", "is_VBZ", "head_NN", "of_IN", "Factory Inc._NNP", "._.")); 
         
         assertTrue(mergedSentence.equals(goldSentence));
+        
+        long start = System.nanoTime();
+        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns(posTestString));
+        System.out.println("POS Took " + (System.nanoTime() - start) + "ns");
+        assertTrue(patterns.size() == 2);
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("was the first") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("was the first"));
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("who is head of") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("who is head of"));
     }
 }

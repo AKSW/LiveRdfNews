@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.Constants;
 import org.aksw.NewsCrawler;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
@@ -29,8 +30,10 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
+import org.apache.lucene.util.NumericUtils;
 import org.apache.lucene.util.Version;
 
 /**
@@ -45,10 +48,10 @@ public class IndexManager {
     private static IndexManager INSTANCE;
     private Logger logger = Logger.getLogger(getClass());
     
-    private final String INDEX_DIRECTORY = NewsCrawler.CONFIG.getStringSetting("database", "directory");
+    public static String INDEX_DIRECTORY = NewsCrawler.CONFIG.getStringSetting("database", "directory");
     
-    private FSDirectory index;
-    private static IndexWriter writer;
+    public static Directory INDEX;
+    private IndexWriter writer;
     private final Analyzer analyzer = new LowerCaseWhitespaceAnalyzer();
 
     /**
@@ -101,17 +104,17 @@ public class IndexManager {
     
     /**
      * 
-     * @param uri 
+     * @param url 
      * @return
      */
-    public synchronized boolean isNewArticle(String uri) {
+    public synchronized boolean isNewArticle(String url) {
         
         try {
 
-            TopScoreDocCollector collector = TopScoreDocCollector.create(10, true);
-            IndexReader reader = IndexReader.open(index);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
+            IndexReader reader = IndexReader.open(INDEX);
             IndexSearcher searcher = new IndexSearcher(reader); 
-            searcher.search(new WildcardQuery(new Term("articleURL", uri)), collector);
+            searcher.search(new TermQuery(new Term(Constants.LUCENE_FIELD_URL, url)), collector);
             ScoreDoc[] hits = collector.topDocs().scoreDocs;
             searcher.close();
             reader.close();
@@ -120,7 +123,7 @@ public class IndexManager {
         }
         catch (IOException e) {
             
-            logger.error("Could not execute exists query for uri: " + uri, e);
+            logger.error("Could not execute exists query for uri: " + url, e);
             e.printStackTrace();
         }
         
@@ -129,14 +132,14 @@ public class IndexManager {
     
     /**
      * 
-     * @param article
+     * @param sentence
      */
-    public synchronized void addNewsArticle(NewsArticle article) {
+    public synchronized void addSentence(Sentence sentence) {
 
         try {
 
             openIndexWriter();
-            writer.addDocument(articleToDocument(article));
+            writer.addDocument(sentenceToDocument(sentence));
             closeIndexWriter();
         }
         catch (CorruptIndexException e) {
@@ -155,34 +158,41 @@ public class IndexManager {
      * 
      * @param article
      */
-    public void addNewsArticles(Set<NewsArticle> articles) {
+    public void addSentences(Set<Sentence> sentences) {
         
-        for ( NewsArticle article : articles )
-            addNewsArticle(article);
+        try {
+            
+            openIndexWriter();
+            
+            for ( Sentence sentence : sentences ) 
+                writer.addDocument(sentenceToDocument(sentence));
+                    
+            closeIndexWriter();
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     /**
      * 
-     * @param article
+     * @param sentence
      * @return
      */
-    private Document articleToDocument(NewsArticle article) {
+    private Document sentenceToDocument(Sentence sentence) {
         
         Document luceneDocument = new Document();
-        luceneDocument.add(new NumericField("extractionDate", Field.Store.YES, true).setLongValue(article.getExtractionDate().getTime()));
-        luceneDocument.add(new NumericField("timeSliceID", Field.Store.YES, true).setIntValue(article.getTimeSliceID()));
-        luceneDocument.add(new Field("imageURL", article.getImageUrl(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-        luceneDocument.add(new Field("articleURL", article.getArticleUrl(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-        luceneDocument.add(new Field("title", article.getTitle(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-        luceneDocument.add(new Field("text", article.getText(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-        luceneDocument.add(new Field("posTaggedText", article.getPosTaggedText(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-        luceneDocument.add(new Field("nerTaggedText", article.getNerTaggedText(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-        
-        for ( String keyword : article.getKeywords() )
-            luceneDocument.add(new Field("keywords", keyword, Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-                
-        if ( article.getHtml() != null && !article.getHtml().isEmpty() )
-            luceneDocument.add(new Field("html", article.getHtml(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+        luceneDocument.add(new NumericField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Field.Store.YES, true).setLongValue(sentence.getExtractionDate().getTime()));
+        luceneDocument.add(new NumericField(Constants.LUCENE_FIELD_TIME_SLICE, Field.Store.YES, true).setIntValue(sentence.getTimeSliceID()));
+        luceneDocument.add(new Field(Constants.LUCENE_FIELD_TEXT, sentence.getText(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+        luceneDocument.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, sentence.getPosTaggedSentence(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+        luceneDocument.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, sentence.getNerTaggedSentence(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+        luceneDocument.add(new Field(Constants.LUCENE_FIELD_URL, sentence.getArticleUrl(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
         
         return luceneDocument;
     }
@@ -192,12 +202,12 @@ public class IndexManager {
      * @param article
      * @return
      */
-    private Set<Document> articlesToDocuments(Collection<NewsArticle> articles) {
+    private Set<Document> sentencesToDocuments(Collection<Sentence> articles) {
         
         Set<Document> documents = new HashSet<Document>();
         
-        for ( NewsArticle article : articles) 
-            documents.add(articleToDocument(article));
+        for ( Sentence article : articles) 
+            documents.add(sentenceToDocument(article));
         
         return documents;
     }
@@ -222,6 +232,9 @@ public class IndexManager {
         }
     }
     
+    /**
+     * 
+     */
     public void closeLuceneIndex() {
         
         try {
@@ -239,6 +252,48 @@ public class IndexManager {
     }
     
     /**
+     * 
+     */
+    public void deleteIndex() {
+        
+        try {
+            
+            this.openIndexWriter();
+            this.writer.deleteAll();
+            this.closeIndexWriter();
+        }
+        catch (IOException e) {
+
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * @return the number of documents in the index
+     */
+    public int getNumberOfDocuments() {
+        
+        IndexReader reader;
+        int numberOfDocuments = 0;
+        
+        try {
+            
+            reader = IndexReader.open(INDEX);
+            numberOfDocuments = reader.maxDoc();
+            reader.close();
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return numberOfDocuments;
+    }
+    
+    /**
      * Create a new filesystem lucene index
      * 
      * @param absoluteFilePath - the path where to create/append the index
@@ -249,8 +304,8 @@ public class IndexManager {
 
         try {
             
-            index = FSDirectory.open(new File(absoluteFilePath));
-            return new IndexWriter(index, indexWriterConfig);
+            INDEX = FSDirectory.open(new File(absoluteFilePath));
+            return new IndexWriter(INDEX, indexWriterConfig);
         }
         catch (CorruptIndexException e) {
             
@@ -267,5 +322,120 @@ public class IndexManager {
             e.printStackTrace();
             throw new RuntimeException("Could not create index", e);
         }
+    }
+    
+    /**
+     * 
+     * @param documentId
+     * @param field
+     * @return
+     */
+    public String getStringValueFromDocument(int documentId, String field) {
+        
+        String fieldValue = null;
+        
+        try {
+            
+            IndexReader reader = IndexReader.open(INDEX);
+            fieldValue = reader.document(documentId).get(field);
+            reader.close();
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return fieldValue;
+    }
+    
+    /**
+     * 
+     * @param documentId
+     * @param field
+     * @return
+     */
+    public String getStringValueFromDocument(IndexReader reader, int documentId, String field) {
+        
+        try {
+            
+            return reader.document(documentId).get(field);
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 
+     * @param documentIds
+     * @param field
+     * @return
+     */
+    public Set<String> getStringValueFromDocuments(List<Integer> documentIds, String field) {
+
+        Set<String> values = new HashSet<String>();
+        
+        try {
+            
+            IndexReader reader = IndexReader.open(INDEX);
+            for ( Integer id : documentIds ) values.add(this.getStringValueFromDocument(reader, id, field));
+            reader.close();
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return values;
+    }
+
+    /**
+     * Returns all documents (top 10000000) with the given timeslice id
+     * from the underlying index. 
+     * 
+     * @param timeSlice
+     * @return
+     */
+    public List<Integer> getSentenceFromTimeSlice(int timeSlice) {
+
+        List<Integer> documentIds = new ArrayList<Integer>();
+        
+        try {
+            
+            TopScoreDocCollector collector = TopScoreDocCollector.create(10000000, false);
+            IndexReader reader = IndexReader.open(INDEX);
+            IndexSearcher searcher = new IndexSearcher(reader); 
+            searcher.search(new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
+            ScoreDoc[] hits = collector.topDocs().scoreDocs;
+            
+            for ( ScoreDoc hit : hits ) documentIds.add(hit.doc);
+                    
+            searcher.close();
+            reader.close();
+        }
+        catch (CorruptIndexException e) {
+
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            
+            e.printStackTrace();
+        }
+        return documentIds;
     }
 }

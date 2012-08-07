@@ -5,6 +5,7 @@ package org.aksw;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -13,7 +14,7 @@ import junit.framework.TestSuite;
 import org.aksw.concurrency.QueueManager;
 import org.aksw.config.Config;
 import org.aksw.crawler.ArticleCrawlerThread;
-import org.aksw.index.NewsArticle;
+import org.aksw.index.Sentence;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
@@ -50,15 +51,13 @@ public class ArticleCrawlerThreadTest extends TestCase {
      * @throws IOException 
      * @throws InvalidFileFormatException 
      */
-    public void testNerAndPostagging() throws InvalidFileFormatException, IOException {
+    public void testCrawling() throws InvalidFileFormatException, IOException {
         
         NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
         ArticleCrawlerThread t = new ArticleCrawlerThread();
-        NewsArticle article = t.crawlArticle("http://www.nytimes.com/2012/07/24/world/middleeast/chemical-weapons-wont-be-used-in-rebellion-syria-says.html?_r=1&ref=global-home");
+        Set<Sentence> sentences = t.crawlArticle("http://www.nytimes.com/2012/07/24/world/middleeast/chemical-weapons-wont-be-used-in-rebellion-syria-says.html?_r=1&ref=global-home");
         
-        assertTrue(article.getNerTaggedText() != null);
-        assertTrue(!article.getNerTaggedText().isEmpty());
-        assertTrue(article.getPosTaggedText() != null);
-        assertTrue(!article.getPosTaggedText().isEmpty());
+        assertTrue(sentences != null);
+        assertTrue(!sentences.isEmpty());
     }
 }

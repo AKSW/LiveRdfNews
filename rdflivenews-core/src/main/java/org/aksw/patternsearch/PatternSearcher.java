@@ -4,6 +4,7 @@
 package org.aksw.patternsearch;
 
 import java.util.List;
+import java.util.Set;
 
 import org.aksw.pattern.Pattern;
 
