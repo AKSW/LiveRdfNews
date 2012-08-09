@@ -7,25 +7,21 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
-import org.aksw.simba.rdflivenews.pattern.extraction.PatternExtractionTest;
-import org.aksw.simba.rdflivenews.refinement.PatternRefiner;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 
 public class DeduplicationTest extends TestCase {
@@ -44,7 +40,10 @@ public class DeduplicationTest extends TestCase {
         
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         IndexManager.INDEX_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "test");
+        
+        // prepare the index
         IndexManager.getInstance().deleteIndex();
+        this.addSentencesToLuceneIndex();
     }
 
     /**
@@ -57,15 +56,21 @@ public class DeduplicationTest extends TestCase {
     
     public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
-        Set<String> source = new HashSet<String>(Arrays.asList("Test.", "Triple Test."));
-        Set<String> target = new HashSet<String>(Arrays.asList("Test.", "Double Test.")); 
+        int fromTimeSliceId = 1;
+        int toTimeSliceId   = 2;
+        int window          = 1;
         
         Deduplication deduplication = new FastDeduplication();
+        Set<String> source = deduplication.getSource(fromTimeSliceId, window);
+        Set<String> target = deduplication.getTarget(fromTimeSliceId, toTimeSliceId);
         
-        Method method = FastDeduplication.class.getDeclaredMethod("deduplicate", Set.class, Set.class, int.class);
-        method.setAccessible(true);
-        assertEquals(source, method.invoke(deduplication, source, source, 1));
-        assertEquals(target, method.invoke(deduplication, target, target, 1));
+        // source compared to source -> everything is duplicate
+        assertEquals(source, deduplication.deduplicate(source, source, fromTimeSliceId));
+        assertEquals(target, deduplication.deduplicate(target, target, fromTimeSliceId));
+        
+        // there is one duplicate string in the target
+        target.removeAll(deduplication.deduplicate(target, target, fromTimeSliceId));
+        assertEquals(6, target.size());
     }
     
     /**
@@ -76,7 +81,43 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void testGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void tesstGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        
+        Deduplication deduplication = new FastDeduplication();
+        
+        Method method = FastDeduplication.class.getDeclaredMethod("getSource", int.class, int.class);
+        method.setAccessible(true);
+        
+        Set<String> firstTimeSlice = this.createSentenceFirstTimeSlice();
+        // do we get the correct amountof sentences for the first timeslice
+        assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 1)).size());
+        // are those sentences the correct ones
+        assertEquals(firstTimeSlice, method.invoke(deduplication, 1, 1));
+        // just to make sure :)
+        firstTimeSlice.add("This is a stupid sentence");
+        assertNotSame(this.createSentenceSecondTimeSlice(), method.invoke(deduplication, 1, 1));
+        
+        // zero window should not be possible
+        try {
+            
+            assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 0)).size());
+            fail("this should have thrown an exception");
+        }
+        catch (Exception expected) { /* expected don't do anything */ }
+        
+        // window larger then possible timeslices should also work
+        assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
+    }
+    
+    /**
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public void tesstGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         
@@ -110,44 +151,19 @@ public class DeduplicationTest extends TestCase {
     
     /**
      * 
-     * @throws SecurityException
-     * @throws NoSuchMethodException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @throws InvocationTargetException
      */
-    public void testGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private void addSentencesToLuceneIndex() {
         
         this.addSentencesToIndex(this.createSentenceFirstTimeSlice(), 1);
         this.addSentencesToIndex(this.createSentenceSecondTimeSlice(), 2);
         this.addSentencesToIndex(this.createSentenceSecondTimeSlice(), 3);
-        
-        Deduplication deduplication = new FastDeduplication();
-        
-        Method method = FastDeduplication.class.getDeclaredMethod("getSource", int.class, int.class);
-        method.setAccessible(true);
-        
-        Set<String> firstTimeSlice = this.createSentenceFirstTimeSlice();
-        // do we get the correct amountof sentences for the first timeslice
-        assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 1)).size());
-        // are those sentences the correct ones
-        assertEquals(firstTimeSlice, method.invoke(deduplication, 1, 1));
-        // just to make sure :)
-        firstTimeSlice.add("This is a stupid sentence");
-        assertNotSame(this.createSentenceSecondTimeSlice(), method.invoke(deduplication, 1, 1));
-        
-        // zero window should not be possible
-        try {
-            
-            assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 0)).size());
-            fail("this should have thrown an exception");
-        }
-        catch (Exception expected) { /* expected don't do anything */ }
-        
-        // window larger then possible timeslices should also work
-        assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
     }
     
+    /**
+     * 
+     * @param sentences
+     * @param timeSlice
+     */
     public void addSentencesToIndex(Set<String> sentences, int timeSlice) {
         
         List<Sentence> newSentences = new ArrayList<Sentence>(); 
@@ -165,6 +181,10 @@ public class DeduplicationTest extends TestCase {
         IndexManager.getInstance().addSentences(newSentences);
     }
     
+    /**
+     * 
+     * @return
+     */
     public Set<String> createSentenceFirstTimeSlice(){
         
         Set<String> results = new HashSet<String>();
@@ -177,11 +197,15 @@ public class DeduplicationTest extends TestCase {
         return results;
     }
     
+    /**
+     * 
+     * @return
+     */
     public Set<String> createSentenceSecondTimeSlice(){
         
         Set<String> results = new HashSet<String>();
         results.add("It is an enterprise that is meant to send a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
-        results.add("It is an enterprise that is meant to send a pointed message to Berlin, and that becomes more urgent as tensions with Iran rise .");
+        results.add("It is an enterprise that is meant to send a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         results.add("It is not an enterprise that is meant to be a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         results.add("But it will require partner nations in the gulf to put aside rivalries , share information and coordinate their individual arsenals of interceptor missiles to create a defensive shield encompassing all the regional allies .");
         results.add("Secretary of State Hillary Rodham Clinton , among the first to raise the need for the missile shield three years ago , sought to spur the gulf allies on during a recent visit to Saudi Arabia .");
