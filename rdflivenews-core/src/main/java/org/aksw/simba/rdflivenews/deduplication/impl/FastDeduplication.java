@@ -21,13 +21,13 @@ public class FastDeduplication implements Deduplication {
     private int window;
 
     /**
-     * 
+     *
      */
     public FastDeduplication() {
 
-        this.threshold  = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
-        this.window     = RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window");
-        this.ids        = new HashMap<String, Integer>();
+        this.threshold = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
+        this.window = RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window");
+        this.ids = new HashMap<String, Integer>();
     }
 
     /**
@@ -54,15 +54,19 @@ public class FastDeduplication implements Deduplication {
      * @param window Window for wish duplicates are to be considered
      */
     private Set<String> getSource(int fromTimeSlice, int window) {
-        if ( window <= 0 ) throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + window);
-        if ( fromTimeSlice < 1 ) throw new IllegalArgumentException("From Time Slice needs to be bigger than 0: " + fromTimeSlice);
-        
+        if (window <= 0) {
+            throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + window);
+        }
+        if (fromTimeSlice < 1) {
+            throw new IllegalArgumentException("From Time Slice needs to be bigger than 0: " + fromTimeSlice);
+        }
+
         IndexManager manager = IndexManager.getInstance();
         Set<String> source = new HashSet<String>();
-        
-        for (int i = fromTimeSlice - window ; i <= fromTimeSlice ; i++) {
+
+        for (int i = fromTimeSlice - window; i <= fromTimeSlice; i++) {
             for (int id : manager.getSentenceFromTimeSlice(i)) {
-                
+
                 String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 ids.put(doc, id);
                 source.add(doc);
@@ -78,15 +82,19 @@ public class FastDeduplication implements Deduplication {
      * @param toTimeSlice Highest time slice id of target documents
      */
     private Set<String> getTarget(int fromTimeSlice, int toTimeSlice) {
-        if ( fromTimeSlice <= 0 ) throw new IllegalArgumentException("From Time Slice cant be less then 1: " + fromTimeSlice);
-        if ( fromTimeSlice >= toTimeSlice ) throw new IllegalArgumentException("To Time Slice "+toTimeSlice+" needs to be bigger than From Time Slice " + fromTimeSlice);
-        
+        if (fromTimeSlice <= 0) {
+            throw new IllegalArgumentException("From Time Slice cant be less then 1: " + fromTimeSlice);
+        }
+        if (fromTimeSlice >= toTimeSlice) {
+            throw new IllegalArgumentException("To Time Slice " + toTimeSlice + " needs to be bigger than From Time Slice " + fromTimeSlice);
+        }
+
         Set<String> target = new HashSet<String>();
         IndexManager manager = IndexManager.getInstance();
-        
-        for ( int i = fromTimeSlice; i <= toTimeSlice; i++) {
-            for ( int id : manager.getSentenceFromTimeSlice(i) ) {
-                
+
+        for (int i = fromTimeSlice; i <= toTimeSlice; i++) {
+            for (int id : manager.getSentenceFromTimeSlice(i)) {
+
                 String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 ids.put(doc, id);
                 target.add(doc);
@@ -108,10 +116,14 @@ public class FastDeduplication implements Deduplication {
         Set<String> duplicates = new HashSet<String>();
         Map<String, Map<String, Double>> result = FastNGram.compute(source, target, 0, threshold);
         System.out.println(result);
+        int keyID;
         for (String key : result.keySet()) {
+            keyID = ids.get(key);
             for (String doc : result.get(key).keySet()) {
                 int id = ids.get(doc);
-                duplicates.add(doc);
+                if (keyID != id) {
+                    duplicates.add(doc);
+                }
                 manager.setDocumentDuplicateInTimeSlice(id, fromTimeSlice);
             }
         }
