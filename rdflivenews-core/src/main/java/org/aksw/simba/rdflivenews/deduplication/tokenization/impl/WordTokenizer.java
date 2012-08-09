@@ -18,6 +18,9 @@ public class WordTokenizer implements Tokenizer{
 
     /**
      * 
+     * @param s String to tokenize
+     * @param q Has no effect
+     * @return Set of tokens (words) for s
      */
     public Set<String> tokenize(String s, int q) {
         
