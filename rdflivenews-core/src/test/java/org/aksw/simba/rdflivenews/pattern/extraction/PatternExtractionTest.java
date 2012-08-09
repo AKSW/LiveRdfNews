@@ -1,11 +1,12 @@
 /**
  * 
  */
-package org.aksw;
+package org.aksw.simba.rdflivenews.pattern.extraction;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,11 @@ import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
+import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.patternsearch.PatternSearcher;
 import org.aksw.simba.rdflivenews.patternsearch.concurrency.PatternSearchThreadManager;
+import org.aksw.simba.rdflivenews.patternsearch.impl.NamedEntityTagPatternSearcher;
+import org.aksw.simba.rdflivenews.patternsearch.impl.PartOfSpeechTagPatternSearcher;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
@@ -93,6 +98,45 @@ public class PatternExtractionTest extends TestCase {
         System.out.println(mergedPatterns.get(23));
         System.out.println(mergedPatterns.get(8));
         System.out.println(mergedPatterns.get(19));
+    }
+    
+    /**
+     * @throws Exception 
+     */
+    public void testNerPatternMerging() throws Exception {
+
+        String nerTestString = "This_OTHER was_OTHER Microsoft_ORGANIZATION BARACK_PERSON of_OTHER clean_OTHER USA_ORGANIZATION Nation_ORGANIZATION by_OTHER this_OTHER test_PLACE test1_PLACE test2_PLACE ._OTHER";
+        
+        PatternSearcher patternSearcher = new NamedEntityTagPatternSearcher();
+        List<String> mergedSentence = patternSearcher.mergeTagsInSentences(nerTestString);
+        List<String> goldSentence   = new ArrayList<String>(Arrays.asList("This_OTHER", "was_OTHER", "Microsoft_ORGANIZATION", "BARACK_PERSON", "of_OTHER", "clean_OTHER", "USA Nation_ORGANIZATION", "by_OTHER", "this_OTHER", "test test1 test2_PLACE", "._OTHER")); 
+        
+        assertTrue(mergedSentence.equals(goldSentence));
+        
+        long start = System.nanoTime();
+        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns(nerTestString, 1));
+        System.out.println("NER Took " + (System.nanoTime() - start) + "ns");
+        assertTrue(patterns.size() == 2);
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("of clean") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("of clean"));
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("by this") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("by this"));
+    }
+    
+    public void testPosPatternMerging() {
+        
+        String posTestString = "Barack_NNP Obama_NNP was_VBD the_DT first_JJ President_NNPS who_WDT is_VBZ head_NN of_IN Factory_NNP Inc._NNP ._.";
+        
+        PatternSearcher patternSearcher = new PartOfSpeechTagPatternSearcher();
+        List<String> mergedSentence = patternSearcher.mergeTagsInSentences(posTestString);
+        List<String> goldSentence   = new ArrayList<String>(Arrays.asList("Barack Obama_NNP", "was_VBD", "the_DT" ,"first_JJ", "President_NNP", "who_WDT", "is_VBZ", "head_NN", "of_IN", "Factory Inc._NNP", "._.")); 
+        
+        assertTrue(mergedSentence.equals(goldSentence));
+        
+        long start = System.nanoTime();
+        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns(posTestString, 1));
+        System.out.println("POS Took " + (System.nanoTime() - start) + "ns");
+        assertTrue(patterns.size() == 2);
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("was the first") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("was the first"));
+        assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("who is head of") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("who is head of"));
     }
     
     private List<String> createSentences(){

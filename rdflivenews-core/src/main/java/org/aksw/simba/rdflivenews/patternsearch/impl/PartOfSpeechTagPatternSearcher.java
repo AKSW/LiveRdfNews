@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
 
     /* (non-Javadoc)
-     * @see org.aksw.simba.rdflivenews.patternsearch.PatternSearcher#extractPatterns(java.lang.String)
+     * @see org.aksw.simba.rdflivenews.simba.rdflivenews.patternsearch.PatternSearcher#extractPatterns(java.lang.String)
      */
     public List<Pattern> extractPatterns(String posTaggedSentence, int luceneSentenceId) {
 
@@ -81,7 +81,7 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
     }
 
     /* (non-Javadoc)
-     * @see org.aksw.simba.rdflivenews.patternsearch.PatternSearcher#mergeTagsInSentences(java.lang.String)
+     * @see org.aksw.simba.rdflivenews.simba.rdflivenews.patternsearch.PatternSearcher#mergeTagsInSentences(java.lang.String)
      */
     /**
      * 

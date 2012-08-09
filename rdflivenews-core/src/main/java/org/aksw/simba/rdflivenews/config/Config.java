@@ -22,11 +22,13 @@ public class Config {
         this.defactoConfig =  config;
         
         String dataDir = this.getStringSetting("general", "data-directory");
-        dataDir = dataDir.endsWith("/") ? dataDir : dataDir + System.getProperty("path.separator");
-        RDF_LIVE_NEWS_DATA_DIRECTORY = dataDir;
+        RDF_LIVE_NEWS_DATA_DIRECTORY = dataDir.endsWith("/") ? dataDir : dataDir + System.getProperty("file.separator");
+
+        if ( !new File(RDF_LIVE_NEWS_DATA_DIRECTORY).exists() ) 
+            throw new RuntimeException("Data directory does not exist: "+ RDF_LIVE_NEWS_DATA_DIRECTORY);
         
-        if ( !new File(RDF_LIVE_NEWS_DATA_DIRECTORY).exists() ) throw new RuntimeException("Data directory does not exist: "+ RDF_LIVE_NEWS_DATA_DIRECTORY);
-        new File(RDF_LIVE_NEWS_DATA_DIRECTORY + this.getStringSetting("general", "index"));
+        if ( !new File(RDF_LIVE_NEWS_DATA_DIRECTORY + this.getStringSetting("general", "index")).exists() )
+            new File(RDF_LIVE_NEWS_DATA_DIRECTORY + this.getStringSetting("general", "index")).mkdir();
     }
     
     /**

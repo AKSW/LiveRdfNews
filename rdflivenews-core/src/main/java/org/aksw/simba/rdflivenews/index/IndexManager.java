@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.config.Config;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -45,7 +46,7 @@ public class IndexManager {
     private static IndexManager INSTANCE;
     private Logger logger = Logger.getLogger(getClass());
     
-    public static String INDEX_DIRECTORY = RdfLiveNews.CONFIG.getStringSetting("database", "directory");
+    public static String INDEX_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "index");
     
     public static Directory INDEX;
     private IndexWriter writer;

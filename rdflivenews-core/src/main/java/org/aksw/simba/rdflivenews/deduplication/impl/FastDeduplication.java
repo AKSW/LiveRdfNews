@@ -20,10 +20,13 @@ public class FastDeduplication implements Deduplication {
     private double threshold;
     private int window;
 
+    /**
+     * 
+     */
     public FastDeduplication() {
-        RdfLiveNews.CONFIG.getStringSetting("database", "dbpedia");
-        threshold = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
-        window = (int) RdfLiveNews.CONFIG.getLongSetting("deduplication", "window");
+
+        this.threshold = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
+        this.window =    RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window");
     }
 
     /**
@@ -32,7 +35,7 @@ public class FastDeduplication implements Deduplication {
      * @param fromTimeSlice
      * @param toTimeSlice
      */
-    public void runDeduplication(int fromTimeSlice, int toTimeSlice) {
+    public void deduplicate(int fromTimeSlice, int toTimeSlice) {
         //1. load index of all data before fromFrame
         ids = new HashMap<String, Integer>();
         Set<String> source = getSource(fromTimeSlice, window);
@@ -103,7 +106,7 @@ public class FastDeduplication implements Deduplication {
             for (String doc : result.get(key).keySet()) {
                 int id = ids.get(doc);
                 duplicates.add(doc);
-//                manager.setDocumentDuplicateInTimeSlice(id, fromTimeSlice);
+                manager.setDocumentDuplicateInTimeSlice(id, fromTimeSlice);
             }
         }
         return duplicates;
