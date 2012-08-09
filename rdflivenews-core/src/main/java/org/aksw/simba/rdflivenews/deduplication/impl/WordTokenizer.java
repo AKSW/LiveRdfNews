@@ -15,7 +15,6 @@ import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
  */
 public class WordTokenizer implements Tokenizer {
 
-    @Override
     public Set<String> tokenize(String s, int q) {
         s = s.toLowerCase();
         String[] split = s.split(" ");

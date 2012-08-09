@@ -11,3 +11,7 @@ index = index
 test = test
 ; this is an index where the dbpedia types and labels are index TODO create documentation on how to generate it 
 dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources/data/index
+
+[deduplication]
+threshold = 1
+window = 1

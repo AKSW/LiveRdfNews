@@ -59,12 +59,15 @@ public class RssDirectoryReader {
      */
     public void queryRssFeeds() throws IOException, IllegalArgumentException, FeedException {
 
+        int i = 1;
         // check every rss feed
         for (String feedUrl : rssFeeds) {
             
+            System.out.println(i++ + ": " + feedUrl);
             logger.info("Getting article urls from feed: " + feedUrl);
 
             XmlReader reader = null;
+            String link = "";
 
             try {
 
@@ -73,7 +76,7 @@ public class RssDirectoryReader {
 
                 for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();) {
                     
-                    String link = syndEntryIterator.next().getLink();
+                    link = syndEntryIterator.next().getLink();
                         
                     // we only want to add the uri if the uri is not already
                     // in the queue or in the database
@@ -85,6 +88,10 @@ public class RssDirectoryReader {
                     else
                         logger.info("Article already known... skipping: " + link);
                 }
+            }
+            catch (NullPointerException npe) {
+                
+                logger.debug("Error parsing feed: " + feedUrl + " and url: " + link, npe);
             }
             catch (IOException uhe) {
 
@@ -103,5 +110,7 @@ public class RssDirectoryReader {
                 if (reader != null) reader.close();
             }
         }
+        
+        System.out.println("Finished reading list of rss feeds... waiting for restart");
     }
 }

@@ -65,4 +65,13 @@ public class QueueManager {
         this.logger.debug("Queueing uri: " + uri);
         return crawlStack.contains(uri);
     }
+    
+    /**
+     * 
+     * @return
+     */
+    public int getNumberOfQueuedArticles() {
+        
+        return crawlStack.size();
+    }
 }

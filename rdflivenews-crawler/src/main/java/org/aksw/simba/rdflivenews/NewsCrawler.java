@@ -50,8 +50,9 @@ public class NewsCrawler {
         updateFeedTimer.schedule(updateFeeds, 0, NewsCrawler.CONFIG.getLongSetting("crawl", "updateRssInterval"));
         logger.info("Started RSS update task!");
         
+        // start the statistics module
         Timer statisticsTimer = new Timer();
-        StatisiticsTask statTask = new StatisiticsTask();
+        StatisiticsTask statTask = new StatisiticsTask(TIME_SLICE_ID);
         statisticsTimer.schedule(statTask, 0, NewsCrawler.CONFIG.getLongSetting("statistics", "updateStatisticsInterval"));
 
         // this thread get's started and will never and, it opens a new thread pool where one thread crawls one rss entry

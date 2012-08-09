@@ -25,8 +25,9 @@ public class FastDeduplication implements Deduplication {
      */
     public FastDeduplication() {
 
-        this.threshold = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
-        this.window =    RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window");
+        this.threshold  = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
+        this.window     = RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window");
+        this.ids        = new HashMap<String, Integer>();
     }
 
     /**
@@ -36,15 +37,12 @@ public class FastDeduplication implements Deduplication {
      * @param toTimeSlice
      */
     public void runDeduplication(int fromTimeSlice, int toTimeSlice) {
+
         //1. load index of all data before fromFrame
-        ids = new HashMap<String, Integer>();
         Set<String> source = getSource(fromTimeSlice, window);
         Set<String> target = getTarget(fromTimeSlice, toTimeSlice);
         //2. deduplicate & delete duplicates for the current time slices, i.e., target
-        Set<String> duplicates = deduplicate(target, target, fromTimeSlice);
-        for (String duplicate : duplicates) {
-            target.remove(duplicate);
-        }
+        target.removeAll(deduplicate(target, target, fromTimeSlice));
         //3. deduplicate & delete duplicates for the old and new data
         deduplicate(source, target, fromTimeSlice);
     }
@@ -56,11 +54,15 @@ public class FastDeduplication implements Deduplication {
      * @param window Window for wish duplicates are to be considered
      */
     private Set<String> getSource(int fromTimeSlice, int window) {
+        if ( window <= 0 ) throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + window);
+        if ( fromTimeSlice < 1 ) throw new IllegalArgumentException("From Time Slice needs to be bigger than 0: " + fromTimeSlice);
+        
         IndexManager manager = IndexManager.getInstance();
         Set<String> source = new HashSet<String>();
-        for (int i = fromTimeSlice - window; i <= fromTimeSlice; i++) {
-            List<Integer> currentIds = manager.getSentenceFromTimeSlice(i);
-            for (int id : currentIds) {
+        
+        for (int i = fromTimeSlice - window ; i <= fromTimeSlice ; i++) {
+            for (int id : manager.getSentenceFromTimeSlice(i)) {
+                
                 String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 ids.put(doc, id);
                 source.add(doc);
@@ -76,12 +78,15 @@ public class FastDeduplication implements Deduplication {
      * @param toTimeSlice Highest time slice id of target documents
      */
     private Set<String> getTarget(int fromTimeSlice, int toTimeSlice) {
-        Set<String> target = new HashSet<String>();
+        if ( fromTimeSlice <= 0 ) throw new IllegalArgumentException("From Time Slice cant be less then 1: " + fromTimeSlice);
+        if ( fromTimeSlice >= toTimeSlice ) throw new IllegalArgumentException("To Time Slice "+toTimeSlice+" needs to be bigger than From Time Slice " + fromTimeSlice);
         
+        Set<String> target = new HashSet<String>();
         IndexManager manager = IndexManager.getInstance();
-        for (int i = fromTimeSlice; i <= toTimeSlice; i++) {
-            List<Integer> currentIds = manager.getSentenceFromTimeSlice(i);
-            for (int id : currentIds) {
+        
+        for ( int i = fromTimeSlice; i <= toTimeSlice; i++) {
+            for ( int id : manager.getSentenceFromTimeSlice(i) ) {
+                
                 String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 ids.put(doc, id);
                 target.add(doc);
@@ -102,6 +107,7 @@ public class FastDeduplication implements Deduplication {
         IndexManager manager = IndexManager.getInstance();
         Set<String> duplicates = new HashSet<String>();
         Map<String, Map<String, Double>> result = FastNGram.compute(source, target, 0, threshold);
+        System.out.println(result);
         for (String key : result.keySet()) {
             for (String doc : result.get(key).keySet()) {
                 int id = ids.get(doc);

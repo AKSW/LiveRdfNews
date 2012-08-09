@@ -446,4 +446,18 @@ public class IndexManager {
         }
         return documentIds;
     }
+
+    public void getArticlesFromTimeSlice(int timeSliceId) {
+
+//        TopScoreDocCollector collector = TopScoreDocCollector.create(10000000, false);
+//        IndexReader reader = IndexReader.open(INDEX);
+//        IndexSearcher searcher = new IndexSearcher(reader); 
+//        searcher.search(new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
+//        ScoreDoc[] hits = collector.topDocs().scoreDocs;
+//        
+//        for ( ScoreDoc hit : hits ) documentIds.add(hit.doc);
+//                
+//        searcher.close();
+//        reader.close();
+    }
 }
