@@ -7,44 +7,24 @@ package org.aksw.simba.rdflivenews.deduplication.impl;
 import java.util.*;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 
 /**
  *
  * @author ngonga
  */
-public class FastDeduplication implements Deduplication {
+public class FastDeduplication extends DefaultDeduplication {
 
     private Map<String, Integer> ids;
     private double threshold;
-    private int window;
 
     /**
      *
      */
     public FastDeduplication() {
 
-        this.threshold = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
-        this.window = RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window");
-        this.ids = new HashMap<String, Integer>();
-    }
-
-    /**
-     * Runs the deduplication process and marks duplicate documents as such
-     *
-     * @param fromTimeSlice
-     * @param toTimeSlice
-     */
-    public void runDeduplication(int fromTimeSlice, int toTimeSlice) {
-
-        //1. load index of all data before fromFrame
-        Set<String> source = getSource(fromTimeSlice, window);
-        Set<String> target = getTarget(fromTimeSlice, toTimeSlice);
-        //2. deduplicate & delete duplicates for the current time slices, i.e., target
-        target.removeAll(deduplicate(target, target, fromTimeSlice));
-        //3. deduplicate & delete duplicates for the old and new data
-        deduplicate(source, target, fromTimeSlice);
+        this.threshold  = RdfLiveNews.CONFIG.getDoubleSetting("deduplication", "threshold");
+        this.ids        = new HashMap<String, Integer>();
     }
 
     /**
@@ -53,14 +33,10 @@ public class FastDeduplication implements Deduplication {
      * @param fromTimeSlice Highest time slice
      * @param window Window for wish duplicates are to be considered
      */
-    private Set<String> getSource(int fromTimeSlice, int window) {
-        if (window <= 0) {
-            throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + window);
-        }
-        if (fromTimeSlice < 1) {
-            throw new IllegalArgumentException("From Time Slice needs to be bigger than 0: " + fromTimeSlice);
-        }
-
+    public Set<String> getSource(int fromTimeSlice, int window) {
+        if ( window <= 0 ) throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + window);
+        if ( fromTimeSlice < 1 ) throw new IllegalArgumentException("From Time Slice needs to be bigger than 0: " + fromTimeSlice);
+        
         IndexManager manager = IndexManager.getInstance();
         Set<String> source = new HashSet<String>();
 
@@ -81,14 +57,10 @@ public class FastDeduplication implements Deduplication {
      * @param fromTimeSlice Lowest time slice id of target documents
      * @param toTimeSlice Highest time slice id of target documents
      */
-    private Set<String> getTarget(int fromTimeSlice, int toTimeSlice) {
-        if (fromTimeSlice <= 0) {
-            throw new IllegalArgumentException("From Time Slice cant be less then 1: " + fromTimeSlice);
-        }
-        if (fromTimeSlice >= toTimeSlice) {
-            throw new IllegalArgumentException("To Time Slice " + toTimeSlice + " needs to be bigger than From Time Slice " + fromTimeSlice);
-        }
-
+    public Set<String> getTarget(int fromTimeSlice, int toTimeSlice) {
+        if ( fromTimeSlice <= 0 ) throw new IllegalArgumentException("From Time Slice cant be less then 1: " + fromTimeSlice);
+        if ( fromTimeSlice >= toTimeSlice ) throw new IllegalArgumentException("To Time Slice "+toTimeSlice+" needs to be bigger than From Time Slice " + fromTimeSlice);
+        
         Set<String> target = new HashSet<String>();
         IndexManager manager = IndexManager.getInstance();
 
@@ -111,8 +83,8 @@ public class FastDeduplication implements Deduplication {
      * @param fromTimeSlice Current time slice for marking deleted documents
      * @return Set of duplicates
      */
-    private Set<String> deduplicate(Set<String> source, Set<String> target, int fromTimeSlice) {
-        IndexManager manager = IndexManager.getInstance();
+    public Set<String> deduplicate(Set<String> source, Set<String> target, int fromTimeSlice) {
+        IndexManager manager = IndexManager.getInstance();        
         Set<String> duplicates = new HashSet<String>();
         Map<String, Map<String, Double>> result = FastNGram.compute(source, target, 0, threshold);
         System.out.println(result);
@@ -120,11 +92,14 @@ public class FastDeduplication implements Deduplication {
         for (String key : result.keySet()) {
             keyID = ids.get(key);
             for (String doc : result.get(key).keySet()) {
+        
                 int id = ids.get(doc);
                 if (keyID != id) {
                     duplicates.add(doc);
                 }
                 manager.setDocumentDuplicateInTimeSlice(id, fromTimeSlice);
+                duplicates.add(doc);
+                IndexManager.getInstance().setDocumentDuplicateInTimeSlice(id, fromTimeSlice);
             }
         }
         return duplicates;
