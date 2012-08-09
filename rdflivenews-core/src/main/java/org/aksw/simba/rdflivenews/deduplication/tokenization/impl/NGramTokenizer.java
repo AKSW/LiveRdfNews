@@ -16,24 +16,30 @@ import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
 public class NGramTokenizer implements Tokenizer {
 
     public Set<String> tokenize(String s, int q) {
-        
-        if (s == null) s = "";
-        
+
+        if (s == null) {
+            s = "";
+        }
+
         //remove double blanks
-        while (s.contains("  ")) s = s.replaceAll("  ", " ");
-        
+        while (s.contains("  ")) {
+            s = s.replaceAll("  ", " ");
+        }
+
         s = s.trim();
-        
-        for ( int i = 1 ; i < q ; i++ ) s = s + "_";
-        
+
+        for (int i = 1; i < q; i++) {
+            s = s + "_";
+        }
+
         System.out.println(s);
-        
+
         Set<String> tokens = new HashSet<String>();
-        
-        for ( int i = 0 ; i < s.length() - 2 ; i++) 
-            tokens.add(s.substring(i, i + 3));
-        
+
+        for (int i = 0; i < s.length() - q  + 1; i++) {
+            tokens.add(s.substring(i, i + q));
+        }
+
         return tokens;
     }
 }
-
