@@ -35,7 +35,7 @@ public class FastDeduplication implements Deduplication {
      * @param fromTimeSlice
      * @param toTimeSlice
      */
-    public void deduplicate(int fromTimeSlice, int toTimeSlice) {
+    public void runDeduplication(int fromTimeSlice, int toTimeSlice) {
         //1. load index of all data before fromFrame
         ids = new HashMap<String, Integer>();
         Set<String> source = getSource(fromTimeSlice, window);

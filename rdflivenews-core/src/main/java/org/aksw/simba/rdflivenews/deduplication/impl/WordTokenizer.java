@@ -7,12 +7,13 @@ package org.aksw.simba.rdflivenews.deduplication.impl;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
 
 /**
  *
  * @author ngonga
  */
-public class WordTokenizer implements Tokenizer{
+public class WordTokenizer implements Tokenizer {
 
     @Override
     public Set<String> tokenize(String s, int q) {
