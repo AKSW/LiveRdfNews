@@ -20,7 +20,18 @@ import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.WordTokenizer;
  */
 public class FastNGram {
     
+    /**
+     * Runs the deduplication
+     * @param source Source strings
+     * @param target Target strings
+     * @param q Parameter for the tokenizer
+     * @param threshold Similarity threshold
+     * @return Map source -> target -> similarity
+     */
     public static Map<String, Map<String, Double>> compute(Set<String> source, Set<String> target, int q, double threshold) {
+        
+        if(source.isEmpty() || target.isEmpty()) return new HashMap<String, Map<String, Double>>();
+        
         Index index = new Index(q, threshold);
         double kappa = (1 + threshold) / threshold;
         Similarity sim = new Similarity(q);
@@ -50,9 +61,6 @@ public class FastNGram {
             {
                 if(allSizes.contains(size))
                 {
-//            for (Integer size : allSizes) {
-//                if (size + sourceSize <= kappa * (Math.min(size, sourceSize) + q - 1)) {
-//                    //maps tokens to strings
                     Map<String, Set<String>> stringsOfSize = index.getStrings(size);
                     Map<String, Integer> countMap = new HashMap<String, Integer>();
                     for (String token : sourceTokens) {
