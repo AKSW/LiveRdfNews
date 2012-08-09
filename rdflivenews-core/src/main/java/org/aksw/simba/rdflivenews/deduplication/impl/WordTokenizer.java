@@ -4,6 +4,7 @@
  */
 package org.aksw.simba.rdflivenews.deduplication.impl;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,8 +19,7 @@ public class WordTokenizer implements Tokenizer{
         s = s.toLowerCase();
         String[] split = s.split(" ");
         Set<String> result = new HashSet<String>();
-        for(int i=0; i< split.length; i++)
-            result.add(split[i]);
+        result.addAll(Arrays.asList(split));
         return result;
     }
     
