@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.aksw.simba.rdflivenews.deduplication.impl.WordTokenizer;
 
 import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
 import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.NGramTokenizer;
@@ -40,7 +41,8 @@ public class Index {
      */
     public Index(int _q, double _threshold) {
         sizeTokenIndex = new HashMap<Integer, Map<String, Set<String>>>();
-        tokenizer = new NGramTokenizer();
+        //tokenizer = new NGramTokenizer();
+        tokenizer = new WordTokenizer();
         q = _q;
         threshold = _threshold;
     }
