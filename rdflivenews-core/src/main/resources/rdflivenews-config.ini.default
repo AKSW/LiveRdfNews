@@ -1,0 +1,11 @@
+[database]
+; this directory should not be inside the code repo
+directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
+; we need this test directory only for the junit tests
+test-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews/test
+; this is an index where the dbpedia types and labels are index TODO create documentation on how to generate it 
+dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources/data/index
+
+[search]
+; the method how we look for patterns: NER or POS possible
+method = NER

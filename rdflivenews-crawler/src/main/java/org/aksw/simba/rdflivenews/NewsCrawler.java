@@ -34,7 +34,8 @@ public class NewsCrawler {
     public static void main(String[] args) throws InvalidFileFormatException, IOException, InterruptedException {
         
         // load the config, we dont need to configure logging because the log4j config is on the classpath
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
+        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         
         // with this hook we can guaranty that the lucene index is closed correctly
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
