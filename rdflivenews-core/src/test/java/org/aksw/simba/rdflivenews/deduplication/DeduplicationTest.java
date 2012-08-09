@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +57,67 @@ public class DeduplicationTest extends TestCase {
     
     public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
+        Set<String> source = new HashSet<String>(Arrays.asList("Test.", "Triple Test."));
+        Set<String> target = new HashSet<String>(Arrays.asList("Test.", "Double Test.")); 
+        
+        Deduplication deduplication = new FastDeduplication();
+        
+        Method method = FastDeduplication.class.getDeclaredMethod("deduplicate", Set.class, Set.class, int.class);
+        method.setAccessible(true);
+        assertEquals(source, method.invoke(deduplication, source, source, 1));
+        assertEquals(target, method.invoke(deduplication, target, target, 1));
+    }
+    
+    /**
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public void testGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        
+        Deduplication deduplication = new FastDeduplication();
+        
+        Method method = FastDeduplication.class.getDeclaredMethod("getTarget", int.class, int.class);
+        method.setAccessible(true);
+        
+        Set<String> secondTimeSlice = this.createSentenceSecondTimeSlice();
+        
+        // the second timeslice is the delta S, so we have 7 entries 
+        assertEquals(7, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
+        assertEquals(secondTimeSlice, method.invoke(deduplication, 1, 2));
+        // this should not work
+        secondTimeSlice.add("This is a stupid sentence");
+        assertNotSame(this.createSentenceSecondTimeSlice(), method.invoke(deduplication, 1, 2));
+        
+        // zero window should not be possible
+        try {
+            
+            method.invoke(deduplication, 1, 0);
+            fail("this should have thrown an exception");
+        }
+        catch (Exception expected) { /* expected don't do anything */ }
+        // from time slice needs to be greate than 0
+        try {
+            
+            method.invoke(deduplication, 0, 1);
+            fail("this should have thrown an exception");
+        }
+        catch (Exception expected) { /* expected don't do anything */ }
+    }
+    
+    /**
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public void testGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        
         this.addSentencesToIndex(this.createSentenceFirstTimeSlice(), 1);
         this.addSentencesToIndex(this.createSentenceSecondTimeSlice(), 2);
         this.addSentencesToIndex(this.createSentenceSecondTimeSlice(), 3);
@@ -84,37 +146,6 @@ public class DeduplicationTest extends TestCase {
         
         // window larger then possible timeslices should also work
         assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
-        
-        method = FastDeduplication.class.getDeclaredMethod("getTarget", int.class, int.class);
-        method.setAccessible(true);
-        
-        Set<String> secondTimeSlice = this.createSentenceSecondTimeSlice();
-        
-        // the second timeslice is the delta S, so we have 7 entries 
-        assertEquals(7, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
-        assertEquals(secondTimeSlice, method.invoke(deduplication, 1, 2));
-        // this should not work
-        secondTimeSlice.add("This is a stupid sentence");
-        assertNotSame(this.createSentenceSecondTimeSlice(), method.invoke(deduplication, 1, 2));
-        
-        // zero window should not be possible
-        try {
-            
-            method.invoke(deduplication, 1, 0);
-            fail("this should have thrown an exception");
-        }
-        catch (Exception expected) { /* expected don't do anything */ }
-        // zero window should not be possible
-        try {
-            
-            method.invoke(deduplication, 0, 1);
-            fail("this should have thrown an exception");
-        }
-        catch (Exception expected) { /* expected don't do anything */ }
-        
-        method = FastDeduplication.class.getDeclaredMethod("deduplicate", Set.class, Set.class, int.class);
-        method.setAccessible(true);
-        System.out.println(method.invoke(deduplication, secondTimeSlice, secondTimeSlice, 1));
     }
     
     public void addSentencesToIndex(Set<String> sentences, int timeSlice) {
