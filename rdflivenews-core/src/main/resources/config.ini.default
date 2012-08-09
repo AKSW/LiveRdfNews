@@ -1,17 +1,3 @@
-[timeSlice]
-; the number of milliseconds a time slice should include
-duration = 100000
-
-[crawl]
-;timeout in milliseconds a crawler tries to get the page content  
-timeout = 100000
-;timeout after which the rss feeds get refreshed in ms (default 30mins)
-updateRssInterval = 1800000
-numberOfThreads = 10
-
-[rss]
-feedlist = rss-list.txt
-
 [database]
 ; this directory should not be inside the code repo
 directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
@@ -19,7 +5,6 @@ directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
 test-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews/test
 ; this is an index where the dbpedia types and labels are index TODO create documentation on how to generate it 
 dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources/data/index
-cache = 10
 
 [search]
 ; the method how we look for patterns: NER or POS possible
