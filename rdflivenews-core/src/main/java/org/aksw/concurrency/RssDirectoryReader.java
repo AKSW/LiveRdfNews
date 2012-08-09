@@ -67,10 +67,17 @@ public class RssDirectoryReader {
                 reader = new XmlReader(new URL(feedUrl));
                 SyndFeed feed = new SyndFeedInput().build(reader);
 
-                for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();) {
-
-                    String link = syndEntryIterator.next().getLink();
-
+                // get all the links and shuffle them this way we
+                // dont crawl from the same domains so often and can 
+                // decrease the amount of time each crawler waits after 
+                // each link
+                List<String> links = new ArrayList<String>();
+                for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();)
+                    links.add(syndEntryIterator.next().getLink());
+                Collections.shuffle(links);
+                
+                for ( String link : links ) {
+                    
                     // we only want to add the uri if the uri is not already
                     // in the queue or in the database
                     if (!QueueManager.getInstance().isUriQueued(link) && IndexManager.getInstance().isNewArticle(link)) {
@@ -88,8 +95,7 @@ public class RssDirectoryReader {
             }
             finally {
 
-                if (reader != null)
-                    reader.close();
+                if (reader != null) reader.close();
             }
         }
     }

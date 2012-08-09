@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.pair.Entity;
+import org.aksw.entity.Entity;
 import org.aksw.pair.EntityPair;
 import org.aksw.pair.Pair;
 
@@ -128,7 +128,12 @@ public class DefaultPattern implements Pattern {
      */
     public void addLearnedFromEntities(EntityPair pair) {
 
-        if ( this.entityPairs.containsKey(pair.hashCode()) ) ((EntityPair) this.entityPairs.get(pair.hashCode())).increaseOccurrence();
+        if ( this.entityPairs.containsKey(pair.hashCode()) ) {
+            
+            EntityPair oldPair = ((EntityPair) this.entityPairs.get(pair.hashCode()));
+            oldPair.increaseOccurrence();
+            oldPair.addLuceneSentencIds(pair.getLuceneSentenceIds());
+        }
         else this.entityPairs.put(pair.hashCode(), pair);
     }
     
@@ -151,8 +156,7 @@ public class DefaultPattern implements Pattern {
     }
     
     /**
-     * 
-     * @return
+     * @return all <bold>new</bold> entities
      */
     public List<EntityPair> getNewEntities(){
         
@@ -170,6 +174,26 @@ public class DefaultPattern implements Pattern {
         return this.luceneSentenceIds;
     }
     
+    /**
+     * 
+     */
+    public int getTotalOccurrence() {
+
+        return this.entityPairs.size();
+    }
+
+    /**
+     * 
+     */
+    public Set<Integer> getFoundInSentencesIds() {
+
+        Set<Integer> sentenceIds = new HashSet<Integer>();
+        for ( EntityPair pair : this.entityPairs.values() )
+            sentenceIds.addAll(pair.getLuceneSentenceIds());
+        
+        return sentenceIds;
+    }
+    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -177,15 +201,14 @@ public class DefaultPattern implements Pattern {
     public String toString() {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Pattern: "      +  this.naturalLanguageRepresentation);
-        builder.append("\nTagged-Pattern: "  + this.naturalLanguageRepresentationWithTags);
+        builder.append("Pattern: arg1 "      +  this.naturalLanguageRepresentation + " arg2");
+        builder.append("\nTagged-Pattern: arg1 "  + this.naturalLanguageRepresentationWithTags + " arg2");
         builder.append("\nOccurrence: "    + this.totalOccurrence);
         
         int i = 1;
-        for ( Pair<Entity,Entity> pair : this.entityPairs.values() ) {
-            
-            builder.append("\n\t"+ i++ +": " + pair.getFirstEntity().getLabel() +" ("+ pair.getFirstEntity().getType() + ") - " + pair.getSecondEntity().getLabel() +" ("+ pair.getSecondEntity().getType() + ")");
-        }
+        for ( Pair<Entity,Entity> pair : this.entityPairs.values() )
+            builder.append("\n\t"+ i++ +": " + pair);
+                
         return builder.append("\n").toString();
     }
     
@@ -222,13 +245,5 @@ public class DefaultPattern implements Pattern {
             if (!naturalLanguageRepresentation.equals(other.naturalLanguageRepresentation))
                 return false;
         return true;
-    }
-
-    /**
-     * 
-     */
-    public int getTotalOccurrence() {
-
-        return this.entityPairs.size();
     }
 }

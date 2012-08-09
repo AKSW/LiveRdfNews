@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.pair.Entity;
+import org.aksw.entity.Entity;
 import org.aksw.pair.EntityPair;
 import org.aksw.pattern.DefaultPattern;
 import org.aksw.pattern.Pattern;
@@ -25,7 +25,7 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
     /* (non-Javadoc)
      * @see org.aksw.patternsearch.PatternSearcher#extractPatterns(java.lang.String)
      */
-    public List<Pattern> extractPatterns(String posTaggedSentence) {
+    public List<Pattern> extractPatterns(String posTaggedSentence, int luceneSentenceId) {
 
         List<Pattern> patterns       = new ArrayList<Pattern>();
         List<String> mergedSentence = mergeTagsInSentences(posTaggedSentence);
@@ -70,7 +70,7 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
                 if ( nlrWithoutTags != null && !nlrWithoutTags.isEmpty() && 
                         secondEntity != null && !secondEntity.getLabel().isEmpty() ) {
 
-                    pattern.addLearnedFromEntities(new EntityPair(firstEntity,secondEntity));
+                    pattern.addLearnedFromEntities(new EntityPair(firstEntity,secondEntity,luceneSentenceId));
                     pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " "));
                     pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " "));
                     

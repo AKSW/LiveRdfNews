@@ -36,4 +36,32 @@ public class Constants {
      * use this value as the lucene field name for a sentence extractions date
      */
     public static final String LUCENE_FIELD_EXTRACTION_DATE = "date";
+    
+    /* ################################################################ */
+    /* ################################################################ */
+    /* ################################################################ */
+    
+    /**
+     * this is the lucene field name of the dbpedia index for the rdf:type(s) of a given resource
+     */
+    public static final String DBPEDIA_LUCENE_FIELD_TYPES = "types";
+    
+    /**
+     * this is the lucene field name of the dbpedia index for the uri of a given resource
+     */
+    public static final String DBPEDIA_LUCENE_FIELD_URI = "uri";
+    
+    /**
+     * this is the lucene field name of the dbpedia index for the label of a given resource
+     */
+    public static final String DBPEDIA_LUCENE_FIELD_LABEL = "label";
+    
+    /* ################################################################ */
+    /* ################################################################ */
+    /* ################################################################ */
+    
+    /**
+     * the regular dbpedia ontology prefix
+     */
+    public static final String DBPEDIA_ONTOLOGY_PREFIX = "http://dbpedia.org/ontology/";
 }

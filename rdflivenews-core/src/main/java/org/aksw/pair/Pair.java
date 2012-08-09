@@ -10,8 +10,8 @@ package org.aksw.pair;
  */
 public class Pair<T1, T2> {
 
-    private T1 firstEntity;
-    private T2 secondEntity;
+    protected T1 firstEntity;
+    protected T2 secondEntity;
     
     /**
      * 

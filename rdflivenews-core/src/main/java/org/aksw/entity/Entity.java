@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.pair;
+package org.aksw.entity;
 
 
 /**

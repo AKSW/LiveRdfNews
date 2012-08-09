@@ -57,7 +57,7 @@ public class PatternExtractionTest extends TestCase {
         IndexManager.INDEX_DIRECTORY = NewsCrawler.CONFIG.getStringSetting("database", "test-directory");
         IndexManager.getInstance().deleteIndex();
         
-        Set<Sentence> sentences = new HashSet<Sentence>();
+        List<Sentence> sentences = new ArrayList<Sentence>();
         for ( String sent : this.createSentences() ) {
             
             Sentence sentence = new Sentence();
@@ -71,17 +71,17 @@ public class PatternExtractionTest extends TestCase {
         
         IndexManager.getInstance().addSentences(sentences);
         
-        assertEquals(201, IndexManager.getInstance().getNumberOfDocuments());
+        assertEquals(216, IndexManager.getInstance().getNumberOfDocuments());
         
         List<Integer> sentenceFromFirstIterationIds = IndexManager.getInstance().getSentenceFromTimeSlice(1);
-        assertEquals(201, sentenceFromFirstIterationIds.size());
+        assertEquals(216, sentenceFromFirstIterationIds.size());
         
         PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
-        List<org.aksw.pattern.Pattern> patterns = patternSearchManager.startPatternSearchCallables(sentenceFromFirstIterationIds, 1);
+        List<org.aksw.pattern.Pattern> patterns = patternSearchManager.startPatternSearchCallables(sentenceFromFirstIterationIds, 3);
         
         // the patterns are not merged so we should have 
         // extracted as much patterns as we do have sentences
-        assertEquals(201, patterns.size()); 
+        assertEquals(216, patterns.size()); 
         
         List<org.aksw.pattern.Pattern> mergedPatterns = patternSearchManager.mergeNewFoundPatterns(patterns);
         assertEquals(35, mergedPatterns.size());
@@ -91,6 +91,7 @@ public class PatternExtractionTest extends TestCase {
             if ( pattern.getNaturalLanguageRepresentation().equals("is a subsidiary of") ) assertEquals(9, pattern.getTotalOccurrence());
             if ( pattern.getNaturalLanguageRepresentation().equals("is smaller in size than") ) assertEquals(5, pattern.getTotalOccurrence());
             if ( pattern.getNaturalLanguageRepresentation().equals("has fired") ) assertEquals(2, pattern.getTotalOccurrence());
+            if ( pattern.getNaturalLanguageRepresentation().equals("has meet") ) assertEquals(2, pattern.getLearnedFromEntities().get(0).getOccurrence());
         }
         
         // just to have a feeling what a pattern actually is 
@@ -114,6 +115,9 @@ public class PatternExtractionTest extends TestCase {
         List<String> person2company     = generatePersonToCompanyPatterns();
         List<String> company2place      = generateCompanyToPlacePatterns();
 
+        // do this first loop twice to find the some pairs multiple times
+        for ( int i = 0, j = 0; i < personNames.size() - 1; i = i + 2, j++ )  
+            sentences.add(String.format("%s %s %s ._OTHER", personNames.get(i), person2person.get(j % person2person.size()), personNames.get(i+1)));
         for ( int i = 0, j = 0; i < personNames.size() - 1; i = i + 2, j++ )  
             sentences.add(String.format("%s %s %s ._OTHER", personNames.get(i), person2person.get(j % person2person.size()), personNames.get(i+1)));
 

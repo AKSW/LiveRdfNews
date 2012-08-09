@@ -92,4 +92,9 @@ public interface Pattern {
      * @return
      */
     public int getTotalOccurrence();
+    
+    /**
+     * @return a list of lucene document id's in which the pattern was found
+     */
+    public Set<Integer> getFoundInSentencesIds();
 }

@@ -5,6 +5,7 @@ package org.aksw;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -55,7 +56,7 @@ public class ArticleCrawlerThreadTest extends TestCase {
         
         NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
         ArticleCrawlerThread t = new ArticleCrawlerThread();
-        Set<Sentence> sentences = t.crawlArticle("http://www.nytimes.com/2012/07/24/world/middleeast/chemical-weapons-wont-be-used-in-rebellion-syria-says.html?_r=1&ref=global-home");
+        List<Sentence> sentences = t.crawlArticle("http://www.nytimes.com/2012/07/24/world/middleeast/chemical-weapons-wont-be-used-in-rebellion-syria-says.html?_r=1&ref=global-home");
         
         assertTrue(sentences != null);
         assertTrue(!sentences.isEmpty());

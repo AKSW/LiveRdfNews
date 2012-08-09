@@ -22,7 +22,7 @@ public interface PatternSearcher {
      * @param taggedSentence
      * @return
      */
-    public List<Pattern> extractPatterns(String taggedSentence);
+    public List<Pattern> extractPatterns(String taggedSentence, int luceneSentenceId);
     
     /**
      * Merges the NE or POS tags of subsequent words so that those words 

@@ -3,6 +3,15 @@
  */
 package org.aksw.pair;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.aksw.entity.Entity;
+
+import edu.stanford.nlp.util.StringUtils;
+
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -10,14 +19,27 @@ package org.aksw.pair;
  */
 public class EntityPair extends Pair<Entity,Entity> {
 
-    private int occurrence;
+    private int occurrence = 1;
     private boolean isNew = true;
+    private Set<Integer> luceneSentenceIds = new HashSet<Integer>();
     
     /**
+     * @param luceneSentenceId 
      * 
      */
-    public EntityPair(Entity firstEntity, Entity secondEntity) {
+    public EntityPair(Entity firstEntity, Entity secondEntity, int luceneSentenceId) {
         super(firstEntity, secondEntity);
+        
+        this.addLuceneSentenceId(luceneSentenceId);
+    }
+
+    /**
+     * 
+     * @param luceneSentenceId
+     */
+    private void addLuceneSentenceId(int luceneSentenceId) {
+
+        this.luceneSentenceIds.add(luceneSentenceId);
     }
 
     /**
@@ -62,5 +84,39 @@ public class EntityPair extends Pair<Entity,Entity> {
     public void setNew(boolean isNew) {
     
         this.isNew = isNew;
+    }
+
+    /**
+     * @return the luceneSentenceId
+     */
+    public Set<Integer> getLuceneSentenceIds() {
+
+        return luceneSentenceIds;
+    }
+
+    /**
+     * @param luceneSentenceId the luceneSentenceId to set
+     */
+    public void setLuceneSentenceId(Set<Integer> luceneSentenceIds) {
+
+        this.luceneSentenceIds = luceneSentenceIds;
+    }
+    
+    /**
+     * 
+     * @param luceneSentenceIds
+     */
+    public void addLuceneSentencIds(Set<Integer> luceneSentenceIds) {
+
+        this.luceneSentenceIds.addAll(luceneSentenceIds);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+
+        return this.firstEntity.getLabel() +" ("+ this.firstEntity.getType() + ") - " + this.secondEntity.getLabel() +" ("+ this.secondEntity.getType() + ") / sentenceIDs: " + StringUtils.join(this.luceneSentenceIds, ", ") + " / occurrence: " + this.occurrence;
     }
 }

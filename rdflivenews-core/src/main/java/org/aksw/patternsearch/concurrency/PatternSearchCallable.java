@@ -73,7 +73,7 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
             
             // get the sentence from the index and try to extract patterns from it
             String taggedSentence = reader.document(luceneDocumentId).get(this.luceneFieldName);
-            this.foundPatterns.addAll(this.patternSearcher.extractPatterns(taggedSentence));
+            this.foundPatterns.addAll(this.patternSearcher.extractPatterns(taggedSentence,luceneDocumentId));
             
             this.progress++;
         }

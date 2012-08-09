@@ -42,6 +42,8 @@ import org.apache.lucene.util.Version;
  */
 public class IndexManager {
 
+    public static final int UNDEFINED_SENTENCE_ID = -1;
+    
     /**
      * singleton
      */
@@ -158,7 +160,7 @@ public class IndexManager {
      * 
      * @param article
      */
-    public void addSentences(Set<Sentence> sentences) {
+    public void addSentences(List<Sentence> sentences) {
         
         try {
             
