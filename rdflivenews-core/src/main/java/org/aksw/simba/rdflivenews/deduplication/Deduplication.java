@@ -1,13 +1,13 @@
-/**
- * 
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package org.aksw.simba.rdflivenews.deduplication;
 
-
 /**
- * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
+ * @author ngonga
  */
 public interface Deduplication {
-
+    public void runDeduplication(int fromFrame, int toFrame);
 }
