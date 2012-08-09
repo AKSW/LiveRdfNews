@@ -10,4 +10,10 @@ package org.aksw.simba.rdflivenews.deduplication;
  */
 public interface Deduplication {
 
+    /**
+     * 
+     * @param fromTimeSlice
+     * @param toTimeSlice
+     */
+    public void deduplicate(int fromTimeSlice, int toTimeSlice);
 }

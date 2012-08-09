@@ -21,3 +21,7 @@ feedlist = rss-list.txt
 data-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
 ; website sentence crawl index
 index = index
+
+[statistics]
+; prints statistics to a file every x ms
+updateStatisticsInterval = 10000

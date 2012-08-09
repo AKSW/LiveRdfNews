@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw;
+package org.aksw.simba.rdflivenews.pattern.refinement;
 
 import java.io.File;
 import java.io.IOException;

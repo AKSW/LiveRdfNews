@@ -12,7 +12,7 @@ import org.aksw.simba.rdflivenews.deduplication.Deduplication;
  */
 public class DummyDeduplication implements Deduplication {
 
-    public void runDeduplication(int fromTimeSlice, int toTimeSlice) {
+    public void deduplicate(int fromTimeSlice, int toTimeSlice) {
         
-    }    
+    }
 }

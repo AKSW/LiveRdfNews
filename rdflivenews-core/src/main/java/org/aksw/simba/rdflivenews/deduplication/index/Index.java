@@ -2,12 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.aksw.simba.rdflivenews.deduplication.impl;
+package org.aksw.simba.rdflivenews.deduplication.index;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
+import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.NGramTokenizer;
 
 /**
  *

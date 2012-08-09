@@ -11,6 +11,7 @@ import org.aksw.simba.rdflivenews.concurrency.CrawlRssFeedEntryThread;
 import org.aksw.simba.rdflivenews.concurrency.ShutdownThread;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.crawler.UpdateRssFeedsTask;
+import org.aksw.simba.rdflivenews.statistics.StatisiticsTask;
 import org.apache.log4j.Logger;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
@@ -46,8 +47,12 @@ public class NewsCrawler {
         // start to update the rss entries which are then crawled periodically
         Timer updateFeedTimer = new Timer();
         UpdateRssFeedsTask updateFeeds = new UpdateRssFeedsTask();
-        updateFeedTimer.schedule(updateFeeds, 0, NewsCrawler.CONFIG.getLongSetting("crawl", "updateRssInterval")); // TODO make this configurable
+        updateFeedTimer.schedule(updateFeeds, 0, NewsCrawler.CONFIG.getLongSetting("crawl", "updateRssInterval"));
         logger.info("Started RSS update task!");
+        
+        Timer statisticsTimer = new Timer();
+        StatisiticsTask statTask = new StatisiticsTask();
+        statisticsTimer.schedule(statTask, 0, NewsCrawler.CONFIG.getLongSetting("statistics", "updateStatisticsInterval"));
 
         // this thread get's started and will never and, it opens a new thread pool where one thread crawls one rss entry
         CrawlRssFeedEntryThread crawlRssFeedsThread = new CrawlRssFeedEntryThread();
@@ -58,8 +63,14 @@ public class NewsCrawler {
         while ( true ) {
 
             // the time has come to create a new slice
-            if ( System.currentTimeMillis() - startTime >= NewsCrawler.CONFIG.getLongSetting("timeSlice", "duration") )
+            if ( System.currentTimeMillis() - startTime >= NewsCrawler.CONFIG.getLongSetting("timeSlice", "duration") ) {
+                
+                statTask.printTimeSliceStatistics(TIME_SLICE_ID);
+                
+                // increase the timeslice and reset the start time
                 NewsCrawler.TIME_SLICE_ID++;
+                startTime = System.currentTimeMillis();
+            }
             
             // avoid 100% cpu load 
             Thread.sleep(5000);
