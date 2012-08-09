@@ -1,21 +1,18 @@
 /**
  * 
  */
-package org.aksw;
+package org.aksw.simba.rdflivenews.crawler;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.aksw.simba.rdflivenews.concurrency.QueueManager;
+import org.aksw.simba.rdflivenews.NewsCrawler;
 import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.crawler.ArticleCrawlerThread;
-import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
 import org.aksw.simba.rdflivenews.index.Sentence;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;

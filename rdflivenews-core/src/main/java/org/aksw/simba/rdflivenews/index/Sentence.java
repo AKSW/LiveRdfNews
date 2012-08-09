@@ -1,7 +1,6 @@
 package org.aksw.simba.rdflivenews.index;
 
 import java.util.Date;
-import java.util.Set;
 
 /**
  * 

@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
-import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
@@ -22,14 +21,10 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
-import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -50,7 +45,7 @@ public class IndexManager {
     private static IndexManager INSTANCE;
     private Logger logger = Logger.getLogger(getClass());
     
-    public static String INDEX_DIRECTORY = NewsCrawler.CONFIG.getStringSetting("database", "directory");
+    public static String INDEX_DIRECTORY = RdfLiveNews.CONFIG.getStringSetting("database", "directory");
     
     public static Directory INDEX;
     private IndexWriter writer;

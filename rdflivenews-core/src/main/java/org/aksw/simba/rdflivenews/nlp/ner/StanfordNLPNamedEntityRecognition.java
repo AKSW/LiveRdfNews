@@ -4,13 +4,11 @@
 package org.aksw.simba.rdflivenews.nlp.ner;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.simba.rdflivenews.mvn.MavenHelper;
 import org.aksw.simba.rdflivenews.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;

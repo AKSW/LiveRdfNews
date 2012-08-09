@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.patternsearch.PatternSearcher;
 import org.aksw.simba.rdflivenews.patternsearch.impl.NamedEntityTagPatternSearcher;
 import org.aksw.simba.rdflivenews.patternsearch.impl.PartOfSpeechTagPatternSearcher;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 /**
  * Unit test for simple TESTCRAWLER.

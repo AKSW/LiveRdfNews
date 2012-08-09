@@ -3,23 +3,18 @@
  */
 package org.aksw.simba.rdflivenews.patternsearch.concurrency;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.aksw.simba.rdflivenews.Constants;
-import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.patternsearch.PatternSearcher;
 import org.aksw.simba.rdflivenews.patternsearch.impl.NamedEntityTagPatternSearcher;
 import org.aksw.simba.rdflivenews.patternsearch.impl.PartOfSpeechTagPatternSearcher;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 
 
 /**
@@ -48,17 +43,17 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
         this.luceneDocumentsIds = luceneDocumentsIdsSubList;
         this.name               = name;
         
-        if ( NewsCrawler.CONFIG.getStringSetting("search", "method").equals("POS") ) {
+        if ( RdfLiveNews.CONFIG.getStringSetting("search", "method").equals("POS") ) {
             
             this.luceneFieldName = Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE;
             this.patternSearcher = new PartOfSpeechTagPatternSearcher();
         }
-        else if ( NewsCrawler.CONFIG.getStringSetting("search", "method").equals("NER") ) {
+        else if ( RdfLiveNews.CONFIG.getStringSetting("search", "method").equals("NER") ) {
             
             this.luceneFieldName = Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE;
             this.patternSearcher = new NamedEntityTagPatternSearcher();
         }
-        else throw new RuntimeException(String.format("Supplied pattern search method '%s' not supported!", NewsCrawler.CONFIG.getStringSetting("search", "method")));
+        else throw new RuntimeException(String.format("Supplied pattern search method '%s' not supported!", RdfLiveNews.CONFIG.getStringSetting("search", "method")));
     }
 
     /**

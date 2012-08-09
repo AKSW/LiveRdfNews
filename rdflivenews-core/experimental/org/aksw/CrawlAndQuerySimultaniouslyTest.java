@@ -12,25 +12,17 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.aksw.simba.rdflivenews.index.LowerCaseWhitespaceAnalyzer;
-import org.apache.lucene.analysis.Analyzer;
+import junit.framework.TestCase;
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
 import org.ini4j.InvalidFileFormatException;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 
 /**

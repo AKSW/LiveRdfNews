@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
-import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
@@ -33,7 +33,7 @@ public class LuceneRefinementManager {
     
     public LuceneRefinementManager() {
         
-        INDEX = LuceneManager.openLuceneIndex(NewsCrawler.CONFIG.getStringSetting("database", "dbpedia"));
+        INDEX = LuceneManager.openLuceneIndex(RdfLiveNews.CONFIG.getStringSetting("database", "dbpedia"));
     }
     
     /**

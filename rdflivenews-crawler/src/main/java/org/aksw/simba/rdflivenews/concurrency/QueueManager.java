@@ -3,10 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.concurrency;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.log4j.Logger;

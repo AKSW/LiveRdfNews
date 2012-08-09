@@ -12,15 +12,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
-import org.aksw.simba.rdflivenews.refinement.PatternRefiner;
-import org.ini4j.Ini;
-import org.ini4j.InvalidFileFormatException;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.refinement.PatternRefiner;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
 
 
 /**
@@ -40,7 +40,7 @@ public class PatternRefinerTest extends TestCase {
     public PatternRefinerTest(String testName) throws InvalidFileFormatException, IOException{
         super(testName);
         
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
     }
 
     /**

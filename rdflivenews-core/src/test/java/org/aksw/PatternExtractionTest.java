@@ -6,26 +6,20 @@ package org.aksw;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
-import org.aksw.simba.rdflivenews.index.IndexManager;
-import org.aksw.simba.rdflivenews.index.Sentence;
-import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
-import org.aksw.simba.rdflivenews.patternsearch.concurrency.PatternSearchCallable;
-import org.aksw.simba.rdflivenews.patternsearch.concurrency.PatternSearchThreadManager;
-import org.ini4j.Ini;
-import org.ini4j.InvalidFileFormatException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.index.IndexManager;
+import org.aksw.simba.rdflivenews.index.Sentence;
+import org.aksw.simba.rdflivenews.patternsearch.concurrency.PatternSearchThreadManager;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -54,8 +48,8 @@ public class PatternExtractionTest extends TestCase {
 
     public void testPatternExtraction() throws InvalidFileFormatException, IOException {
 
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
-        IndexManager.INDEX_DIRECTORY = NewsCrawler.CONFIG.getStringSetting("database", "test-directory");
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
+        IndexManager.INDEX_DIRECTORY = RdfLiveNews.CONFIG.getStringSetting("database", "test-directory");
         IndexManager.getInstance().deleteIndex();
         
         List<Sentence> sentences = new ArrayList<Sentence>();

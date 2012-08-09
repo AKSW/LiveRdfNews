@@ -1,7 +1,6 @@
 package org.aksw.simba.rdflivenews.patternsearch.concurrency;
 
 import java.text.DecimalFormat;
-import java.util.Collection;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
