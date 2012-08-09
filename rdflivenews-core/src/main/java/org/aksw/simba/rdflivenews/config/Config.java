@@ -3,6 +3,8 @@
  */
 package org.aksw.simba.rdflivenews.config;
 
+import java.io.File;
+
 import org.ini4j.Ini;
 
 
@@ -13,10 +15,18 @@ import org.ini4j.Ini;
 public class Config {
     
     private Ini defactoConfig;
+    public static String RDF_LIVE_NEWS_DATA_DIRECTORY;
 
     public Config(Ini config) {
         
         this.defactoConfig =  config;
+        
+        String dataDir = this.getStringSetting("general", "data-directory");
+        dataDir = dataDir.endsWith("/") ? dataDir : dataDir + System.getProperty("path.separator");
+        RDF_LIVE_NEWS_DATA_DIRECTORY = dataDir;
+        
+        if ( !new File(RDF_LIVE_NEWS_DATA_DIRECTORY).exists() ) throw new RuntimeException("Data directory does not exist: "+ RDF_LIVE_NEWS_DATA_DIRECTORY);
+        new File(RDF_LIVE_NEWS_DATA_DIRECTORY + this.getStringSetting("general", "index"));
     }
     
     /**

@@ -48,8 +48,8 @@ public class PatternExtractionTest extends TestCase {
 
     public void testPatternExtraction() throws InvalidFileFormatException, IOException {
 
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
-        IndexManager.INDEX_DIRECTORY = RdfLiveNews.CONFIG.getStringSetting("database", "test-directory");
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+        IndexManager.INDEX_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "test");
         IndexManager.getInstance().deleteIndex();
         
         List<Sentence> sentences = new ArrayList<Sentence>();

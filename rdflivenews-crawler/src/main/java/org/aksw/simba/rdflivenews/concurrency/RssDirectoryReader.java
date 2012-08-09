@@ -3,8 +3,10 @@
  */
 package org.aksw.simba.rdflivenews.concurrency;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,7 +43,7 @@ public class RssDirectoryReader {
         try {
 
             this.rssFeeds = FileUtils.readLines(MavenHelper.loadFile("/rss-list.txt"), "UTF-8");
-            Collections.shuffle(this.rssFeeds);
+//            Collections.shuffle(this.rssFeeds);
         }
         catch (IOException e) {
 
@@ -59,6 +61,8 @@ public class RssDirectoryReader {
 
         // check every rss feed
         for (String feedUrl : rssFeeds) {
+            
+            logger.info("Getting article urls from feed: " + feedUrl);
 
             XmlReader reader = null;
 
@@ -67,31 +71,32 @@ public class RssDirectoryReader {
                 reader = new XmlReader(new URL(feedUrl));
                 SyndFeed feed = new SyndFeedInput().build(reader);
 
-                // get all the links and shuffle them this way we
-                // dont crawl from the same domains so often and can 
-                // decrease the amount of time each crawler waits after 
-                // each link
-                List<String> links = new ArrayList<String>();
-                for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();)
-                    links.add(syndEntryIterator.next().getLink());
-                Collections.shuffle(links);
-                
-                for ( String link : links ) {
+                for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();) {
                     
+                    String link = syndEntryIterator.next().getLink();
+                        
                     // we only want to add the uri if the uri is not already
                     // in the queue or in the database
                     if (!QueueManager.getInstance().isUriQueued(link) && IndexManager.getInstance().isNewArticle(link)) {
 
                         QueueManager.getInstance().addArticleToCrawlQueue(link);
-                        logger.info("Added new entry to queue: " + link);
+                        this.logger.info("Added new article URL: " + link);
                     }
                     else
                         logger.info("Article already known... skipping: " + link);
                 }
             }
+            catch (IOException uhe) {
+
+                logger.debug("Error parsing feed: " + feedUrl, uhe);
+            }
+            catch (IllegalArgumentException iae) {
+                
+                logger.debug("Error parsing feed: " + feedUrl, iae);
+            }
             catch (ParsingFeedException pfe) {
 
-                logger.error("Error parsing feed: " + feedUrl, pfe);
+                logger.debug("Error parsing feed: " + feedUrl, pfe);
             }
             finally {
 

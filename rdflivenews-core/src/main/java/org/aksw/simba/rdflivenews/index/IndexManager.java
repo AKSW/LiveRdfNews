@@ -55,7 +55,7 @@ public class IndexManager {
      * 
      * @return
      */
-    public static IndexManager getInstance() {
+    public static synchronized IndexManager getInstance() {
 
         if ( IndexManager.INSTANCE == null ) IndexManager.INSTANCE = new IndexManager();
         return IndexManager.INSTANCE;
@@ -155,7 +155,7 @@ public class IndexManager {
      * 
      * @param article
      */
-    public void addSentences(List<Sentence> sentences) {
+    public synchronized void addSentences(List<Sentence> sentences) {
         
         try {
             
@@ -227,6 +227,16 @@ public class IndexManager {
             String error = "Check if index exists failed!";
             throw new RuntimeException(error, e);
         }
+    }
+    
+    /**
+     * 
+     * @param documentId
+     * @param timeSlice
+     */
+    public void setDocumentDuplicateInTimeSlice(int documentId, int timeSlice) {
+        
+        
     }
     
     /**

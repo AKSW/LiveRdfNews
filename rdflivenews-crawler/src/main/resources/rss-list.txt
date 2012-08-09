@@ -858,8 +858,6 @@ http://www.businessweek.com/the_thread/economicsunbound/economicsunbound.rss
 http://www.businessweek.com/the_thread/hotproperty/hotproperty.rss
 http://www.businessweek.com/the_thread/techbeat/techbeat.rss
 http://www.businessweek.com/topStories/rss/topStories.rss
-http://www.caribbean360.com/feed/index.1.rss
-http://www.caribbean360.com/index.php/feed/index.1.rss
 http://www.carrollconews.com/feed/rss/all/week.rss
 http://www.cassville-democrat.com/feed/rss/all/week.rss
 http://www.cbc.ca/arts/blog/sundance2007/index.xml

@@ -3,8 +3,8 @@
  */
 package org.aksw.simba.rdflivenews.concurrency;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Collections;
+import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 public class QueueManager {
     
     private static QueueManager INSTANCE = null;
-    private static Queue<String> crawlQueue = new ConcurrentLinkedQueue<String>();
+    private static Stack<String> crawlStack = new Stack<String>();
     private Logger logger = Logger.getLogger(getClass());
     
     /**
@@ -40,7 +40,8 @@ public class QueueManager {
      */
     public void addArticleToCrawlQueue(String articleUrl) {
         
-        crawlQueue.add(articleUrl);
+        crawlStack.add(articleUrl);
+        Collections.shuffle(crawlStack);
     }
     
     /**
@@ -49,8 +50,8 @@ public class QueueManager {
      */
     public synchronized String removeArticleFromCrawlQueue() {
         
-        String uri = crawlQueue.poll();
-        logger.debug("Removed uri from crawlQueue: " + uri);
+        String uri = !crawlStack.isEmpty() ? crawlStack.pop() : null;
+        logger.debug("Removed uri from crawlStack: " + uri);
         return uri;
     }
 
@@ -62,6 +63,6 @@ public class QueueManager {
     public boolean isUriQueued(String uri) {
         
         this.logger.debug("Queueing uri: " + uri);
-        return crawlQueue.contains(uri);
+        return crawlStack.contains(uri);
     }
 }

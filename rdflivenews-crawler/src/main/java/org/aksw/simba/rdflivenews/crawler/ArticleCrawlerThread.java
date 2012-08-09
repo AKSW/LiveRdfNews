@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.crawler;
 
+import java.io.FileNotFoundException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -101,12 +102,15 @@ public class ArticleCrawlerThread extends Thread {
         }
         catch (IllegalArgumentException iae) {
             
-            logger.error("Error crawling html from url: " + url, iae);
+            logger.debug("Error crawling html from url: " + url, iae);
+        }
+        catch (FileNotFoundException iae) {
+            
+            logger.debug("Error crawling html from url: " + url, iae);
         }
         catch (Exception e) {
             
-            e.printStackTrace();
-            logger.error("Error crawling html from url: " + url, e);
+            logger.debug("Error crawling html from url: " + url, e);
         }
         
         return null;

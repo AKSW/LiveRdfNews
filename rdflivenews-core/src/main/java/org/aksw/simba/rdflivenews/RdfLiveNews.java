@@ -22,6 +22,6 @@ public class RdfLiveNews {
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
 
         // load the config, we dont need to configure logging because the log4j config is on the classpath
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
     }
 }
