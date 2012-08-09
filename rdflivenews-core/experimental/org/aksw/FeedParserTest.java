@@ -3,8 +3,9 @@ package org.aksw;
 import java.io.File;
 import java.io.IOException;
 
-import org.aksw.concurrency.RssDirectoryReader;
-import org.aksw.config.Config;
+import org.aksw.simba.rdflivenews.concurrency.RssDirectoryReader;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 

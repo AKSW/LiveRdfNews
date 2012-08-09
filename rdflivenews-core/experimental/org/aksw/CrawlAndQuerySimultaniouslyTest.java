@@ -12,7 +12,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.aksw.index.LowerCaseWhitespaceAnalyzer;
+import org.aksw.simba.rdflivenews.index.LowerCaseWhitespaceAnalyzer;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;

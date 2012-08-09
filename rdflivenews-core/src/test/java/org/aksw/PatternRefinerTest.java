@@ -12,8 +12,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.config.Config;
-import org.aksw.refinement.PatternRefiner;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.refinement.PatternRefiner;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 

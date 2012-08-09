@@ -9,8 +9,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.aksw.config.Config;
-import org.aksw.refinement.LuceneRefinementManager;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.refinement.LuceneRefinementManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 

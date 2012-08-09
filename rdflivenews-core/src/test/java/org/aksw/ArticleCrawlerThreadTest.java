@@ -12,10 +12,11 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.aksw.concurrency.QueueManager;
-import org.aksw.config.Config;
-import org.aksw.crawler.ArticleCrawlerThread;
-import org.aksw.index.Sentence;
+import org.aksw.simba.rdflivenews.concurrency.QueueManager;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.crawler.ArticleCrawlerThread;
+import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.index.Sentence;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 

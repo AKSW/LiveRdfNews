@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.aksw.pattern.Pattern;
-import org.aksw.patternsearch.PatternSearcher;
-import org.aksw.patternsearch.impl.NamedEntityTagPatternSearcher;
-import org.aksw.patternsearch.impl.PartOfSpeechTagPatternSearcher;
+import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.patternsearch.PatternSearcher;
+import org.aksw.simba.rdflivenews.patternsearch.impl.NamedEntityTagPatternSearcher;
+import org.aksw.simba.rdflivenews.patternsearch.impl.PartOfSpeechTagPatternSearcher;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

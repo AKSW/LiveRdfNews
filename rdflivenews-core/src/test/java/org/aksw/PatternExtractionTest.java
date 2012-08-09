@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.aksw.config.Config;
-import org.aksw.index.IndexManager;
-import org.aksw.index.Sentence;
-import org.aksw.nlp.ner.StanfordNLPNamedEntityRecognition;
-import org.aksw.patternsearch.concurrency.PatternSearchCallable;
-import org.aksw.patternsearch.concurrency.PatternSearchThreadManager;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.crawler.NewsCrawler;
+import org.aksw.simba.rdflivenews.index.IndexManager;
+import org.aksw.simba.rdflivenews.index.Sentence;
+import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
+import org.aksw.simba.rdflivenews.patternsearch.concurrency.PatternSearchCallable;
+import org.aksw.simba.rdflivenews.patternsearch.concurrency.PatternSearchThreadManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
@@ -77,16 +78,16 @@ public class PatternExtractionTest extends TestCase {
         assertEquals(216, sentenceFromFirstIterationIds.size());
         
         PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
-        List<org.aksw.pattern.Pattern> patterns = patternSearchManager.startPatternSearchCallables(sentenceFromFirstIterationIds, 3);
+        List<org.aksw.simba.rdflivenews.pattern.Pattern> patterns = patternSearchManager.startPatternSearchCallables(sentenceFromFirstIterationIds, 3);
         
         // the patterns are not merged so we should have 
         // extracted as much patterns as we do have sentences
         assertEquals(216, patterns.size()); 
         
-        List<org.aksw.pattern.Pattern> mergedPatterns = patternSearchManager.mergeNewFoundPatterns(patterns);
+        List<org.aksw.simba.rdflivenews.pattern.Pattern> mergedPatterns = patternSearchManager.mergeNewFoundPatterns(patterns);
         assertEquals(35, mergedPatterns.size());
         
-        for ( org.aksw.pattern.Pattern pattern : mergedPatterns ) {
+        for ( org.aksw.simba.rdflivenews.pattern.Pattern pattern : mergedPatterns ) {
             
             if ( pattern.getNaturalLanguageRepresentation().equals("is a subsidiary of") ) assertEquals(9, pattern.getTotalOccurrence());
             if ( pattern.getNaturalLanguageRepresentation().equals("is smaller in size than") ) assertEquals(5, pattern.getTotalOccurrence());

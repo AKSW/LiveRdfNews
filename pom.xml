@@ -18,6 +18,7 @@
 	<modules>
 		<module>rdflivenews-gui</module>
 		<module>rdflivenews-core</module>
+		<module>rdflivenews-crawler</module>
 	</modules>
 	<repositories>
 		<repository>
