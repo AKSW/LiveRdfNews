@@ -118,18 +118,22 @@ public class FastDeduplication extends DefaultDeduplication {
         Map<String, Map<String, Double>> result = FastNGram.compute(source, target, 0, threshold);
         result = removeSymmetry(result);
         System.out.println(result);
-        int keyID;
-        for (String key : result.keySet()) {
-            keyID = ids.get(key);
-            for (String doc : result.get(key).keySet()) {
-
-                int id = ids.get(doc);
-                if (keyID != id) {
-                    duplicates.add(doc);
+        int sourceDocID, targetDocID;
+        for (String sourceDoc : result.keySet()) {
+            sourceDocID = ids.get(sourceDoc);
+            // tag very similarity documents as being duplicates
+            for (String targetDoc : result.get(sourceDoc).keySet()) {
+                targetDocID = ids.get(targetDoc);
+                if (sourceDocID != targetDocID) {
+                    duplicates.add(targetDoc);
+                    manager.setDocumentDuplicateInTimeSlice(targetDocID, timeSlice);
                 }
-                manager.setDocumentDuplicateInTimeSlice(id, timeSlice);
-                duplicates.add(doc);
-                IndexManager.getInstance().setDocumentDuplicateInTimeSlice(id, timeSlice);
+            }
+            // tag clone as being duplicates
+            if (clones.containsKey(sourceDocID)) {
+                for (Integer clone : clones.get(sourceDocID)) {
+                    manager.setDocumentDuplicateInTimeSlice(clone, timeSlice);
+                }
             }
         }
         return duplicates;
@@ -183,7 +187,7 @@ public class FastDeduplication extends DefaultDeduplication {
         value.put("C", 1d);
         value.put("D", 1d);
         map.put("B", value);
-        
+
         System.out.println(map);
         System.out.println(removeSymmetry(map));
     }
