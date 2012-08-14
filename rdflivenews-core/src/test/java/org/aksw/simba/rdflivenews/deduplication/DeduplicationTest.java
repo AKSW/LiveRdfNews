@@ -54,7 +54,7 @@ public class DeduplicationTest extends TestCase {
         return new TestSuite(DeduplicationTest.class);
     }
     
-    public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void tesstDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         int fromTimeSliceId = 1;
         int toTimeSliceId   = 2;
@@ -82,7 +82,7 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void testGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void tesstGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         
@@ -115,7 +115,7 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void testGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void tesstGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         

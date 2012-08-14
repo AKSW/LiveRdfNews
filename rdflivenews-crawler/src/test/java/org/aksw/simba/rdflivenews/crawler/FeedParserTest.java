@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.concurrency.RssDirectoryReader;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.ini4j.Ini;
@@ -48,20 +49,21 @@ public class FeedParserTest extends TestCase {
      */
     public void testApp() throws InvalidFileFormatException, IOException {
 
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
         RssDirectoryReader reader = new RssDirectoryReader(new LinkedBlockingQueue<String>());
      
-        try {
-            
-            reader.queryRssFeeds();
-        }
-        catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (FeedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        try {
+//            
+//            reader.queryRssFeeds();
+//        }
+//        catch (IllegalArgumentException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        catch (FeedException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
     }
 }
