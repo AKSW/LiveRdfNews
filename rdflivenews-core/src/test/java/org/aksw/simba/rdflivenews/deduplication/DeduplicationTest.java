@@ -46,13 +46,13 @@ public class DeduplicationTest extends TestCase {
         this.addSentencesToLuceneIndex();
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-
-        return new TestSuite(DeduplicationTest.class);
-    }
+//    /**
+//     * @return the suite of tests being tested
+//     */
+//    public static Test suite() {
+//
+//        return new TestSuite(DeduplicationTest.class);
+//    }
     
     public void tesstDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
@@ -82,7 +82,7 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void tesstGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void testGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         
@@ -115,7 +115,7 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void tesstGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void testGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         
