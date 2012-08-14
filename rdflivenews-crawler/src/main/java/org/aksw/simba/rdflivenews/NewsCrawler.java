@@ -14,6 +14,7 @@ import org.aksw.simba.rdflivenews.concurrency.ShutdownThread;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.crawler.UpdateRssFeedsTask;
 import org.aksw.simba.rdflivenews.index.IndexManager;
+import org.aksw.simba.rdflivenews.mvn.MavenHelper;
 import org.aksw.simba.rdflivenews.statistics.StatisticsTask;
 import org.apache.log4j.Logger;
 import org.ini4j.Ini;
@@ -37,10 +38,10 @@ public class NewsCrawler {
      * @throws InterruptedException 
      */
     public static void main(String[] args) throws InvalidFileFormatException, IOException, InterruptedException {
-        
+
         // load the config, we dont need to configure logging because the log4j config is on the classpath
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+        NewsCrawler.CONFIG = new Config(new Ini(NewsCrawler.class.getResourceAsStream("/newscrawler-config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getResourceAsStream("/rdflivenews-config.ini")));
         
         // with this hook we can guaranty that the lucene index is closed correctly
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
@@ -72,8 +73,6 @@ public class NewsCrawler {
 
             // the time has come to create a new slice
             if ( System.currentTimeMillis() - startTime >= NewsCrawler.CONFIG.getLongSetting("timeSlice", "duration") ) {
-                
-//                statTask.printTimeSliceStatistics(TIME_SLICE_ID);
                 
                 // increase the timeslice and reset the start time
                 NewsCrawler.TIME_SLICE_ID++;

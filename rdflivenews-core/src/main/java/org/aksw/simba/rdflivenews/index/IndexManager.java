@@ -417,7 +417,7 @@ public class IndexManager {
     }
 
     /**
-     * Returns all documents (top 10000000) with the given timeslice id
+     * Returns all documents (top 1000000) with the given timeslice id
      * from the underlying index. 
      * 
      * @param timeSlice
@@ -429,7 +429,7 @@ public class IndexManager {
         
         try {
             
-            TopScoreDocCollector collector = TopScoreDocCollector.create(10000000, false);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(1000000, false);
             IndexReader reader = IndexReader.open(INDEX);
             IndexSearcher searcher = new IndexSearcher(reader); 
             searcher.search(new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);

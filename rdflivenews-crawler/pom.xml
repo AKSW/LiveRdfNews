@@ -1,53 +1,56 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  
-  <parent>
-    <artifactId>rdflivenews</artifactId>
-    <groupId>org.aksw</groupId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-  
-  <artifactId>rdflivenews-crawler</artifactId>
-  <name>rdflivenews-crawler</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.aksw</groupId>
-    	<artifactId>rdflivenews-core</artifactId>
-    	<version>1.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-  
-<!--   <build> -->
-<!--     <plugins> -->
-<!--       <plugin> -->
-<!--         <groupId>org.codehaus.mojo</groupId> -->
-<!--         <artifactId>exec-maven-plugin</artifactId> -->
-<!--         <version>1.2.1</version> -->
-<!--         <configuration> -->
-<!--           <executable>java</executable> -->
-<!--           <arguments> -->
-<!--             <argument>-Dmx=2G</argument> -->
-<!--             <argument>-classpath</argument> -->
-<!--             automatically creates the classpath using all project dependencies, -->
-<!--                  also adding the project build directory -->
-<!--             <classpath/> -->
-<!--             <argument>org.aksw.simba.rdflivenews.NewsCrawler</argument> -->
-<!--           </arguments> -->
-<!--         </configuration> -->
-<!--       </plugin> -->
-<!--     </plugins> -->
-<!--   </build> -->
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>rdflivenews</artifactId>
+		<groupId>org.aksw</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>rdflivenews-crawler</artifactId>
+	<name>rdflivenews-crawler</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>rome</groupId>
+			<artifactId>rome</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>de.jetwick</groupId>
+			<artifactId>snacktory</artifactId>
+			<version>1.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aksw</groupId>
+			<artifactId>rdflivenews-core</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+<!-- 	<build> -->
+<!-- 		<plugins> -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.codehaus.mojo</groupId> -->
+<!-- 				<artifactId>exec-maven-plugin</artifactId> -->
+<!-- 				<version>1.2.1</version> -->
+<!-- 				<configuration> -->
+<!-- 					<classpathScope>test</classpathScope> -->
+<!-- 				</configuration> -->
+<!-- 			</plugin> -->
+<!-- 		</plugins> -->
+<!-- 	</build> -->
 </project>
