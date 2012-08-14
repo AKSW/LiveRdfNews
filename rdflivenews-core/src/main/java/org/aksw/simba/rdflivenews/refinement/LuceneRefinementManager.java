@@ -33,7 +33,7 @@ public class LuceneRefinementManager {
     
     public LuceneRefinementManager() {
         
-        INDEX = LuceneManager.openLuceneIndex(RdfLiveNews.CONFIG.getStringSetting("database", "dbpedia"));
+        INDEX = LuceneManager.openLuceneIndex(RdfLiveNews.CONFIG.getStringSetting("general", "dbpedia"));
     }
     
     /**
