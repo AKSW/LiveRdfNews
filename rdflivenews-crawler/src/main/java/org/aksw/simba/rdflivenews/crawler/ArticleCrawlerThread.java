@@ -9,12 +9,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 import org.aksw.simba.rdflivenews.NewsCrawler;
-import org.aksw.simba.rdflivenews.concurrency.QueueManager;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
 import org.aksw.simba.rdflivenews.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
@@ -30,27 +28,40 @@ import de.jetwick.snacktory.JResult;
  */
 public class ArticleCrawlerThread extends Thread {
 
-    private HtmlFetcher fetcher = new HtmlFetcher();
-    private DateFormat format   = new SimpleDateFormat("yyyy/MM/dd");
-    private Logger logger       = Logger.getLogger(ArticleCrawlerThread.class);
+    private HtmlFetcher fetcher         = new HtmlFetcher();
+    private DateFormat format           = new SimpleDateFormat("yyyy/MM/dd");
+    private Logger logger               = Logger.getLogger(ArticleCrawlerThread.class);
+    private BlockingQueue<String> queue = null;
     
+    public ArticleCrawlerThread(BlockingQueue<String> queue) {
+
+        this.queue  = queue;
+    }
+
     /**
      * 
      */
     @Override public void run() {
 
-        // this thread should also run forever
-        while ( true ) {
-            
+        // thread needs to run forever
+        while (true) {
+
             // if there is an uri on the queue the try to crawl the rss entry
-            String uri = QueueManager.getInstance().removeArticleFromCrawlQueue();
-            if ( uri != null ) {
+            String uri = null;
+            try {
                 
-                logger.debug("Starting to crawl uri: " + uri);
-                List<Sentence> sentences = crawlArticle(uri);
-                
-                if ( sentences != null ) IndexManager.getInstance().addSentences(sentences);    
+                uri = queue.take();
             }
+            catch (InterruptedException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+                
+            logger.debug("Starting to crawl uri: " + uri);
+            List<Sentence> sentences = crawlArticle(uri);
+            
+            if ( sentences != null ) IndexManager.getInstance().addSentences(sentences);    
+            
             // wait so that we dont run this method over and over if no rss feeds are avaiable
             try {
                 
@@ -125,7 +136,7 @@ public class ArticleCrawlerThread extends Thread {
 
         try {
             
-            return date != null ? format.parse(date) :  new Date();
+            return date != null ? format.parse(date) : new Date();
         }
         catch ( ParseException pe ) {
             

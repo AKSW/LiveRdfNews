@@ -3,6 +3,7 @@ package org.aksw.simba.rdflivenews.index;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -22,10 +23,13 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
@@ -419,7 +423,7 @@ public class IndexManager {
      * @param timeSlice
      * @return
      */
-    public List<Integer> getSentenceFromTimeSlice(int timeSlice) {
+    public List<Integer> getSentenceIdsFromTimeSlice(int timeSlice) {
 
         List<Integer> documentIds = new ArrayList<Integer>();
         
@@ -446,7 +450,22 @@ public class IndexManager {
         }
         return documentIds;
     }
-
+    
+    public int getHighestTimeSliceId() throws CorruptIndexException, IOException {
+        
+        IndexReader reader = IndexReader.open(INDEX);
+        IndexSearcher searcher = new IndexSearcher(reader);
+        int maxTimeSliceId = 0;
+        
+        for ( int i = 0; i < reader.maxDoc() ; i++ ) 
+            maxTimeSliceId = Math.max(Integer.valueOf(searcher.doc(i).get(Constants.LUCENE_FIELD_TIME_SLICE)), maxTimeSliceId);
+        
+        reader.close();
+        searcher.close();
+        
+        return maxTimeSliceId;
+    }
+    
     public void getArticlesFromTimeSlice(int timeSliceId) {
 
 //        TopScoreDocCollector collector = TopScoreDocCollector.create(10000000, false);

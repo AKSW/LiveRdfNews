@@ -47,7 +47,7 @@ public class FastDeduplication extends DefaultDeduplication {
         Set<String> source = new HashSet<String>();
 
         for (int i = fromTimeSlice - window; i <= fromTimeSlice; i++) {
-            for (int id : manager.getSentenceFromTimeSlice(i)) {
+            for (int id : manager.getSentenceIdsFromTimeSlice(i)) {
 
                 String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 if (ids.keySet().contains(doc)) {
@@ -83,7 +83,7 @@ public class FastDeduplication extends DefaultDeduplication {
         IndexManager manager = IndexManager.getInstance();
 
         for (int i = fromTimeSlice; i <= toTimeSlice; i++) {
-            for (int id : manager.getSentenceFromTimeSlice(i)) {
+            for (int id : manager.getSentenceIdsFromTimeSlice(i)) {
 
                 String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 if (ids.keySet().contains(doc)) {

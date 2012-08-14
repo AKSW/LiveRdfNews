@@ -2,13 +2,13 @@ package org.aksw.simba.rdflivenews.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.aksw.simba.rdflivenews.NewsCrawler;
-import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.concurrency.RssDirectoryReader;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.ini4j.Ini;
@@ -49,7 +49,7 @@ public class FeedParserTest extends TestCase {
     public void testApp() throws InvalidFileFormatException, IOException {
 
         NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
-        RssDirectoryReader reader = new RssDirectoryReader();
+        RssDirectoryReader reader = new RssDirectoryReader(new LinkedBlockingQueue<String>());
      
         try {
             

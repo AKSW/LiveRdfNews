@@ -73,7 +73,7 @@ public class PatternExtractionTest extends TestCase {
         
         assertEquals(216, IndexManager.getInstance().getNumberOfDocuments());
         
-        List<Integer> sentenceFromFirstIterationIds = IndexManager.getInstance().getSentenceFromTimeSlice(1);
+        List<Integer> sentenceFromFirstIterationIds = IndexManager.getInstance().getSentenceIdsFromTimeSlice(1);
         assertEquals(216, sentenceFromFirstIterationIds.size());
         
         PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();

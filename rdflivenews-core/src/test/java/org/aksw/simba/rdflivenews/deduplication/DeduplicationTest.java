@@ -69,8 +69,9 @@ public class DeduplicationTest extends TestCase {
         assertEquals(target, deduplication.deduplicate(target, target, fromTimeSliceId));
         
         // there is one duplicate string in the target
-        target.removeAll(deduplication.deduplicate(target, target, fromTimeSliceId));
-        assertEquals(6, target.size());
+        Set<String> newTarget = deduplication.deduplicate(target, target, fromTimeSliceId);
+        for (String s : newTarget) System.out.println(s);
+        assertEquals(6, newTarget.size());
     }
     
     /**
@@ -81,32 +82,29 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void tesstGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void testGetSource() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         
-        Method method = FastDeduplication.class.getDeclaredMethod("getSource", int.class, int.class);
-        method.setAccessible(true);
-        
-        Set<String> firstTimeSlice = this.createSentenceFirstTimeSlice();
+        List<String> firstTimeSlice = this.createSentenceFirstTimeSlice();
         // do we get the correct amountof sentences for the first timeslice
-        assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 1)).size());
+        assertEquals(5, deduplication.getSource(1, 1).size());
         // are those sentences the correct ones
-        assertEquals(firstTimeSlice, method.invoke(deduplication, 1, 1));
+        assertEquals(firstTimeSlice, deduplication.getSource(1, 1));
         // just to make sure :)
         firstTimeSlice.add("This is a stupid sentence");
-        assertNotSame(this.createSentenceSecondTimeSlice(), method.invoke(deduplication, 1, 1));
+        assertNotSame(this.createSentenceSecondTimeSlice(), deduplication.getSource(1, 1));
         
         // zero window should not be possible
         try {
             
-            assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 0)).size());
+            assertEquals(5, deduplication.getSource(1, 0).size());
             fail("this should have thrown an exception");
         }
         catch (Exception expected) { /* expected don't do anything */ }
         
         // window larger then possible timeslices should also work
-        assertEquals(5, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
+        assertEquals(5, deduplication.getSource(1, 2).size());
     }
     
     /**
@@ -117,14 +115,14 @@ public class DeduplicationTest extends TestCase {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    public void tesstGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public void testGetTarget() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
         Deduplication deduplication = new FastDeduplication();
         
         Method method = FastDeduplication.class.getDeclaredMethod("getTarget", int.class, int.class);
         method.setAccessible(true);
         
-        Set<String> secondTimeSlice = this.createSentenceSecondTimeSlice();
+        List<String> secondTimeSlice = this.createSentenceSecondTimeSlice();
         
         // the second timeslice is the delta S, so we have 7 entries 
         assertEquals(7, ((Set<String>) method.invoke(deduplication, 1, 2)).size());
@@ -164,7 +162,7 @@ public class DeduplicationTest extends TestCase {
      * @param sentences
      * @param timeSlice
      */
-    public void addSentencesToIndex(Set<String> sentences, int timeSlice) {
+    public void addSentencesToIndex(List<String> sentences, int timeSlice) {
         
         List<Sentence> newSentences = new ArrayList<Sentence>(); 
         for ( String sent : sentences ) {
@@ -185,9 +183,9 @@ public class DeduplicationTest extends TestCase {
      * 
      * @return
      */
-    public Set<String> createSentenceFirstTimeSlice(){
+    public List<String> createSentenceFirstTimeSlice(){
         
-        Set<String> results = new HashSet<String>();
+        List<String> results = new ArrayList<String>();
         results.add("It is an enterprise that is meant to send a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         results.add("But it will require partner nations in the gulf to put aside rivalries , share information and coordinate their individual arsenals of interceptor missiles to create a defensive shield encompassing all the regional allies .");
         results.add("Secretary of State Hillary Rodham Clinton , among the first to raise the need for the missile shield three years ago , sought to spur the gulf allies on during a recent visit to Saudi Arabia .");
@@ -201,9 +199,9 @@ public class DeduplicationTest extends TestCase {
      * 
      * @return
      */
-    public Set<String> createSentenceSecondTimeSlice(){
+    public List<String> createSentenceSecondTimeSlice(){
         
-        Set<String> results = new HashSet<String>();
+        List<String> results = new ArrayList<String>();
         results.add("It is an enterprise that is meant to send a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         results.add("It is an enterprise that is meant to send a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         results.add("It is not an enterprise that is meant to be a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");

@@ -3,17 +3,14 @@
  */
 package org.aksw.simba.rdflivenews.concurrency;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import org.aksw.simba.rdflivenews.NewsCrawler;
-import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.mvn.MavenHelper;
 import org.apache.commons.io.FileUtils;
@@ -32,18 +29,21 @@ import com.sun.syndication.io.XmlReader;
  */
 public class RssDirectoryReader {
 
-    private List<String> rssFeeds = null;
-    private Logger logger = Logger.getLogger(getClass());
+    private List<String> rssFeeds           = null;
+    private Logger logger                   = Logger.getLogger(getClass());
+    private BlockingQueue<String> queue     = null;
 
     /**
      * Reads the list of urls from the rss-list.txt file
+     * @param queue 
      */
-    public RssDirectoryReader() {
+    public RssDirectoryReader(BlockingQueue<String> queue) {
 
         try {
 
             this.rssFeeds = FileUtils.readLines(MavenHelper.loadFile("/rss-list.txt"), "UTF-8");
-//            Collections.shuffle(this.rssFeeds);
+            Collections.shuffle(this.rssFeeds);
+            this.queue = queue;
         }
         catch (IOException e) {
 
@@ -59,11 +59,9 @@ public class RssDirectoryReader {
      */
     public void queryRssFeeds() throws IOException, IllegalArgumentException, FeedException {
 
-        int i = 1;
         // check every rss feed
         for (String feedUrl : rssFeeds) {
             
-            System.out.println(i++ + ": " + feedUrl);
             logger.info("Getting article urls from feed: " + feedUrl);
 
             XmlReader reader = null;
@@ -76,17 +74,24 @@ public class RssDirectoryReader {
 
                 for (Iterator<SyndEntry> syndEntryIterator = feed.getEntries().iterator(); syndEntryIterator.hasNext();) {
                     
-                    link = syndEntryIterator.next().getLink();
-                        
-                    // we only want to add the uri if the uri is not already
-                    // in the queue or in the database
-                    if (!QueueManager.getInstance().isUriQueued(link) && IndexManager.getInstance().isNewArticle(link)) {
+                    SyndEntry entry = syndEntryIterator.next();
+                    
+                    link = entry.getUri();
+                    if ( !link.startsWith("http://") ) link = entry.getLink();
+                    if ( link.startsWith("http://") ) {
 
-                        QueueManager.getInstance().addArticleToCrawlQueue(link);
-                        this.logger.info("Added new article URL: " + link);
+                        // we only want to add the uri if the uri is not already
+                        // in the queue or in the database
+                        if (!this.queue.contains(link) && IndexManager.getInstance().isNewArticle(link)) {
+
+                            this.queue.put(link);
+                            this.logger.info("Added new article URL: " + link);
+                        }
+                        else {
+                            
+                            logger.info("Article already known... skipping: " + link);
+                        }
                     }
-                    else
-                        logger.info("Article already known... skipping: " + link);
                 }
             }
             catch (NullPointerException npe) {
@@ -104,6 +109,10 @@ public class RssDirectoryReader {
             catch (ParsingFeedException pfe) {
 
                 logger.debug("Error parsing feed: " + feedUrl, pfe);
+            }
+            catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
             finally {
 
