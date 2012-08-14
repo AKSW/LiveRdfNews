@@ -30,24 +30,24 @@
     </dependency>
   </dependencies>
   
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <configuration>
-          <executable>java</executable>
-          <arguments>
-            <argument>-Dmx=2G</argument>
-            <argument>-classpath</argument>
-            <!-- automatically creates the classpath using all project dependencies,
-                 also adding the project build directory -->
-            <classpath/>
-            <argument>org.aksw.simba.rdflivenews.NewsCrawler</argument>
-          </arguments>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+<!--   <build> -->
+<!--     <plugins> -->
+<!--       <plugin> -->
+<!--         <groupId>org.codehaus.mojo</groupId> -->
+<!--         <artifactId>exec-maven-plugin</artifactId> -->
+<!--         <version>1.2.1</version> -->
+<!--         <configuration> -->
+<!--           <executable>java</executable> -->
+<!--           <arguments> -->
+<!--             <argument>-Dmx=2G</argument> -->
+<!--             <argument>-classpath</argument> -->
+<!--             automatically creates the classpath using all project dependencies, -->
+<!--                  also adding the project build directory -->
+<!--             <classpath/> -->
+<!--             <argument>org.aksw.simba.rdflivenews.NewsCrawler</argument> -->
+<!--           </arguments> -->
+<!--         </configuration> -->
+<!--       </plugin> -->
+<!--     </plugins> -->
+<!--   </build> -->
 </project>
