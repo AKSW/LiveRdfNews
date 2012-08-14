@@ -39,7 +39,7 @@ public class LuceneRefinementManagerTest extends TestCase {
     public LuceneRefinementManagerTest(String testName) throws InvalidFileFormatException, IOException {
         super(testName);
         
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         this.luceneRefinementManager = new LuceneRefinementManager();
     }
 
