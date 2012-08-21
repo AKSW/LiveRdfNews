@@ -38,7 +38,7 @@ public class DataGeneration {
         
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         String indexDir = RdfLiveNews.CONFIG.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "index");
-        IndexReader reader = LuceneManager.createIndexReader(LuceneManager.openLuceneIndex(indexDir));
+        IndexReader reader = LuceneManager.openIndexReader(LuceneManager.openLuceneIndex(indexDir));
         
         StanfordNLPNamedEntityRecognition neTagger = new StanfordNLPNamedEntityRecognition();
         

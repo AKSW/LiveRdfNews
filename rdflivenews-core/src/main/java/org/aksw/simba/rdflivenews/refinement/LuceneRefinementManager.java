@@ -46,7 +46,7 @@ public class LuceneRefinementManager {
         Set<String> types = new HashSet<String>();
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(100, false);
-        IndexReader reader = LuceneManager.createIndexReader(INDEX);
+        IndexReader reader = LuceneManager.openIndexReader(INDEX);
         IndexSearcher searcher = new IndexSearcher(reader);
         LuceneManager.query(searcher, new TermQuery(new Term(Constants.DBPEDIA_LUCENE_FIELD_URI, uri)), collector);
 
@@ -69,7 +69,7 @@ public class LuceneRefinementManager {
     public String getPossibleUri(String label) {
 
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, true);
-        IndexReader reader             = LuceneManager.createIndexReader(INDEX);
+        IndexReader reader             = LuceneManager.openIndexReader(INDEX);
         IndexSearcher searcher         = new IndexSearcher(reader);
         
         LuceneManager.query(searcher, LuceneManager.parse(this.dbpediaLabelQueryParser, label) , collector);

@@ -28,7 +28,7 @@ public class FastNGram {
      * @param threshold Similarity threshold
      * @return Map source -> target -> similarity
      */
-    public static Map<String, Map<String, Double>> compute(Set<String> source, Set<String> target, Tokenizer tokenizer, int q, double threshold) {
+    public static Map<String, Map<String, Double>> compute(Set<String> source, Set<String> target, Tokenizer tokenizer, double threshold) {
         
         if(source.isEmpty() || target.isEmpty()) return new HashMap<String, Map<String, Double>>();
         

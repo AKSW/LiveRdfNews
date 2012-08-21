@@ -6,13 +6,17 @@ package org.aksw.simba.rdflivenews.lucene;
 import java.io.File;
 import java.io.IOException;
 
+import org.aksw.simba.rdflivenews.Constants;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -48,7 +52,7 @@ public class LuceneManager {
      * @param index
      * @return
      */
-    public static IndexReader createIndexReader(Directory index) {
+    public static IndexReader openIndexReader(Directory index) {
 
         try {
             
@@ -63,6 +67,46 @@ public class LuceneManager {
             throw new RuntimeException("Could not open lucene index reader", e);
         }
     }
+    
+    /**
+     * 
+     * @param index
+     * @return
+     */
+    public static Document getDocumentByNumber(Directory index, int number) {
+
+        Document doc = null;
+        
+        try {
+            
+            doc = openIndexReader(index).document(number);
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return doc;
+    }
+    
+    public static void updateDocument(IndexWriter writer, Term term, Document document) {
+        
+        try {
+            
+            writer.updateDocument(term, document);
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 
@@ -75,6 +119,8 @@ public class LuceneManager {
         try {
             
             searcher.search(query, collector);
+            searcher.getIndexReader().close();
+            searcher.close();
         }
         catch (IOException e) {
             
@@ -151,5 +197,11 @@ public class LuceneManager {
             
             throw new RuntimeException("Could not query: \""+ queryString +"\"!", e);
         }
+    }
+
+    public static void query(Directory index, Query query, TopScoreDocCollector collector) {
+
+        IndexSearcher searcher = new IndexSearcher(LuceneManager.openIndexReader(index));
+        LuceneManager.query(searcher, query, collector);
     }
 }

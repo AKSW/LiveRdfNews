@@ -12,6 +12,11 @@ import java.util.Set;
 public class Constants {
 
     /**
+     * name of the primary key for the index
+     */
+    public static final String LUCENE_FIELD_ID = "id";
+    
+    /**
      * use this value as the lucene field name for a pos tagged sentence
      */
     public static final String LUCENE_FIELD_POS_TAGGED_SENTENCE = "pos";
@@ -35,6 +40,11 @@ public class Constants {
      * use this value as the lucene field name for the sentence time slice (int values from 0 .. n)
      */
     public static final String LUCENE_FIELD_TIME_SLICE = "timeslice";
+    
+    /**
+     * use this value as the lucene field name if a sentence is supposed to be a duplicate in a time slice n
+     */
+    public static final String LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE = "duplicate";
 
     /**
      * use this value as the lucene field name for a sentence extractions date
