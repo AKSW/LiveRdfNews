@@ -18,5 +18,5 @@ public interface Tokenizer {
      * @param q
      * @return
      */
-    public Set<String> tokenize(String s, int q);
+    public Set<String> tokenize(String s);
 }

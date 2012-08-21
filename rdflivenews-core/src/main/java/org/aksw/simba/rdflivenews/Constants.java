@@ -1,5 +1,9 @@
 package org.aksw.simba.rdflivenews;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * 
@@ -64,4 +68,13 @@ public class Constants {
      * the regular dbpedia ontology prefix
      */
     public static final String DBPEDIA_ONTOLOGY_PREFIX = "http://dbpedia.org/ontology/";
+    
+    /* ################################################################ */
+    /* ################################################################ */
+    /* ################################################################ */
+    
+    public static final Set<String> STOP_WORDS = new HashSet<String>(Arrays.asList( "i", "a", "about", "an", "and", "are", "as", "at", "be", "by", "for", "from",
+                                                                "how", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "``",
+                                                                "was", "what", "when", "where", "who", "will", "with", "the", "'s", "did",
+                                                                "have", "has", "had", "were", "'ll", ",", "-LRB-", "-RRB-", "''", "--", "-", ";"));
 }

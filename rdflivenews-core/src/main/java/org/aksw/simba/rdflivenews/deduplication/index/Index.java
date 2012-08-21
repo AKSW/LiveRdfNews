@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.aksw.simba.rdflivenews.deduplication.impl.WordTokenizer;
 
 import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
 import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.NGramTokenizer;
+import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.WordTokenizer;
 
 /**
  *
@@ -28,22 +28,9 @@ public class Index {
      * Constructor
      *
      */
-    public Index(double _threshold) {
+    public Index(Tokenizer tokenizer, double _threshold) {
         sizeTokenIndex = new HashMap<Integer, Map<String, Set<String>>>();
-        tokenizer = new NGramTokenizer();
-        threshold = _threshold;
-    }
-
-    /**
-     * Constructor for similarities others than trigrams
-     *
-     * @param _q value of n for n-grams
-     */
-    public Index(int _q, double _threshold) {
-        sizeTokenIndex = new HashMap<Integer, Map<String, Set<String>>>();
-        //tokenizer = new NGramTokenizer();
-        tokenizer = new WordTokenizer();
-        q = _q;
+        this.tokenizer = tokenizer;
         threshold = _threshold;
     }
 
@@ -55,7 +42,7 @@ public class Index {
      */
     public Set<String> addString(String s) {
         //update token index
-        Set<String> tokens = tokenizer.tokenize(s, q);
+        Set<String> tokens = tokenizer.tokenize(s);
         int size = tokens.size();
         if (!sizeTokenIndex.containsKey(size)) {
             sizeTokenIndex.put(size, new HashMap<String, Set<String>>());

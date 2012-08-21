@@ -17,21 +17,13 @@ import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.NGramTokenizer
 public class Similarity {
 
     private Tokenizer tokenizer;
-    private int q = 3;
-
-    /**
-     * 
-     * @param q
-     */
-    public Similarity(int q) {
-        tokenizer = new NGramTokenizer();
-    }
 
     /**
      * 
      */
-    public Similarity() {
-        tokenizer = new NGramTokenizer();
+    public Similarity(Tokenizer tokenizer) {
+        
+        this.tokenizer = tokenizer;
     }
 
     /**
@@ -42,8 +34,11 @@ public class Similarity {
      */
     public double getSimilarity(String x, String y) {
         
-        Set<String> yTokens = tokenizer.tokenize(y, q);
-        Set<String> xTokens = tokenizer.tokenize(x, q);
+        Set<String> yTokens = tokenizer.tokenize(y);
+        Set<String> xTokens = tokenizer.tokenize(x);
+        
+        System.out.println(yTokens);
+        System.out.println(xTokens);
         return getSimilarity(xTokens, yTokens);
     }
     
@@ -63,6 +58,6 @@ public class Similarity {
     
     public static void main(String args[])
     {
-        System.out.println(new Similarity().getSimilarity("abcd", "abcde"));
+        System.out.println(new Similarity(new NGramTokenizer(3)).getSimilarity("abcd", "abcde"));
     }
 }

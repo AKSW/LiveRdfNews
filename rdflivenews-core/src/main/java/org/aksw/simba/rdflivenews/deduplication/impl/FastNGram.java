@@ -28,16 +28,13 @@ public class FastNGram {
      * @param threshold Similarity threshold
      * @return Map source -> target -> similarity
      */
-    public static Map<String, Map<String, Double>> compute(Set<String> source, Set<String> target, int q, double threshold) {
+    public static Map<String, Map<String, Double>> compute(Set<String> source, Set<String> target, Tokenizer tokenizer, int q, double threshold) {
         
         if(source.isEmpty() || target.isEmpty()) return new HashMap<String, Map<String, Double>>();
         
-        Index index = new Index(q, threshold);
+        Index index = new Index(tokenizer, threshold);
         double kappa = (1 + threshold) / threshold;
-        Similarity sim = new Similarity(q);
-        
-        //this should be a parameter
-        Tokenizer tokenizer = new WordTokenizer();
+        Similarity sim = new Similarity(tokenizer);
         
         Map<String, Set<String>> targetTokens = new HashMap<String, Set<String>>();
         Map<String, Map<String, Double>> result = new HashMap<String, Map<String, Double>>();
@@ -52,7 +49,7 @@ public class FastNGram {
         Map<String, Double> buffer;
         for (String s : source) {
             Set<Integer> allSizes = index.getAllSizes();
-            Set<String> sourceTokens = tokenizer.tokenize(s, q);
+            Set<String> sourceTokens = tokenizer.tokenize(s);
             double sourceSize = (double) sourceTokens.size();
             candidates1 = new HashSet<String>();
             candidates2 = new HashSet<String>();

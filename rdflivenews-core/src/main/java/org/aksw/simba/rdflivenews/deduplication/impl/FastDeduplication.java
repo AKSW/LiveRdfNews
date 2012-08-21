@@ -7,6 +7,7 @@ package org.aksw.simba.rdflivenews.deduplication.impl;
 import java.util.*;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.WordTokenizer;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 
 /**
@@ -115,7 +116,7 @@ public class FastDeduplication extends DefaultDeduplication {
     public Set<String> deduplicate(Set<String> source, Set<String> target, int timeSlice) {
         IndexManager manager = IndexManager.getInstance();
         Set<String> duplicates = new HashSet<String>();
-        Map<String, Map<String, Double>> result = FastNGram.compute(source, target, 0, threshold);
+        Map<String, Map<String, Double>> result = FastNGram.compute(source, target, new WordTokenizer(), 0, threshold);
         result = removeSymmetry(result);
         System.out.println(result);
         int sourceDocID, targetDocID;

@@ -22,7 +22,7 @@ public class WordTokenizer implements Tokenizer{
      * @param q Has no effect
      * @return Set of tokens (words) for s
      */
-    public Set<String> tokenize(String s, int q) {
+    public Set<String> tokenize(String s) {
         
         if ( s == null || s.isEmpty() ) return new HashSet<String>();
         return new HashSet<String>(Arrays.asList(s.toLowerCase().split(" ")));
