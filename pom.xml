@@ -20,11 +20,16 @@
 		<module>rdflivenews-core</module>
 		<module>rdflivenews-crawler</module>
 	</modules>
+	
 	<repositories>
 		<repository>
 			<id>karussell_snapshots</id>
 			<url>https://github.com/karussell/mvnrepo/raw/master/snapshots/</url>
 		</repository>
+	    <repository>
+	        <id>gerb_snapshots</id>
+	        <url>https://github.com/gerbsen/maven-repo/tree/master/snapshots</url>
+	    </repository>
 	</repositories>
 
 	<dependencies>
