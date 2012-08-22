@@ -14,22 +14,22 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<modules>
 		<module>rdflivenews-gui</module>
 		<module>rdflivenews-core</module>
 		<module>rdflivenews-crawler</module>
 	</modules>
-	
+
 	<repositories>
 		<repository>
 			<id>karussell_snapshots</id>
 			<url>https://github.com/karussell/mvnrepo/raw/master/snapshots/</url>
 		</repository>
-	    <repository>
-	        <id>gerb_snapshots</id>
-	        <url>https://github.com/gerbsen/maven-repo/tree/master/snapshots</url>
-	    </repository>
+		<repository>
+			<id>gerb_snapshots</id>
+			<url>https://github.com/gerbsen/maven-repo/tree/master/snapshots</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -50,29 +50,29 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-            <groupId>org.ini4j</groupId>
-            <artifactId>ini4j</artifactId>
-            <version>0.5.2</version>
-        </dependency>
+			<groupId>org.ini4j</groupId>
+			<artifactId>ini4j</artifactId>
+			<version>0.5.2</version>
+		</dependency>
 	</dependencies>
-	
+
 	<build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
-                    <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
-                        <compilerArgument></compilerArgument>
-                    </configuration>
-                </plugin>
-<!--                 <plugin> -->
-<!-- 		            <groupId>org.codehaus.mojo</groupId> -->
-<!-- 		            <artifactId>exec-maven-plugin</artifactId> -->
-<!-- 		        </plugin> -->
-            </plugins>
-        </pluginManagement>
-    </build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+						<compilerArgument></compilerArgument>
+					</configuration>
+				</plugin>
+				<!-- <plugin> -->
+				<!-- <groupId>org.codehaus.mojo</groupId> -->
+				<!-- <artifactId>exec-maven-plugin</artifactId> -->
+				<!-- </plugin> -->
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>

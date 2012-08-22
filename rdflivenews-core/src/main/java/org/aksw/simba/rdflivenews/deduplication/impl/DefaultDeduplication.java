@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.deduplication.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.deduplication.Deduplication;
@@ -17,7 +18,7 @@ public abstract class DefaultDeduplication implements Deduplication {
     /* (non-Javadoc)
      * @see org.aksw.simba.rdflivenews.deduplication.Deduplication#runDeduplication(int, int)
      */
-    public void runDeduplication(int fromTimeSlice, int toTimeSlice, int windowSize) {
+    public Set<Integer> runDeduplication(int fromTimeSlice, int toTimeSlice, int windowSize) {
 
         // 1. load index of all data before fromFrame
         Set<String> source = getSource(fromTimeSlice, windowSize);
@@ -39,5 +40,8 @@ public abstract class DefaultDeduplication implements Deduplication {
                 
         // 3. deduplicate & delete duplicates for the old and new data
         deduplicate(source, target, fromTimeSlice);
+        
+        // TODO this needs to fixed
+        return null;
     }
 }

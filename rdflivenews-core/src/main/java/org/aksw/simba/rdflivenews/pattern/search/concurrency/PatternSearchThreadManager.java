@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.patternsearch.concurrency;
+package org.aksw.simba.rdflivenews.pattern.search.concurrency;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.refinement.PatternRefiner;
+import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.util.ListUtil;
 import org.apache.log4j.Logger;
 
@@ -122,22 +122,6 @@ public class PatternSearchThreadManager {
         for ( Pattern pattern : oldPatternList ) oldPatterns.put(pattern.hashCode(), pattern);
         
         return this.mergePatterns(oldPatterns, newPatterns);
-    }
-    
-    /**
-     * 
-     * @param patterns
-     * @return patterns
-     */
-    public List<Pattern> refinePatterns(List<Pattern> patterns) {
-        
-        PatternRefiner refiner = new PatternRefiner();
-        
-        // this could be done in parallel
-        for ( Pattern pattern : patterns )
-            refiner.refine(pattern);
-        
-        return patterns;
     }
     
     /**

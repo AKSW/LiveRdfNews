@@ -1,24 +1,31 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.refinement;
+package org.aksw.simba.rdflivenews.pattern.refinement.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
+import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementManager;
 
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
-public class PatternRefiner {
+public class DefaultPatternRefiner implements PatternRefiner {
     
     private LuceneRefinementManager luceneRefinementManager = new LuceneRefinementManager(); 
 
-    public void refine(Pattern pattern) {
+    /**
+     * 
+     * @param pattern
+     */
+    public void refinePattern(Pattern pattern) {
 
         for ( EntityPair pair : pattern.getLearnedFromEntities() ) {
             
@@ -68,5 +75,15 @@ public class PatternRefiner {
 
         return this.generateFavouriteType(types, 
                         luceneRefinementManager.getTypesOfResource(luceneRefinementManager.getPossibleUri(label)));
+    }
+
+    /**
+     * Refines a pattern with the help of the refine(Pattern pattern) method
+     * 
+     * @param patterns
+     */
+    public void refinePatterns(List<Pattern> patterns) {
+
+        for ( Pattern pattern : patterns ) this.refinePattern(pattern);
     }
 }

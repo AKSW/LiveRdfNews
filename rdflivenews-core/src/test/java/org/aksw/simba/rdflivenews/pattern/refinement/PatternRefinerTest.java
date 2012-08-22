@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.refinement.PatternRefiner;
+import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
@@ -54,9 +54,9 @@ public class PatternRefinerTest extends TestCase {
     public void testGetFavouriteType() 
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
-        PatternRefiner refiner = new PatternRefiner();
+        PatternRefiner refiner = new DefaultPatternRefiner();
         
-        Method method = PatternRefiner.class.getDeclaredMethod("generateFavouriteType", Map.class, Set.class);
+        Method method = DefaultPatternRefiner.class.getDeclaredMethod("generateFavouriteType", Map.class, Set.class);
         method.setAccessible(true);
         
         Map<String,Integer> oldTypes = new HashMap<String,Integer>();

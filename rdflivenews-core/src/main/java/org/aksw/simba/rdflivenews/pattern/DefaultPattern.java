@@ -27,6 +27,7 @@ public class DefaultPattern implements Pattern {
     private Map<Integer,EntityPair> entityPairs;
     
     private int totalOccurrence;
+    private Double score;
     private Map<String, Integer> typesFirstEntity;
     private Map<String, Integer> typesSecondEntity;
     private String favouriteTypeSecondEntity;
@@ -244,5 +245,17 @@ public class DefaultPattern implements Pattern {
             if (!naturalLanguageRepresentation.equals(other.naturalLanguageRepresentation))
                 return false;
         return true;
+    }
+
+    @Override
+    public void setScore(Double score) {
+
+        this.score = score;
+    }
+
+    @Override
+    public Double getScore() {
+
+        return this.score;
     }
 }

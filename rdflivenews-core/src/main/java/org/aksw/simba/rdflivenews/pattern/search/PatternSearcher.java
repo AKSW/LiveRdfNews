@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.patternsearch;
+package org.aksw.simba.rdflivenews.pattern.search;
 
 import java.util.List;
 

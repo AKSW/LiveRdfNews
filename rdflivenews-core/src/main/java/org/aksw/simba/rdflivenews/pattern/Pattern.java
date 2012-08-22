@@ -96,4 +96,16 @@ public interface Pattern {
      * @return a list of lucene document id's in which the pattern was found
      */
     public Set<Integer> getFoundInSentencesIds();
+
+    /**
+     * 
+     * @param d
+     */
+    public void setScore(Double d);
+    
+    /**
+     * 
+     * @return
+     */
+    public Double getScore();
 }

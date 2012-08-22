@@ -51,6 +51,11 @@ public class Constants {
      */
     public static final String LUCENE_FIELD_EXTRACTION_DATE = "date";
     
+    /**
+     * use this field to search for sentences which are not duplicate
+     */
+    public static final int NOT_DUPLICATE_SENTENCE = 0;
+    
     /* ################################################################ */
     /* ################################################################ */
     /* ################################################################ */

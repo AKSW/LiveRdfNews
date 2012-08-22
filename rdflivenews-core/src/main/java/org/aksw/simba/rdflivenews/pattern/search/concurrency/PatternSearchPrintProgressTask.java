@@ -1,4 +1,4 @@
-package org.aksw.simba.rdflivenews.patternsearch.concurrency;
+package org.aksw.simba.rdflivenews.pattern.search.concurrency;
 
 import java.text.DecimalFormat;
 import java.util.List;

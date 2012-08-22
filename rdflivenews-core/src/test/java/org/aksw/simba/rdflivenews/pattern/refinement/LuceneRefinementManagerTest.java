@@ -15,7 +15,7 @@ import junit.framework.TestSuite;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.refinement.LuceneRefinementManager;
+import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
