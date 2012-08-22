@@ -236,13 +236,13 @@ public class DeduplicationTest extends TestCase {
         results.add("It is not an enterprise that is meant to be a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         // new
         results.add("This is a completely different sentence which has absolutly nothing to do with the previous sentences, because it 's totally different .");
-        // duplciated to source
+        // duplicated to source
         results.add("But it will require partner nations in the gulf to put aside rivalries , share information and coordinate their individual arsenals of interceptor missiles to create a defensive shield encompassing all the regional allies .");
-        // duplciated to source
+        // duplicated to source
         results.add("Secretary of State Hillary Rodham Clinton , among the first to raise the need for the missile shield three years ago , sought to spur the gulf allies on during a recent visit to Saudi Arabia .");
-        // duplciated to source
+        // duplicated to source
         results.add("'' We can do even more to defend the gulf through cooperation on ballistic missile defense , '' she said during a session in March of the Gulf Cooperation Council , which includes Bahrain , Kuwait , Oman , Qatar , Saudi Arabia and the United Arab Emirates.");
-        // duplciated to source
+        // duplicated to source
         results.add("That would include deploying radars to increase the range of early warning coverage across the Persian Gulf , as well as introducing command , control and communications systems that could exchange that information with missile interceptors whose triggers are held by individual countries.");
         
         return results;
