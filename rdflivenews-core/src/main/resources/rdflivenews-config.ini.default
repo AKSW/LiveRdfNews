@@ -1,6 +1,8 @@
 [search]
 ; the method how we look for patterns: NER or POS possible
 method = NER
+; the number of threads which should search for patterns
+number-of-threads = 3
 
 [general]
 ; this directory should not be inside the code repo

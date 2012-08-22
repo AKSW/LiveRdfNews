@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.refinement;
+package org.aksw.simba.rdflivenews.pattern.refinement.lucene;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.patternsearch.impl;
+package org.aksw.simba.rdflivenews.pattern.search.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.patternsearch.PatternSearcher;
+import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.apache.commons.lang3.StringUtils;
 
 

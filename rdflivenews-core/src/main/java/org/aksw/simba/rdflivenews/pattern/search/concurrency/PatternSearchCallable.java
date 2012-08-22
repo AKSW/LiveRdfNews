@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.patternsearch.concurrency;
+package org.aksw.simba.rdflivenews.pattern.search.concurrency;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +11,9 @@ import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.patternsearch.PatternSearcher;
-import org.aksw.simba.rdflivenews.patternsearch.impl.NamedEntityTagPatternSearcher;
-import org.aksw.simba.rdflivenews.patternsearch.impl.PartOfSpeechTagPatternSearcher;
+import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
+import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
+import org.aksw.simba.rdflivenews.pattern.search.impl.PartOfSpeechTagPatternSearcher;
 import org.apache.lucene.index.IndexReader;
 
 

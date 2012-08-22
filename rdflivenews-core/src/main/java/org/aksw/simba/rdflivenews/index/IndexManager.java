@@ -84,8 +84,9 @@ public class IndexManager {
         // create the index writer configuration and create a new index writer
         IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         indexWriterConfig.setRAMBufferSizeMB(1024);
-        indexWriterConfig.setOpenMode(isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
-        writer = createIndex(INDEX_DIRECTORY, indexWriterConfig);
+        indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
+        writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
+        INDEX = writer.getDirectory();
         closeLuceneIndex();
     }
     
@@ -98,7 +99,7 @@ public class IndexManager {
         IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         indexWriterConfig.setRAMBufferSizeMB(1024);
         indexWriterConfig.setOpenMode(OpenMode.APPEND);
-        writer = createIndex(INDEX_DIRECTORY, indexWriterConfig);
+        writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
     }
     
     /**
@@ -210,26 +211,6 @@ public class IndexManager {
     }
     
     /**
-     * Checks if an index exists at the given location.
-     * 
-     * @param indexDirectory - the directory of the index to be checked
-     * @return true if the index exists, false otherwise
-     */
-    public boolean isIndexExisting(String indexDirectory) {
-        
-        try {
-            
-            return IndexReader.indexExists(FSDirectory.open(new File(indexDirectory)));
-        }
-        catch (IOException e) {
-            
-            e.printStackTrace();
-            String error = "Check if index exists failed!";
-            throw new RuntimeException(error, e);
-        }
-    }
-    
-    /**
      * 
      * @param documentId
      * @param timeSlice
@@ -306,37 +287,6 @@ public class IndexManager {
         LuceneManager.closeIndexReader(reader);
         
         return numberOfDocuments;
-    }
-    
-    /**
-     * Create a new filesystem lucene index
-     * 
-     * @param absoluteFilePath - the path where to create/append the index
-     * @param indexWriterConfig - the index write configuration
-     * @return
-     */
-    private IndexWriter createIndex(String absoluteFilePath, IndexWriterConfig indexWriterConfig) {
-
-        try {
-            
-            INDEX = FSDirectory.open(new File(absoluteFilePath));
-            return new IndexWriter(INDEX, indexWriterConfig);
-        }
-        catch (CorruptIndexException e) {
-            
-            e.printStackTrace();
-            throw new RuntimeException("Could not create index", e);
-        }
-        catch (LockObtainFailedException e) {
-            
-            e.printStackTrace();
-            throw new RuntimeException("Could not create index", e);
-        }
-        catch (IOException e) {
-            
-            e.printStackTrace();
-            throw new RuntimeException("Could not create index", e);
-        }
     }
     
     /**

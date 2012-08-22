@@ -4,6 +4,7 @@
  */
 package org.aksw.simba.rdflivenews.deduplication;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -16,8 +17,9 @@ public interface Deduplication {
      * @param fromTimeSlice
      * @param toTimeSlice
      * @param windowSize - how many timeslices should be considered
+     * @return the primary key of every sentence which is not duplicate with respect to all time slices so far
      */
-    public void runDeduplication(int fromTimeSlice, int toTimeSlice, int windowSize);
+    public Set<Integer> runDeduplication(int fromTimeSlice, int toTimeSlice, int windowSize);
     
     /**
      * 
