@@ -43,4 +43,6 @@ public interface Deduplication {
      * @return
      */
     public Set<String> deduplicate(Set<String> source, Set<String> target, int fromTimeSlice);
+        public void deduplicateClones(int toTimeSlice);
+
 }

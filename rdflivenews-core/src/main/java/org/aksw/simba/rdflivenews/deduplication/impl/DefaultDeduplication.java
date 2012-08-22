@@ -23,9 +23,9 @@ public abstract class DefaultDeduplication implements Deduplication {
         Set<String> source = getSource(fromTimeSlice, windowSize);
         Set<String> target = getTarget(fromTimeSlice + 1, toTimeSlice); // target should not include current source
         
-//        System.out.println("Source");
-//        for (String t : source ) System.out.println(t);
-//        System.out.println("TARGET");
+//        System.out.println("SOURCE = "+source.size());
+//        for (String s : source ) System.out.println(s);
+//        System.out.println("TARGET = "+target.size());
 //        for (String t : target ) System.out.println(t);
         // 2. deduplicate & delete duplicates for the current time slices, i.e., target
         target.removeAll(deduplicate(target, target, toTimeSlice));
@@ -39,5 +39,6 @@ public abstract class DefaultDeduplication implements Deduplication {
                 
         // 3. deduplicate & delete duplicates for the old and new data
         deduplicate(source, target, fromTimeSlice);
+        deduplicateClones(toTimeSlice);
     }
 }

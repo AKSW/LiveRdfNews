@@ -28,4 +28,7 @@ public class DummyDeduplication extends DefaultDeduplication {
 
         return new HashSet<String>();
     }
+
+    public void deduplicateClones(int toTimeSlice) {
+    }
 }

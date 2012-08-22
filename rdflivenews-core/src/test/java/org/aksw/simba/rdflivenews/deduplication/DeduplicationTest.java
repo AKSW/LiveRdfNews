@@ -3,13 +3,10 @@ package org.aksw.simba.rdflivenews.deduplication;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -56,8 +53,7 @@ public class DeduplicationTest extends TestCase {
         return new TestSuite(DeduplicationTest.class);
     }
     
-    public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        
+    public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {        
         // prepare the index
         IndexManager.getInstance().deleteIndex();
         this.addSentencesToLuceneIndex();
@@ -235,7 +231,7 @@ public class DeduplicationTest extends TestCase {
         // new
         results.add("It is not an enterprise that is meant to be a pointed message to Tehran, and that becomes more urgent as tensions with Iran rise .");
         // new
-        results.add("This is a completely different sentence which has absolutly nothing to do with the previous sentences, because it 's totally different .");
+        results.add("This is a completely different sentence which has absolutely nothing to do with the previous sentences because it 's totally different .");
         // duplicated to source
         results.add("But it will require partner nations in the gulf to put aside rivalries , share information and coordinate their individual arsenals of interceptor missiles to create a defensive shield encompassing all the regional allies .");
         // duplicated to source
