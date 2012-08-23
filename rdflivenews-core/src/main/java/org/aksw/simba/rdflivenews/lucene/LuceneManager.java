@@ -75,6 +75,9 @@ public class LuceneManager {
     
     /**
      * 
+     * Do not use this method if you plan to use it thousands of times.
+     * Better use the method with the reader as first parameter.
+     * 
      * @param index
      * @return
      */
@@ -140,6 +143,7 @@ public class LuceneManager {
     }
 
     /**
+     * Searcher is not close
      * 
      * @param searcher
      * @param query
@@ -150,8 +154,6 @@ public class LuceneManager {
         try {
             
             searcher.search(query, collector);
-            searcher.getIndexReader().close();
-            searcher.close();
         }
         catch (IOException e) {
             
@@ -185,7 +187,7 @@ public class LuceneManager {
      * 
      * @param searcher
      */
-    public static void closeSearcher(IndexSearcher searcher) {
+    public static void closeIndexSearcher(IndexSearcher searcher) {
 
         try {
             searcher.close();
@@ -241,6 +243,13 @@ public class LuceneManager {
         IndexSearcher searcher = new IndexSearcher(LuceneManager.openIndexReader(index));
         LuceneManager.query(searcher, query, collector);
     }
+    
+//    public static IndexSearcher query(IndexSearcher searcher, Query query, TopScoreDocCollector collector) {
+//
+//        IndexSearcher searcher = new IndexSearcher(LuceneManager.openIndexReader(index));
+//        LuceneManager.query(searcher, query, collector);
+//        return searcher;
+//    }
 
     /**
      * 
@@ -386,5 +395,15 @@ public class LuceneManager {
         indexWriterConfig.setOpenMode(OpenMode.APPEND);
         
         return openIndexWriter(index, indexWriterConfig);
+    }
+
+    /**
+     * 
+     * @param index
+     * @return
+     */
+    public static IndexSearcher openIndexSearcher(Directory index) {
+
+        return new IndexSearcher(LuceneManager.openIndexReader(index));
     }
 }

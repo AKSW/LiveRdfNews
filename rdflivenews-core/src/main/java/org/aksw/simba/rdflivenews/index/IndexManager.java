@@ -27,6 +27,7 @@ import org.apache.lucene.index.StaleReaderException;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TermQuery;
@@ -220,9 +221,9 @@ public class IndexManager {
             Document oldDoc = LuceneManager.getDocumentByNumber(INDEX, documentId);
             
             Document newDoc = new Document();
-            newDoc.add(new NumericField(Constants.LUCENE_FIELD_ID, Field.Store.YES, true).setIntValue(NumericUtils.prefixCodedToInt(oldDoc.get(Constants.LUCENE_FIELD_ID))));
-            newDoc.add(new NumericField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Field.Store.YES, true).setLongValue(NumericUtils.prefixCodedToLong(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE))));
-            newDoc.add(new NumericField(Constants.LUCENE_FIELD_TIME_SLICE, Field.Store.YES, true).setIntValue(NumericUtils.prefixCodedToInt(oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))));
+            newDoc.add(new NumericField(Constants.LUCENE_FIELD_ID, Field.Store.YES, true).setIntValue(Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID))));
+            newDoc.add(new NumericField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Field.Store.YES, true).setLongValue(Long.valueOf((oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)))));
+            newDoc.add(new NumericField(Constants.LUCENE_FIELD_TIME_SLICE, Field.Store.YES, true).setIntValue(Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE)))));
             newDoc.add(new NumericField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Field.Store.YES, true).setIntValue(timeSlice));
             newDoc.add(new Field(Constants.LUCENE_FIELD_TEXT, oldDoc.get(Constants.LUCENE_FIELD_TEXT), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, oldDoc.get(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
@@ -362,19 +363,33 @@ public class IndexManager {
      * @param timeSlice
      * @return
      */
-    public List<Integer> getSentenceIdsFromTimeSlice(int timeSlice) {
+    public Set<Integer> getSentenceIdsFromTimeSlice(int timeSlice) {
 
-        List<Integer> documentIds = new ArrayList<Integer>();
+        Set<Integer> documentIds = new HashSet<Integer>();
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(1000000, false);
         LuceneManager.query(INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
         
-        for ( ScoreDoc hit : collector.topDocs().scoreDocs )
-            documentIds.add(Integer.valueOf(LuceneManager.getDocumentByNumber(INDEX, hit.doc).get(Constants.LUCENE_FIELD_ID)));
+        IndexReader reader = LuceneManager.openIndexReader(INDEX);
+        
+        for ( ScoreDoc hit : collector.topDocs().scoreDocs ) {
+
+            Integer i = Integer.valueOf(LuceneManager.getDocumentByNumber(reader, hit.doc).get(Constants.LUCENE_FIELD_ID));
+            if ( i < 10000) System.out.println(i);
+            documentIds.add(i);
+        }
+                
+        LuceneManager.closeIndexReader(reader);
               
         return documentIds;
     }
     
+    /**
+     * 
+     * @return
+     * @throws CorruptIndexException
+     * @throws IOException
+     */
     public int getHighestTimeSliceId() throws CorruptIndexException, IOException {
         
         IndexReader reader = IndexReader.open(INDEX);
@@ -389,18 +404,11 @@ public class IndexManager {
         
         return maxTimeSliceId;
     }
-    
-    public void getArticlesFromTimeSlice(int timeSliceId) {
 
-//        TopScoreDocCollector collector = TopScoreDocCollector.create(10000000, false);
-//        IndexReader reader = IndexReader.open(INDEX);
-//        IndexSearcher searcher = new IndexSearcher(reader); 
-//        searcher.search(new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
-//        ScoreDoc[] hits = collector.topDocs().scoreDocs;
-//        
-//        for ( ScoreDoc hit : hits ) documentIds.add(hit.doc);
-//                
-//        searcher.close();
-//        reader.close();
+    public Document getDocumentById(IndexSearcher searcher, Query query) {
+        
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
+        LuceneManager.query(searcher, query, collector);
+        return LuceneManager.getDocument(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
     }
 }

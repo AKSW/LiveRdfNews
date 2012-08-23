@@ -14,7 +14,7 @@ public class WekaPatternScorer implements PatternScorer {
     @Override
     public void scorePattern(Pattern pattern) {
 
-        
+        System.out.println("worked");
     }
 
     /* (non-Javadoc)

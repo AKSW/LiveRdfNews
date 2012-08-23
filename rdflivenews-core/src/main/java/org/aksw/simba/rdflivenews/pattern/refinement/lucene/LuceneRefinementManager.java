@@ -55,7 +55,7 @@ public class LuceneRefinementManager {
                 // we want to exclude schema.org stuff or owl:thing
                 if ( type.startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) ) types.add(type);
                 
-        LuceneManager.closeSearcher(searcher);
+        LuceneManager.closeIndexSearcher(searcher);
         LuceneManager.closeIndexReader(reader);
         
         return types;
@@ -79,7 +79,7 @@ public class LuceneRefinementManager {
         if ( collector.getTotalHits() > 0 ) 
             uri = LuceneManager.getDocument(reader, collector.topDocs().scoreDocs[0].doc).get(Constants.DBPEDIA_LUCENE_FIELD_URI);
                 
-        LuceneManager.closeSearcher(searcher);
+        LuceneManager.closeIndexSearcher(searcher);
         LuceneManager.closeIndexReader(reader);
         
         return uri;

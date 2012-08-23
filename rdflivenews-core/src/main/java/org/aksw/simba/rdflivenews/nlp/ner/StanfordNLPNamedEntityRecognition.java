@@ -22,7 +22,7 @@ import edu.stanford.nlp.ling.CoreLabel;
  * @author gerb
  *
  */
-public final class StanfordNLPNamedEntityRecognition {
+public class StanfordNLPNamedEntityRecognition {
 
 	private static final String NAMED_ENTITY_TAG_DELIMITER = "_";
     private final Logger logger	= Logger.getLogger(StanfordNLPNamedEntityRecognition.class);

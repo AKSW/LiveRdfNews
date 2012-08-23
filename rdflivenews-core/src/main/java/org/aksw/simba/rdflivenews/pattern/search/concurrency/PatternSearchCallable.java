@@ -10,11 +10,17 @@ import java.util.concurrent.Callable;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.index.IndexManager;
+import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.PartOfSpeechTagPatternSearcher;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.util.NumericUtils;
 
 
 /**
@@ -24,7 +30,7 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
 
     private int progress                     = 0;
     private String name                      = null;
-    private List<Integer> luceneDocumentsIds = null;
+    private List<Integer> sentenceIds = null;
     private List<Pattern> foundPatterns      = null;
     
     // specific for different search methods
@@ -40,7 +46,7 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
     public PatternSearchCallable(List<Integer> luceneDocumentsIdsSubList, String name) {
 
         this.foundPatterns      = new ArrayList<Pattern>();
-        this.luceneDocumentsIds = luceneDocumentsIdsSubList;
+        this.sentenceIds = luceneDocumentsIdsSubList;
         this.name               = name;
         
         if ( RdfLiveNews.CONFIG.getStringSetting("search", "method").equals("POS") ) {
@@ -61,19 +67,23 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
      */
     public List<Pattern> call() throws Exception {
 
-        IndexReader reader = IndexReader.open(IndexManager.INDEX);
+        IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
         
         // go through all sentence ids
-        for ( Integer luceneDocumentId : this.luceneDocumentsIds ) {
+        for ( Integer sentenceId : this.sentenceIds ) {
             
             // get the sentence from the index and try to extract patterns from it
-            String taggedSentence = reader.document(luceneDocumentId).get(this.luceneFieldName);
-            this.foundPatterns.addAll(this.patternSearcher.extractPatterns(taggedSentence,luceneDocumentId));
+            Document document = IndexManager.getInstance().getDocumentById(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
+            String taggedSentence = document.get(this.luceneFieldName);
+            System.out.println(document);
+            System.out.println(taggedSentence);
+            this.foundPatterns.addAll(this.patternSearcher.extractPatterns(taggedSentence,sentenceId));
             
             this.progress++;
         }
         // finished extracting patterns so close everything
-        reader.close();
+        LuceneManager.closeIndexSearcher(searcher);
+        
         // and return what we found
         return this.foundPatterns;
     }
@@ -87,7 +97,7 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
      */
     public int getNumberTotal() {
 
-        return this.luceneDocumentsIds.size();
+        return this.sentenceIds.size();
     }
 
     /**
@@ -103,7 +113,7 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
      */
     public double getProgress() {
 
-        return (double) this.progress / this.luceneDocumentsIds.size();
+        return (double) this.progress / this.sentenceIds.size();
     }
 
     /**

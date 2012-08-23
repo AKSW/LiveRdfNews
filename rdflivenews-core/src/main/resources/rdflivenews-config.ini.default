@@ -17,3 +17,12 @@ dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources
 [deduplication]
 threshold = 1
 window = 1
+
+[classes]
+deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.DummyDeduplication
+tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndPartOfSpeechNaturalLanguageTagger
+refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner
+scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer
+cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering
+extraction      = org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction
+mapping         = org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper
