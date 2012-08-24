@@ -4,14 +4,8 @@
  */
 package org.aksw.simba.rdflivenews.deduplication.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
-import org.aksw.simba.rdflivenews.index.IndexManager;
-
 
 /**
  *
@@ -19,21 +13,21 @@ import org.aksw.simba.rdflivenews.index.IndexManager;
  */
 public class DummyDeduplication extends DefaultDeduplication {
 
-    public Set<String> getSource(int fromTimeSlice, int window) {
+    public Set<String> getSource() {
 
         return new HashSet<String>();
     }
 
-    public Set<String> getTarget(int fromTimeSlice, int toTimeSlice) {
+    public Set<String> getTarget() {
 
         return new HashSet<String>();
     }
 
-    public Set<String> deduplicate(Set<String> source, Set<String> target, int fromTimeSlice) {
+    public Set<String> deduplicate(Set<String> source, Set<String> target) {
 
         return new HashSet<String>();
     }
 
-    public void deduplicateClones(int toTimeSlice) {
+    public void deduplicateClones() {
     }
 }

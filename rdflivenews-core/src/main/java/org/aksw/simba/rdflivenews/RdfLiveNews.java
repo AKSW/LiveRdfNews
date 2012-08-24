@@ -37,6 +37,8 @@ import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import com.github.gerbsen.time.TimeUtil;
+
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -61,22 +63,27 @@ public class RdfLiveNews {
             // ##################################################
             // 1. Deduplication
             System.out.println("Starting deduplication!");
+            long start = System.currentTimeMillis();
             
-            // mark the duplicate sentences in the index
+            // mark the duplicate sentences in the index, we dont want to use them to search patterns
             Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
             deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
             Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(iteration);
             nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
             
-            System.out.println("Finished deduplication with " + currentNonDuplicateSentenceIds.size() + " sentences!");
+            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
             // ##################################################
             // 1.5 Sentence NLP Annotation
+            
             System.out.println("Starting NER & POS tagging of " +currentNonDuplicateSentenceIds.size() + " non duplicate sentences!");
+            start = System.currentTimeMillis();
+
+            // we can only find patterns if we have NER or POS tags annotated
             NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
             tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
-            System.out.println("SentenceId-Size" + currentNonDuplicateSentenceIds.size());
-            System.out.println("Finished NER & POS tagging of non duplicate sentences!");
+
+            System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
             // 2. Pattern Search

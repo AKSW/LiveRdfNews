@@ -73,20 +73,32 @@ public class DeduplicationTest extends TestCase {
         
         // do we get the correct amount of sentences for the first timeslice
         deduplication = new FastDeduplication();
-        assertEquals(5, deduplication.getSource(1, 1).size());
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(1);
+        deduplication.setWindowSize(1);
+        assertEquals(5, deduplication.getSource().size());
         
         // are those sentences the correct ones
         deduplication = new FastDeduplication();
-        assertEquals(new HashSet<String>(firstTimeSlice), deduplication.getSource(1, 1));
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(1);
+        deduplication.setWindowSize(1);
+        assertEquals(new HashSet<String>(firstTimeSlice), deduplication.getSource());
         
         // just to make sure :)
         deduplication = new FastDeduplication();
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(1);
+        deduplication.setWindowSize(1);
         firstTimeSlice.add("This is a stupid sentence");
-        assertNotSame(firstTimeSlice, deduplication.getSource(1, 1));
+        assertNotSame(firstTimeSlice, deduplication.getSource());
         
         // window larger then possible timeslices should also work
         deduplication = new FastDeduplication();
-        assertEquals(5, deduplication.getSource(1, 2).size());
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(1);
+        deduplication.setWindowSize(2);
+        assertEquals(5, deduplication.getSource().size());
     }
     
     /**
@@ -110,34 +122,48 @@ public class DeduplicationTest extends TestCase {
         // the second timeslice is the delta S, so we have 6 entries
         // there is 1 duplicate sentence in the list of 7 sentences 
         deduplication = new FastDeduplication();
-        assertEquals(7, deduplication.getTarget(1, 2).size());
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(2);
+        deduplication.setWindowSize(1);
+        assertEquals(7, deduplication.getTarget().size());
         
         // lets see if we get the correct sentences, use the hashset to remove duplicates
         // since only works if we have a similarity threshold of 1
         deduplication = new FastDeduplication();
-        assertEquals(new HashSet<String>(secondTimeSlice), deduplication.getTarget(1, 2));
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(2);
+        deduplication.setWindowSize(1);
+        assertEquals(new HashSet<String>(secondTimeSlice), deduplication.getTarget());
         
         // this should not work
         deduplication = new FastDeduplication();
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(2);
+        deduplication.setWindowSize(1);
         secondTimeSlice.add("This is a stupid sentence");
-        assertNotSame(secondTimeSlice, deduplication.getTarget(1, 2));
+        assertNotSame(secondTimeSlice, deduplication.getTarget());
     }
     
     public void testWrongInput() {
         
         Deduplication deduplication = new FastDeduplication();
+        deduplication.setFromTimeSlice(1);
+        deduplication.setToTimeSlice(0);
+        deduplication.setWindowSize(1);
         
         // zero window should not be possible
         try {
             
-            deduplication.getTarget(1, 0);
+            deduplication.getTarget();
             fail("this should have thrown an exception");
         }
         catch (Exception expected) { /* expected don't do anything */ }
         // from time slice needs to be greate than 0
         try {
             
-            deduplication.getTarget(0, 1);
+            deduplication.setFromTimeSlice(-1);
+            deduplication.setToTimeSlice(1);
+            deduplication.getTarget();
             fail("this should have thrown an exception");
         }
         catch (Exception expected) { /* expected don't do anything */ }
@@ -145,7 +171,10 @@ public class DeduplicationTest extends TestCase {
         // zero window should not be possible
         try {
             
-            assertEquals(5, deduplication.getSource(1, 0).size());
+            deduplication.setFromTimeSlice(1);
+            deduplication.setToTimeSlice(0);
+            deduplication.setWindowSize(0);
+            assertEquals(5, deduplication.getSource().size());
             fail("this should have thrown an exception");
         }
         catch (Exception expected) { /* expected don't do anything */ }

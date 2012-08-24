@@ -36,29 +36,29 @@ public class FastDeduplication extends DefaultDeduplication {
      * @param fromTimeSlice Highest time slice
      * @param window Window for wish duplicates are to be considered
      */
-    public Set<String> getSource(int fromTimeSlice, int window) {
-        if (window <= 0) {
-            throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + window);
-        }
-        if (fromTimeSlice < 0) {
-            throw new IllegalArgumentException("From Time Slice needs to be greater or equal than 0: " + fromTimeSlice);
-        }
+    public Set<String> getSource() {
+        if (this.windowSize <= 0)   throw new IllegalArgumentException("Time Slice Window cant be less then 1: " + this.windowSize);
+        if (this.fromTimeSlice < 0) throw new IllegalArgumentException("From Time Slice needs to be greater or equal than 0: " + fromTimeSlice);
+
         IndexManager manager = IndexManager.getInstance();
         Set<String> source = new HashSet<String>();
 
-        for (int i = fromTimeSlice - window; i <= fromTimeSlice; i++) {
-            for (int id : manager.getSentenceIdsFromTimeSlice(i)) {
-                String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
-
-                if (ids.keySet().contains(doc)) {
-                    int masterId = ids.get(doc);
-                    if (!clones.containsKey(masterId)) {
-                        clones.put(masterId, new HashSet<Integer>());
-                    }
+        for (int timeslice = this.fromTimeSlice - this.windowSize; timeslice <= this.fromTimeSlice; timeslice++) {
+            for ( Map.Entry<Integer, String> entry : manager.getIdsAndTextFromTimeSlice(timeslice).entrySet() ) {
+             
+                Integer id  = entry.getKey();
+                String text = entry.getValue();
+                
+                if (ids.keySet().contains(text)) {
+                    
+                    int masterId = ids.get(text);
+                    if (!clones.containsKey(masterId)) clones.put(masterId, new HashSet<Integer>());
                     clones.get(masterId).add(id);
-                } else {
-                    ids.put(doc, id);
-                    source.add(doc);
+                }
+                else {
+                    
+                    ids.put(text, id);
+                    source.add(text);
                 }
             }
         }
@@ -71,30 +71,31 @@ public class FastDeduplication extends DefaultDeduplication {
      * @param fromTimeSlice Lowest time slice id of target documents
      * @param toTimeSlice Highest time slice id of target documents
      */
-    public Set<String> getTarget(int fromTimeSlice, int toTimeSlice) {
-        if (fromTimeSlice <= 0) {
-            throw new IllegalArgumentException("From Time Slice cant be less then 1: " + fromTimeSlice);
-        }
-        if (fromTimeSlice > toTimeSlice) {
-            throw new IllegalArgumentException("To Time Slice " + toTimeSlice + " needs to be bigger than From Time Slice " + fromTimeSlice);
-        }
+    public Set<String> getTarget() {
+        if (fromTimeSlice < 0) throw new IllegalArgumentException("From Time Slice cant be less then 0: " + fromTimeSlice);
+        if (fromTimeSlice > toTimeSlice) throw new IllegalArgumentException("To Time Slice " + toTimeSlice + " needs to be bigger than From Time Slice " + fromTimeSlice);
 
         Set<String> target = new HashSet<String>();
         IndexManager manager = IndexManager.getInstance();
 
-        for (int i = fromTimeSlice; i <= toTimeSlice; i++) {
-            for (int id : manager.getSentenceIdsFromTimeSlice(i)) {
-
-                String doc = manager.getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
-                if (ids.keySet().contains(doc)) {
-                    int masterId = ids.get(doc);
-                    if (!clones.containsKey(masterId)) {
-                        clones.put(masterId, new HashSet<Integer>());
-                    }
+        // target should not include current source
+        for (int timeSlice = this.fromTimeSlice + 1; timeSlice <= toTimeSlice; timeSlice++) { 
+            // get all ids and sentences in batch mode
+            for ( Map.Entry<Integer, String> entry : manager.getIdsAndTextFromTimeSlice(timeSlice).entrySet() ) { 
+                
+                Integer id  = entry.getKey();
+                String text = entry.getValue();
+                
+                if (ids.keySet().contains(text)) {
+                    
+                    int masterId = ids.get(text);
+                    if (!clones.containsKey(masterId)) clones.put(masterId, new HashSet<Integer>());
                     clones.get(masterId).add(id);
-                } else {
-                    ids.put(doc, id);
-                    target.add(doc);
+                } 
+                else {
+                    
+                    ids.put(text, id);
+                    target.add(text);
                 }
             }
         }
@@ -114,8 +115,8 @@ public class FastDeduplication extends DefaultDeduplication {
      * @return Set of duplicates
      */
     @Override
-    public Set<String> deduplicate(Set<String> source, Set<String> target, int timeSlice) {
-        IndexManager manager = IndexManager.getInstance();
+    public Set<String> deduplicate(Set<String> source, Set<String> target) {
+
         Set<String> duplicates = new HashSet<String>();
         Map<String, Map<String, Double>> result = FastNGram.compute(source, target, new WordTokenizer(), threshold);
         result = removeSymmetry(result);
@@ -127,10 +128,9 @@ public class FastDeduplication extends DefaultDeduplication {
                 targetDocID = ids.get(targetDoc);
                 if (sourceDocID != targetDocID) {
                     duplicates.add(targetDoc);
-                    manager.setDocumentDuplicateInTimeSlice(targetDocID, timeSlice);
+                    this.duplicateIds.add(targetDocID);
                 }
             }
-            // tag clone as being duplicates
         }
         return duplicates;
     }
@@ -170,14 +170,16 @@ public class FastDeduplication extends DefaultDeduplication {
         return result;
     }
 
-    public void deduplicateClones(int timeSlice) {
+    /**
+     * 
+     */
+    public void deduplicateClones() {
         
-        IndexManager manager = IndexManager.getInstance();
-        for (Integer masterId : clones.keySet()) {
-            for (Integer clone : clones.get(masterId)) {
-                manager.setDocumentDuplicateInTimeSlice(clone.intValue(), timeSlice);
-            }
-        }
+        for (Integer masterId : clones.keySet()) 
+            for (Integer clone : clones.get(masterId)) 
+                this.duplicateIds.add(clone.intValue());
+        
+        IndexManager.getInstance().setDocumentsDuplicateInTimeSlice(this.duplicateIds, this.toTimeSlice);
     }
 
     public static void testRemoveSymmetry() {
