@@ -39,7 +39,7 @@ public abstract class DefaultDeduplication implements Deduplication {
 //        for (String t : target ) System.out.println(t);
                 
         // 3. deduplicate & delete duplicates for the old and new data
-        deduplicate(source, target, fromTimeSlice);
+        deduplicate(source, target, toTimeSlice);
         deduplicateClones(toTimeSlice);
         return null;
     }

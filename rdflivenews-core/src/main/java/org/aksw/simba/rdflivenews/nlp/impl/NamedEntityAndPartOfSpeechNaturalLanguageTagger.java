@@ -45,7 +45,7 @@ public class NamedEntityAndPartOfSpeechNaturalLanguageTagger implements NaturalL
         if (!ids.isEmpty()) System.out.println("LOWEST: " + ids.get(0));
         
         // TODO remove the document from ids if the text does not contain NNP or PERSON/PLACE/ORG 
-        
+        if (!newFoundNonDuplicateIds.isEmpty()) System.exit(0);
         Set<Integer> ints = new HashSet<Integer>();
         
         for ( Integer sentenceId : ids ) {
@@ -71,7 +71,6 @@ public class NamedEntityAndPartOfSpeechNaturalLanguageTagger implements NaturalL
         newFoundNonDuplicateIds = new HashSet<Integer>(ints);
         System.out.println("Subset: " + ints.size());
         System.out.println("Superset: " + newFoundNonDuplicateIds.size());
-        
         
         LuceneManager.closeIndexWriter(writer);
         LuceneManager.closeIndexSearcher(searcher);

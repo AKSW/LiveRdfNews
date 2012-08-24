@@ -53,25 +53,6 @@ public class DeduplicationTest extends TestCase {
         return new TestSuite(DeduplicationTest.class);
     }
     
-    public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {        
-        // prepare the index
-        IndexManager.getInstance().deleteIndex();
-        this.addSentencesToLuceneIndex();
-        
-        int fromTimeSliceId = 1;
-        int toTimeSliceId   = 2;
-        int window          = 1;
-        
-        Deduplication deduplication = new FastDeduplication();
-        deduplication.runDeduplication(fromTimeSliceId, toTimeSliceId, window);
-        
-        TopScoreDocCollector collector = TopScoreDocCollector.create(100, false);
-        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(2))), collector);
-        
-        System.out.println(collector.getTotalHits());
-        assertEquals(6, collector.getTotalHits());
-    }
-    
     /**
      * 
      * @throws SecurityException
@@ -170,6 +151,36 @@ public class DeduplicationTest extends TestCase {
         catch (Exception expected) { /* expected don't do anything */ }
     }
     
+    public void testDeduplication() throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {        
+        // prepare the index
+        IndexManager.getInstance().deleteIndex();
+        this.addSentencesToLuceneIndex();
+        
+        int fromTimeSliceId = 0;
+        int toTimeSliceId   = 1;
+        int window          = 1;
+        
+        Deduplication deduplication = new FastDeduplication();
+        deduplication.runDeduplication(fromTimeSliceId, toTimeSliceId, window);
+
+        TopScoreDocCollector collector = TopScoreDocCollector.create(100, false);
+        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(1))), collector);
+        assertEquals(1, collector.getTotalHits());
+        assertEquals(5, IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(toTimeSliceId).size());
+        
+        fromTimeSliceId = 1;
+        toTimeSliceId   = 2;
+        window          = 1;
+        
+        deduplication = new FastDeduplication();
+        deduplication.runDeduplication(fromTimeSliceId, toTimeSliceId, window);
+        
+        collector = TopScoreDocCollector.create(100, false);
+        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(2))), collector);
+        assertEquals(6, collector.getTotalHits());
+        assertEquals(2, IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(toTimeSliceId).size());
+    }
+    
     /**
      * 
      */
@@ -194,6 +205,7 @@ public class DeduplicationTest extends TestCase {
             sentence.setArticleUrl("http://article.com/number1");
             sentence.setText(sent.replaceAll("_[A-Z]*", ""));
             sentence.setNerTaggedSentence(sent);
+            sentence.setPosTaggedSentence(sent);
             sentence.setTimeSliceID(timeSlice);
             sentence.setExtractionDate(new Date());
             newSentences.add(sentence);
@@ -213,6 +225,7 @@ public class DeduplicationTest extends TestCase {
         results.add("But it will require partner nations in the gulf to put aside rivalries , share information and coordinate their individual arsenals of interceptor missiles to create a defensive shield encompassing all the regional allies .");
         results.add("Secretary of State Hillary Rodham Clinton , among the first to raise the need for the missile shield three years ago , sought to spur the gulf allies on during a recent visit to Saudi Arabia .");
         results.add("'' We can do even more to defend the gulf through cooperation on ballistic missile defense , '' she said during a session in March of the Gulf Cooperation Council , which includes Bahrain , Kuwait , Oman , Qatar , Saudi Arabia and the United Arab Emirates.");
+        results.add("That would include deploying radars to increase the range of early warning coverage across the Persian Gulf , as well as introducing command , control and communications systems that could exchange that information with missile interceptors whose triggers are held by individual countries.");
         results.add("That would include deploying radars to increase the range of early warning coverage across the Persian Gulf , as well as introducing command , control and communications systems that could exchange that information with missile interceptors whose triggers are held by individual countries.");
         
         return results;
