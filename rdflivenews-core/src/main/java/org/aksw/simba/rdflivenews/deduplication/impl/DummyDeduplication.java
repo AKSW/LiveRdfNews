@@ -31,7 +31,6 @@ public class DummyDeduplication extends DefaultDeduplication {
 
     public Set<String> deduplicate(Set<String> source, Set<String> target, int fromTimeSlice) {
 
-//        List<Integer> list = new ArrayList<>(IndexManager.getInstance().getSentenceIdsFromTimeSlice(fromTimeSlice));
         return new HashSet<String>();
     }
 
