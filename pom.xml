@@ -30,6 +30,10 @@
 			<id>gerb_snapshots</id>
 			<url>https://github.com/gerbsen/maven-repo/tree/master/snapshots</url>
 		</repository>
+		<repository>
+			<id>maven.aksw.internal</id>
+			<url>http://prod1.aksw.org:8081/archiva/repository/internal</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -53,6 +57,11 @@
 			<groupId>org.ini4j</groupId>
 			<artifactId>ini4j</artifactId>
 			<version>0.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.gerbsen</groupId>
+			<artifactId>utk</artifactId>
+            <version>1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

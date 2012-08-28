@@ -33,8 +33,11 @@ import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThread
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
+import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
+
+import com.github.gerbsen.time.TimeUtil;
 
 
 /**
@@ -46,10 +49,6 @@ public class RdfLiveNews {
     public static Config CONFIG;
 
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
-        
-        PatternScorer scorer = (PatternScorer) ReflectionManager.newInstance("org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer");
-        scorer.scorePattern(null);
-        System.exit(0);
         
         // load the config, we dont need to configure logging because the log4j config is on the classpath
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
@@ -64,29 +63,34 @@ public class RdfLiveNews {
             // ##################################################
             // 1. Deduplication
             System.out.println("Starting deduplication!");
+            long start = System.currentTimeMillis();
             
-            // mark the duplicate sentences in the index
-//            Deduplication deduplication = new FastDeduplication();
-            Deduplication deduplication = new DummyDeduplication();
-            Set<Integer> newFoundNonDuplicateIds = deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
-            nonDuplicateSentenceIds.addAll(newFoundNonDuplicateIds);
+            // mark the duplicate sentences in the index, we dont want to use them to search patterns
+            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
+            deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
+            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(iteration);
+            nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
             
-            System.out.println("Finished deduplication with " + nonDuplicateSentenceIds.size() + " sentences!");
+            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
             // ##################################################
             // 1.5 Sentence NLP Annotation
-            System.out.println("Starting NER & POS tagging of non duplicate sentences!");
-            NaturalLanguageTagger tagger = new NamedEntityAndPartOfSpeechNaturalLanguageTagger();
-            tagger.annotateSentencesInIndex(newFoundNonDuplicateIds);
-            System.out.println("SentenceId-Size" + newFoundNonDuplicateIds.size());
-            System.out.println("Finished NER & POS tagging of non duplicate sentences!");
+            
+            System.out.println("Starting NER & POS tagging of " +currentNonDuplicateSentenceIds.size() + " non duplicate sentences!");
+            start = System.currentTimeMillis();
+
+            // we can only find patterns if we have NER or POS tags annotated
+            NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
+            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+
+            System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
             // 2. Pattern Search
             
             PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
             // search the patterns only in the sentences of the current iteration
-            List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(newFoundNonDuplicateIds), RdfLiveNews.CONFIG.getIntegerSetting("search", "number-of-threads"));
+            List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds), RdfLiveNews.CONFIG.getIntegerSetting("search", "number-of-threads"));
             // merge those patterns with themselves
             patternsOfIteration = patternSearchManager.mergeNewFoundPatterns(patternsOfIteration);
             // merge the old and the new patterns

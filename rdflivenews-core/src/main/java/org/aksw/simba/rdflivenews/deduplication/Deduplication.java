@@ -27,7 +27,7 @@ public interface Deduplication {
      * @param window
      * @return
      */
-    public Set<String> getSource(int fromTimeSlice, int window);
+    public Set<String> getSource();
     
     /**
      * 
@@ -35,7 +35,7 @@ public interface Deduplication {
      * @param toTimeSlice
      * @return
      */
-    public Set<String> getTarget(int fromTimeSlice, int toTimeSlice);
+    public Set<String> getTarget();
     
     /**
      * 
@@ -44,7 +44,28 @@ public interface Deduplication {
      * @param fromTimeSlice
      * @return
      */
-    public Set<String> deduplicate(Set<String> source, Set<String> target, int fromTimeSlice);
-        public void deduplicateClones(int toTimeSlice);
-
+    public Set<String> deduplicate(Set<String> source, Set<String> target);
+    
+    /**
+     * 
+     */
+    public void deduplicateClones();
+    
+    /**
+     * 
+     * @param fromTimeSlice
+     */
+    public void setFromTimeSlice(int fromTimeSlice);
+    
+    /**
+     * 
+     * @param toTimeSlice
+     */
+    public void setToTimeSlice(int toTimeSlice);
+    
+    /**
+     * 
+     * @param windowSize
+     */
+    public void setWindowSize(int windowSize);
 }

@@ -26,7 +26,7 @@ import org.ini4j.InvalidFileFormatException;
  */
 public class NewsCrawler {
 
-    public static Integer TIME_SLICE_ID = 0;
+    public static Integer TIME_SLICE_ID = -1;
     public static Config CONFIG = null;
     private static Logger logger = Logger.getLogger(NewsCrawler.class);
     public static BlockingQueue<String> queue = new LinkedBlockingQueue<String>();

@@ -3,10 +3,6 @@
  */
 package org.aksw.simba.rdflivenews.nlp.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
@@ -18,7 +14,6 @@ import org.aksw.simba.rdflivenews.nlp.pos.StanfordNLPPartOfSpeechTagger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
@@ -40,19 +35,10 @@ public class NamedEntityAndPartOfSpeechNaturalLanguageTagger implements NaturalL
         IndexWriter writer      = LuceneManager.openIndexWriterAppend(IndexManager.INDEX);
         IndexSearcher searcher  = LuceneManager.openIndexSearcher(IndexManager.INDEX);
         
-        List<Integer> ids = new ArrayList<Integer>(newFoundNonDuplicateIds);
-        Collections.sort(ids);
-        if (!ids.isEmpty()) System.out.println("LOWEST: " + ids.get(0));
-        
         // TODO remove the document from ids if the text does not contain NNP or PERSON/PLACE/ORG 
         
-        Set<Integer> ints = new HashSet<Integer>();
-        
-        for ( Integer sentenceId : ids ) {
-            System.out.println(sentenceId);
-            
-            if ( sentenceId > 10000 ) break;
-            ints.add(sentenceId);
+        for ( Integer sentenceId : newFoundNonDuplicateIds ) {
+
             Document oldDoc = IndexManager.getInstance().getDocumentById(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
             String text     = oldDoc.get(Constants.LUCENE_FIELD_TEXT);
             
@@ -68,10 +54,6 @@ public class NamedEntityAndPartOfSpeechNaturalLanguageTagger implements NaturalL
             
             LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId)), newDoc);
         }
-        newFoundNonDuplicateIds = new HashSet<Integer>(ints);
-        System.out.println("Subset: " + ints.size());
-        System.out.println("Superset: " + newFoundNonDuplicateIds.size());
-        
         
         LuceneManager.closeIndexWriter(writer);
         LuceneManager.closeIndexSearcher(searcher);
