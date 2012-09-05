@@ -68,18 +68,29 @@ public interface Pattern {
      * @param generateFavouriteType
      */
     public void setFavouriteTypeSecondEntity(String generateFavouriteType);
+    
+    /**
+     * 
+     * @return
+     */
+    public String getFavouriteTypeSecondEntity();
+    
+    /**
+     * @return the favouriteTypeFirstEntity
+     */
+    public String getFavouriteTypeFirstEntity();
 
     /**
      * 
      * @return
      */
-    public Map<String, Integer> getTypesSecondEntity();
+    public List<String> getTypesSecondEntity();
 
     /**
      * 
      * @return
      */
-    public Map<String, Integer> getTypesFirstEntity();
+    public List<String> getTypesFirstEntity();
     
     /**
      * 

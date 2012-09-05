@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,11 +16,8 @@ import org.aksw.simba.rdflivenews.cluster.labeling.ClusterLabeler;
 import org.aksw.simba.rdflivenews.cluster.labeling.DefaultClusterLabeling;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.deduplication.Deduplication;
-import org.aksw.simba.rdflivenews.deduplication.impl.DummyDeduplication;
-import org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
-import org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndPartOfSpeechNaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
 import org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering;
@@ -37,14 +33,12 @@ import org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
-import org.aksw.simba.rdflivenews.statistics.StatisticsUtil;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.map.MapUtil;
 import com.github.gerbsen.time.TimeUtil;
 
 
@@ -113,6 +107,13 @@ public class RdfLiveNews {
 
             System.out.println(String.format("Finished pattern search with %s patterns in current iteration and %s total patterns!", patternsOfIteration.size(), patterns.size()));
             
+            // ##################################################
+            // 3. Pattern Refinement
+            
+            // refines the domain and range of the patterns 
+            PatternRefiner patternRefiner = new DefaultPatternRefiner();
+            patternRefiner.refinePatterns(patterns);
+            
             // ******************************************************
             // ***************** DEBUG ******************************
             // ******************************************************
@@ -123,20 +124,12 @@ public class RdfLiveNews {
             for ( Pattern p : patterns ) writer.write(p.toString());
             writer.close();
             
-//            System.out.println("exit");
-//            System.exit(0);
+            System.out.println("exit");
+            System.exit(0);
             
             // ******************************************************
             // ***************** DEBUG ******************************
             // ******************************************************
-            
-            
-            // ##################################################
-            // 3. Pattern Refinement
-            
-            // refines the domain and range of the patterns 
-            PatternRefiner patternRefiner = new DefaultPatternRefiner();
-//            patternRefiner.refinePatterns(patterns);
             
             // ##################################################
             // 4. Pattern Scoring

@@ -19,6 +19,10 @@ import junit.framework.TestSuite;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.entity.Entity;
+import org.aksw.simba.rdflivenews.pair.EntityPair;
+import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
+import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.refinement.jena.SubclassChecker;
 import org.ini4j.Ini;
@@ -53,7 +57,7 @@ public class PatternRefinerTest extends TestCase {
         return new TestSuite(PatternRefinerTest.class);
     }
     
-    public void testGetDeepestSubclass() {
+    public void tesstGetDeepestSubclass() {
         
         Set<String> urisOfClasses = new HashSet<>(Arrays.asList("http://dbpedia.org/ontology/Actor", "http://dbpedia.org/ontology/Person", "http://dbpedia.org/ontology/Agent", "http://dbpedia.org/ontology/Artist"));
         assertEquals("http://dbpedia.org/ontology/Actor", SubclassChecker.getDeepestSubclass(urisOfClasses));
@@ -62,24 +66,16 @@ public class PatternRefinerTest extends TestCase {
     public void testGetFavouriteType() 
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         
+        Pattern pattern = new DefaultPattern();
+        pattern.addLearnedFromEntities(new EntityPair(new Entity("Fox Mulder", "PER"), new Entity("David Duchovny", "PER"), 1));
+        pattern.addLearnedFromEntities(new EntityPair(new Entity("Dana Scully", "PER"), new Entity("Gillan Anderson", "PER"), 1));
+        pattern.addLearnedFromEntities(new EntityPair(new Entity("Batman", "PER"), new Entity("Christian Bale", "PER"), 1));
+        pattern.addLearnedFromEntities(new EntityPair(new Entity("Iron Man", "PER"), new Entity("Robert Downey Jr.", "PER"), 1));
+        
         PatternRefiner refiner = new DefaultPatternRefiner();
+        refiner.refinePattern(pattern);
         
-        Method method = DefaultPatternRefiner.class.getDeclaredMethod("generateFavouriteType", Map.class, Set.class);
-        method.setAccessible(true);
-        
-        Map<String,Integer> oldTypes = new HashMap<String,Integer>();
-        Set<String> newTypes = new HashSet<String>();
-        // nothing in old or new so nothing can be done
-        assertEquals("", method.invoke(refiner, oldTypes, newTypes));
-        
-        // add one there and one there, 2x Person & 1x FictionalCharacter > Person
-        oldTypes.put("http://dbpedia.org/ontology/Person", 2);
-        newTypes.add("http://dbpedia.org/ontology/FictionalCharacter");
-        assertEquals("http://dbpedia.org/ontology/Person", method.invoke(refiner, oldTypes, newTypes));
-        
-        // 1x Person 2x FictionalCharacter
-        oldTypes.put("http://dbpedia.org/ontology/Person", 1);
-        newTypes.add("http://dbpedia.org/ontology/FictionalCharacter");
-        assertEquals("http://dbpedia.org/ontology/FictionalCharacter", method.invoke(refiner, oldTypes, newTypes));
+        assertEquals("http://dbpedia.org/ontology/FictionalCharacter", pattern.getFavouriteTypeFirstEntity());
+        assertEquals("http://dbpedia.org/ontology/Person", pattern.getFavouriteTypeSecondEntity());
     }
 }

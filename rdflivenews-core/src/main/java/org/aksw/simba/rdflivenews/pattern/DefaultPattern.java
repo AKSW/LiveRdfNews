@@ -28,8 +28,6 @@ public class DefaultPattern implements Pattern {
     
     private int totalOccurrence;
     private Double score;
-    private Map<String, Integer> typesFirstEntity;
-    private Map<String, Integer> typesSecondEntity;
     private String favouriteTypeSecondEntity;
     private String favouriteTypeFirstEntity;
     private Set<Integer> luceneSentenceIds;
@@ -41,8 +39,6 @@ public class DefaultPattern implements Pattern {
     public DefaultPattern(String patternString) {
 
         this.entityPairs = new HashMap<Integer,EntityPair>();
-        this.typesFirstEntity = new HashMap<String,Integer>();
-        this.typesSecondEntity = new HashMap<String,Integer>();
         this.luceneSentenceIds = new HashSet<Integer>();
         this.favouriteTypeFirstEntity = "";
         this.favouriteTypeSecondEntity = "";
@@ -106,20 +102,44 @@ public class DefaultPattern implements Pattern {
         this.favouriteTypeSecondEntity = favouriteTypeSecondEntity;        
     }
 
+    
     /**
-     * 
+     * @return the favouriteTypeSecondEntity
      */
-    public Map<String, Integer> getTypesSecondEntity() {
+    public String getFavouriteTypeSecondEntity() {
+    
+        return favouriteTypeSecondEntity;
+    }
 
-        return this.typesSecondEntity;
+    
+    /**
+     * @return the favouriteTypeFirstEntity
+     */
+    public String getFavouriteTypeFirstEntity() {
+    
+        return favouriteTypeFirstEntity;
     }
 
     /**
      * 
      */
-    public Map<String, Integer> getTypesFirstEntity() {
+    public List<String> getTypesSecondEntity() {
 
-        return this.typesFirstEntity;
+        List<String> types = new ArrayList<String>();
+        for ( EntityPair entityPair : this.entityPairs.values()) types.add(entityPair.getSecondEntity().getType());
+        
+        return types;
+    }
+
+    /**
+     * 
+     */
+    public List<String> getTypesFirstEntity() {
+
+        List<String> types = new ArrayList<String>();
+        for ( EntityPair entityPair : this.entityPairs.values()) types.add(entityPair.getFirstEntity().getType());
+        
+        return types;
     }
     
     /**
@@ -201,7 +221,7 @@ public class DefaultPattern implements Pattern {
     public String toString() {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Pattern: arg1 "      +  this.naturalLanguageRepresentation + " arg2");
+        builder.append("Pattern: "+this.favouriteTypeFirstEntity+" "      +  this.naturalLanguageRepresentation + " " + this.favouriteTypeSecondEntity);
         builder.append("\nTagged-Pattern: arg1 "  + this.naturalLanguageRepresentationWithTags + " arg2");
         builder.append("\nOccurrence: "    + this.totalOccurrence);
         

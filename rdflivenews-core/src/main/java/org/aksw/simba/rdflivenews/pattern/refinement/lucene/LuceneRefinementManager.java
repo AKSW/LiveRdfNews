@@ -28,12 +28,14 @@ public class LuceneRefinementManager {
 
     private Directory INDEX;
     private QueryParser dbpediaLabelQueryParser = new QueryParser(Version.LUCENE_36, Constants.DBPEDIA_LUCENE_FIELD_LABEL, new StandardAnalyzer(Version.LUCENE_36));
+    private IndexSearcher searcher;
     
     public static final String NO_URI_FOUND = "not found";
     
     public LuceneRefinementManager() {
         
         INDEX = LuceneManager.openLuceneIndex(RdfLiveNews.CONFIG.getStringSetting("general", "dbpedia"));
+        this.searcher         = new IndexSearcher(LuceneManager.openIndexReader(INDEX));
     }
     
     /**
@@ -46,18 +48,13 @@ public class LuceneRefinementManager {
         Set<String> types = new HashSet<String>();
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(100, false);
-        IndexReader reader = LuceneManager.openIndexReader(INDEX);
-        IndexSearcher searcher = new IndexSearcher(reader);
-        LuceneManager.query(searcher, new TermQuery(new Term(Constants.DBPEDIA_LUCENE_FIELD_URI, uri)), collector);
+        LuceneManager.query(this.searcher, new TermQuery(new Term(Constants.DBPEDIA_LUCENE_FIELD_URI, uri)), collector);
 
         for ( ScoreDoc hit : collector.topDocs().scoreDocs )
-            for (String type : LuceneManager.getDocument(reader, hit.doc).getValues(Constants.DBPEDIA_LUCENE_FIELD_TYPES))
+            for (String type : LuceneManager.getDocument(this.searcher.getIndexReader(), hit.doc).getValues(Constants.DBPEDIA_LUCENE_FIELD_TYPES))
                 // we want to exclude schema.org stuff or owl:thing
                 if ( type.startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) ) types.add(type);
                 
-        LuceneManager.closeIndexSearcher(searcher);
-        LuceneManager.closeIndexReader(reader);
-        
         return types;
     }
 
@@ -69,19 +66,14 @@ public class LuceneRefinementManager {
     public String getPossibleUri(String label) {
 
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, true);
-        IndexReader reader             = LuceneManager.openIndexReader(INDEX);
-        IndexSearcher searcher         = new IndexSearcher(reader);
         
-        LuceneManager.query(searcher, LuceneManager.parse(this.dbpediaLabelQueryParser, label) , collector);
+        LuceneManager.query(this.searcher, LuceneManager.parse(this.dbpediaLabelQueryParser, label) , collector);
 
         String uri = LuceneRefinementManager.NO_URI_FOUND;
         
         if ( collector.getTotalHits() > 0 ) 
-            uri = LuceneManager.getDocument(reader, collector.topDocs().scoreDocs[0].doc).get(Constants.DBPEDIA_LUCENE_FIELD_URI);
+            uri = LuceneManager.getDocument(this.searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc).get(Constants.DBPEDIA_LUCENE_FIELD_URI);
                 
-        LuceneManager.closeIndexSearcher(searcher);
-        LuceneManager.closeIndexReader(reader);
-        
         return uri;
     }
 }

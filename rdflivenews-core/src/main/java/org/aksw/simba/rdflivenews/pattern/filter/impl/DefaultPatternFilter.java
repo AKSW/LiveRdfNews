@@ -41,9 +41,18 @@ public class DefaultPatternFilter implements PatternFilter {
             naturalLanguageRepresentationChunks.removeAll(FILTER_TOKENS);
             
             // remove this from the list of all patterns
-            if ( naturalLanguageRepresentationChunks.isEmpty() ) patternIterator.remove();
+            if ( naturalLanguageRepresentationChunks.isEmpty() ) {
+                
+                patternIterator.remove();
+                continue;
+            }
+            
             // patterns which start with and are usually crap
-            if ( nlr.startsWith("and ") ) patternIterator.remove();
+            if ( nlr.startsWith("and ") ) {
+                
+                patternIterator.remove();
+                continue;
+            }
         }
         
         return patternsOfIteration;

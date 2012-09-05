@@ -61,6 +61,9 @@ public class LuceneRefinementManagerTest extends TestCase {
         assertEquals("http://dbpedia.org/resource/Microsoft", luceneRefinementManager.getPossibleUri("Microsoft"));
         assertEquals("http://dbpedia.org/resource/Fox_Mulder", luceneRefinementManager.getPossibleUri("Fox Mulder"));
         assertEquals("http://dbpedia.org/resource/Apple_Inc.", luceneRefinementManager.getPossibleUri("Apple Inc."));
+        assertEquals("http://dbpedia.org/resource/IDEXX_Laboratories", luceneRefinementManager.getPossibleUri("IDEXX"));
+        // we dont find the correct uri for this label
+        assertNotSame("http://dbpedia.org/resource/Nabil_Ayers.", luceneRefinementManager.getPossibleUri("Jonathan Ayers"));
     }
     
     /**
@@ -73,5 +76,8 @@ public class LuceneRefinementManagerTest extends TestCase {
         
         Set<String> foxMulderTypes = new HashSet<String>(Arrays.asList("http://dbpedia.org/ontology/Person", "http://dbpedia.org/ontology/FictionalCharacter"));
         assertEquals(foxMulderTypes, this.luceneRefinementManager.getTypesOfResource("http://dbpedia.org/resource/Fox_Mulder"));
+        
+        Set<String> idexxTypes = new HashSet<String>();
+        assertEquals(idexxTypes, this.luceneRefinementManager.getTypesOfResource("http://dbpedia.org/resource/IDEXX_Laboratories"));
     }
 }

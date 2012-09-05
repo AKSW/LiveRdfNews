@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.rdf.uri.impl;
 
+import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementManager;
 import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
 
 
@@ -12,10 +13,11 @@ import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
  */
 public class DefaultUriRetrieval implements UriRetrieval {
 
+    private final LuceneRefinementManager luceneRefinementManager = new LuceneRefinementManager();
+    
     @Override
     public String getUri(String label) {
 
-        // TODO Auto-generated method stub
-        return null;
+        return luceneRefinementManager.getPossibleUri(label);
     }
 }

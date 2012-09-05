@@ -90,6 +90,8 @@ public class Entity {
 
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((label == null) ? 0 : label.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((uri == null) ? 0 : uri.hashCode());
         return result;
     }
@@ -107,6 +109,20 @@ public class Entity {
         if (getClass() != obj.getClass())
             return false;
         Entity other = (Entity) obj;
+        if (label == null) {
+            if (other.label != null)
+                return false;
+        }
+        else
+            if (!label.equals(other.label))
+                return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        }
+        else
+            if (!type.equals(other.type))
+                return false;
         if (uri == null) {
             if (other.uri != null)
                 return false;

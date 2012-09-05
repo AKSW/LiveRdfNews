@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.pattern.refinement.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.deduplication.Deduplication;
+import org.aksw.simba.rdflivenews.nlp.ner.NamedEntityTagNormalizer;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
@@ -41,23 +43,37 @@ public class DefaultPatternRefiner implements PatternRefiner {
 
         for ( EntityPair pair : pattern.getLearnedFromEntities() ) {
             
-            // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
-            pair.getFirstEntity().setUri(this.uriRetrieval.getUri(pair.getFirstEntity().getLabel()));
-            // we can only find types if we have a uri from dbpedia
-            if ( pair.getFirstEntity().getUri().startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) )
-                pair.getFirstEntity().setType(
-                        SubclassChecker.getDeepestSubclass(luceneRefinementManager.getTypesOfResource(pair.getFirstEntity().getUri())));
-            
-            // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
-            pair.getSecondEntity().setUri(this.uriRetrieval.getUri(pair.getSecondEntity().getLabel()));
-            // we can only find types if we have a uri from dbpedia
-            if ( pair.getSecondEntity().getUri().startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) )
-                pair.getSecondEntity().setType(
-                        SubclassChecker.getDeepestSubclass(luceneRefinementManager.getTypesOfResource(pair.getSecondEntity().getUri())));
-            
-            // mark the pair as not no, so that we dont process it again in subsequent iterations
-            pair.setNew(false);
+            if ( pair.isNew() ) {
+
+                System.out.println(pair);
+                
+                // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
+                pair.getFirstEntity().setUri(this.uriRetrieval.getUri(pair.getFirstEntity().getLabel()));
+                // we can only find types if we have a uri from dbpedia
+                if ( pair.getFirstEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX) )
+                    pair.getFirstEntity().setType(
+                            SubclassChecker.getDeepestSubclass(luceneRefinementManager.getTypesOfResource(pair.getFirstEntity().getUri())));
+                
+                System.out.println(pair);
+                
+                // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
+                pair.getSecondEntity().setUri(this.uriRetrieval.getUri(pair.getSecondEntity().getLabel()));
+                // we can only find types if we have a uri from dbpedia
+                if ( pair.getSecondEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX) )
+                    pair.getSecondEntity().setType(
+                            SubclassChecker.getDeepestSubclass(luceneRefinementManager.getTypesOfResource(pair.getSecondEntity().getUri())));
+                
+                System.out.println(pair);
+                
+                System.out.println("\n\n");
+                
+                // mark the pair as not no, so that we dont process it again in subsequent iterations
+                pair.setNew(false);
+            }
         }
+        
+        pattern.setFavouriteTypeFirstEntity(generateFavouriteType(pattern.getTypesFirstEntity()));
+        pattern.setFavouriteTypeSecondEntity(generateFavouriteType(pattern.getTypesSecondEntity()));
     }
 
     /**
@@ -67,14 +83,18 @@ public class DefaultPatternRefiner implements PatternRefiner {
      * @param foundTypes
      * @return
      */
-    private String generateFavouriteType(Map<String,Integer> types, Set<String> foundTypes) {
+    private String generateFavouriteType(List<String> foundTypes) {
         
+        Map<String,Integer> types = new HashMap<String,Integer>();
+        
+        //  add them all to the list
         for ( String foundType : foundTypes ) {
 
             if ( types.containsKey(foundType) ) types.put(foundType, types.get(foundType) + 1);
             else types.put(foundType, 1);
         }
         
+        // find the maximum
         int maximum          = -1;
         String favouriteType = "";
         
@@ -91,24 +111,17 @@ public class DefaultPatternRefiner implements PatternRefiner {
     }
     
     /**
-     * 
-     * @param types
-     * @param label
-     * @return
-     */
-    private String generateFavouriteType(Map<String,Integer> types, String label) {
-
-        return this.generateFavouriteType(types, 
-                        luceneRefinementManager.getTypesOfResource(luceneRefinementManager.getPossibleUri(label)));
-    }
-
-    /**
      * Refines a pattern with the help of the refine(Pattern pattern) method
      * 
      * @param patterns
      */
     public void refinePatterns(List<Pattern> patterns) {
 
-        for ( Pattern pattern : patterns ) this.refinePattern(pattern);
+        int i = 0;
+        for ( Pattern pattern : patterns ) {
+            
+            System.out.println("refining pattern " + i++ + " " + pattern.getNaturalLanguageRepresentation());
+            this.refinePattern(pattern);
+        }
     }
 }

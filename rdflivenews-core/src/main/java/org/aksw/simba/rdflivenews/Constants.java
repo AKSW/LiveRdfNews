@@ -84,6 +84,11 @@ public class Constants {
      */
     public static final String DBPEDIA_ONTOLOGY_PREFIX = "http://dbpedia.org/ontology/";
     
+    /**
+     * the regular dbpedia ontology prefix
+     */
+    public static final String DBPEDIA_RESOURCE_PREFIX = "http://dbpedia.org/resource/";
+    
     /* ################################################################ */
     /* ################################################################ */
     /* ################################################################ */

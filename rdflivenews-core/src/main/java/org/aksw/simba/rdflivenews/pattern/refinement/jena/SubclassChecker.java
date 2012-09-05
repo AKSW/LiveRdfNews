@@ -73,6 +73,9 @@ public class SubclassChecker {
     }
     
     public static String getDeepestSubclass(Set<String> urisOfClasses) {
+        
+        // we dont need to check anything if we have only one class
+        if ( urisOfClasses.size() == 1 ) return urisOfClasses.iterator().next();
 
         Set<String> uriBlackList = new HashSet<>(Arrays.asList("http://www.w3.org/2000/01/rdf-schema#Resource", "http://dbpedia.org/ontology/Agent", "http://www.w3.org/2002/07/owl#Thing")); 
         
