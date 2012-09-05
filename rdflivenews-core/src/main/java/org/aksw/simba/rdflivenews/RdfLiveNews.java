@@ -6,6 +6,8 @@ package org.aksw.simba.rdflivenews;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +25,9 @@ import org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndPartOfSpeechNaturalLang
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
 import org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
+import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
+import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
 import org.aksw.simba.rdflivenews.pattern.mapping.DbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
@@ -32,11 +37,14 @@ import org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
+import org.aksw.simba.rdflivenews.statistics.StatisticsUtil;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
-import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import com.github.gerbsen.file.BufferedFileWriter;
+import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
+import com.github.gerbsen.map.MapUtil;
 import com.github.gerbsen.time.TimeUtil;
 
 
@@ -52,6 +60,10 @@ public class RdfLiveNews {
         
         // load the config, we dont need to configure logging because the log4j config is on the classpath
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+        
+        System.out.print("Resetting documents to non duplicate ...");
+        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
+        System.out.println(" DONE");
         
         List<Pattern> patterns               = new ArrayList<Pattern>();
         Set<Integer> nonDuplicateSentenceIds = new HashSet<Integer>();
@@ -86,22 +98,45 @@ public class RdfLiveNews {
             System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
-            // 2. Pattern Search
+            // 2. Pattern Search and Filtering
             
-            PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
+            System.out.println(String.format("Starting pattern search with %s non duplicate sentences and %s threads!", currentNonDuplicateSentenceIds.size(), RdfLiveNews.CONFIG.getStringSetting("search", "number-of-threads")));
+
             // search the patterns only in the sentences of the current iteration
+            PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
             List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds), RdfLiveNews.CONFIG.getIntegerSetting("search", "number-of-threads"));
-            // merge those patterns with themselves
-            patternsOfIteration = patternSearchManager.mergeNewFoundPatterns(patternsOfIteration);
-            // merge the old and the new patterns
-            patterns = patternSearchManager.mergeNewFoundAndOldPattern(patterns, patternsOfIteration);
+
+            // filter the patterns and merge the old and the new patterns
+            PatternFilter patternFilter = new DefaultPatternFilter();
+            patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
+            patterns                    = patternSearchManager.mergeNewFoundAndOldPattern(patterns, patternsOfIteration);
+
+            System.out.println(String.format("Finished pattern search with %s patterns in current iteration and %s total patterns!", patternsOfIteration.size(), patterns.size()));
+            
+            // ******************************************************
+            // ***************** DEBUG ******************************
+            // ******************************************************
+            
+            Collections.sort(patterns, new PatternOccurrenceComparator());
+            
+            BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/patterns.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+            for ( Pattern p : patterns ) writer.write(p.toString());
+            writer.close();
+            
+//            System.out.println("exit");
+//            System.exit(0);
+            
+            // ******************************************************
+            // ***************** DEBUG ******************************
+            // ******************************************************
+            
             
             // ##################################################
             // 3. Pattern Refinement
             
             // refines the domain and range of the patterns 
             PatternRefiner patternRefiner = new DefaultPatternRefiner();
-            patternRefiner.refinePatterns(patterns);
+//            patternRefiner.refinePatterns(patterns);
             
             // ##################################################
             // 4. Pattern Scoring

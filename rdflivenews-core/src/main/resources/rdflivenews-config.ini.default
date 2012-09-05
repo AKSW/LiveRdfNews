@@ -26,3 +26,4 @@ scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternSco
 cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering
 extraction      = org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction
 mapping         = org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper
+uriretrieval    = org.aksw.simba.rdflivenews.rdf.uri.impl.DefaultUriRetrieval 

@@ -18,7 +18,6 @@ import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
-import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
@@ -26,6 +25,7 @@ import org.apache.lucene.util.NumericUtils;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import com.github.gerbsen.lucene.LuceneManager;
 
 public class DeduplicationTest extends TestCase {
 

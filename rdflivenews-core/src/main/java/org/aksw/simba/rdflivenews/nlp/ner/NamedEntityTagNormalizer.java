@@ -35,6 +35,11 @@ public class NamedEntityTagNormalizer {
      * 
      */
     public static final String NAMED_ENTITY_TAG_PERSON = "PERSON";
+
+    /**
+     * 
+     */
+    public static final String NAMED_ENTITY_TAG_QUOTE = "QUOTE";
 	
 	static {
 		

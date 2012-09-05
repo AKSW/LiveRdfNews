@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
@@ -20,6 +19,7 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 
+import com.github.gerbsen.lucene.LuceneManager;
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *

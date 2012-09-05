@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.index.IndexManager;
-import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
 import org.aksw.simba.rdflivenews.nlp.pos.StanfordNLPPartOfSpeechTagger;
@@ -19,6 +18,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.util.NumericUtils;
+import com.github.gerbsen.lucene.LuceneManager;
 
 
 /**

@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.index.IndexManager;
-import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
@@ -22,6 +21,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.util.NumericUtils;
 
+import com.github.gerbsen.lucene.LuceneManager;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -75,8 +75,6 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
             // get the sentence from the index and try to extract patterns from it
             Document document = IndexManager.getInstance().getDocumentById(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
             String taggedSentence = document.get(this.luceneFieldName);
-            System.out.println(document);
-            System.out.println(taggedSentence);
             this.foundPatterns.addAll(this.patternSearcher.extractPatterns(taggedSentence,sentenceId));
             
             this.progress++;

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +20,7 @@ import junit.framework.TestSuite;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
+import org.aksw.simba.rdflivenews.pattern.refinement.jena.SubclassChecker;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
@@ -49,6 +51,12 @@ public class PatternRefinerTest extends TestCase {
     public static Test suite() {
 
         return new TestSuite(PatternRefinerTest.class);
+    }
+    
+    public void testGetDeepestSubclass() {
+        
+        Set<String> urisOfClasses = new HashSet<>(Arrays.asList("http://dbpedia.org/ontology/Actor", "http://dbpedia.org/ontology/Person", "http://dbpedia.org/ontology/Agent", "http://dbpedia.org/ontology/Artist"));
+        assertEquals("http://dbpedia.org/ontology/Actor", SubclassChecker.getDeepestSubclass(urisOfClasses));
     }
     
     public void testGetFavouriteType() 

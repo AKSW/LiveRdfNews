@@ -12,7 +12,6 @@ import java.util.List;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.lucene.LuceneManager;
 import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
@@ -21,6 +20,8 @@ import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearc
 import org.apache.lucene.index.IndexReader;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
+
+import com.github.gerbsen.lucene.LuceneManager;
 
 
 /**

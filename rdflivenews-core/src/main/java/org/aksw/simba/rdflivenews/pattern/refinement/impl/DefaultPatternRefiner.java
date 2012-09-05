@@ -7,10 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
+import org.aksw.simba.rdflivenews.pattern.refinement.jena.SubclassChecker;
 import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementManager;
+import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
+import org.aksw.simba.rdflivenews.util.ReflectionManager;
 
 
 /**
@@ -19,7 +25,13 @@ import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementMana
  */
 public class DefaultPatternRefiner implements PatternRefiner {
     
-    private LuceneRefinementManager luceneRefinementManager = new LuceneRefinementManager(); 
+    private final LuceneRefinementManager luceneRefinementManager = new LuceneRefinementManager();
+    private UriRetrieval uriRetrieval = null;
+    
+    public DefaultPatternRefiner() {
+        
+        this.uriRetrieval = (UriRetrieval) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "uriretrieval"));
+    }
 
     /**
      * 
@@ -29,8 +41,21 @@ public class DefaultPatternRefiner implements PatternRefiner {
 
         for ( EntityPair pair : pattern.getLearnedFromEntities() ) {
             
-            pattern.setFavouriteTypeFirstEntity(this.generateFavouriteType(pattern.getTypesFirstEntity(), pair.getFirstEntity().getLabel()));
-            pattern.setFavouriteTypeSecondEntity(this.generateFavouriteType(pattern.getTypesSecondEntity(), pair.getSecondEntity().getLabel()));
+            // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
+            pair.getFirstEntity().setUri(this.uriRetrieval.getUri(pair.getFirstEntity().getLabel()));
+            // we can only find types if we have a uri from dbpedia
+            if ( pair.getFirstEntity().getUri().startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) )
+                pair.getFirstEntity().setType(
+                        SubclassChecker.getDeepestSubclass(luceneRefinementManager.getTypesOfResource(pair.getFirstEntity().getUri())));
+            
+            // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
+            pair.getSecondEntity().setUri(this.uriRetrieval.getUri(pair.getSecondEntity().getLabel()));
+            // we can only find types if we have a uri from dbpedia
+            if ( pair.getSecondEntity().getUri().startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) )
+                pair.getSecondEntity().setType(
+                        SubclassChecker.getDeepestSubclass(luceneRefinementManager.getTypesOfResource(pair.getSecondEntity().getUri())));
+            
+            // mark the pair as not no, so that we dont process it again in subsequent iterations
             pair.setNew(false);
         }
     }

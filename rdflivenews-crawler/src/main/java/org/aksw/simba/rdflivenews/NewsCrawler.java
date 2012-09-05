@@ -14,7 +14,6 @@ import org.aksw.simba.rdflivenews.concurrency.ShutdownThread;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.crawler.UpdateRssFeedsTask;
 import org.aksw.simba.rdflivenews.index.IndexManager;
-import org.aksw.simba.rdflivenews.mvn.MavenHelper;
 import org.aksw.simba.rdflivenews.statistics.StatisticsTask;
 import org.apache.log4j.Logger;
 import org.ini4j.Ini;

@@ -12,10 +12,10 @@ import java.util.concurrent.BlockingQueue;
 
 import org.aksw.simba.rdflivenews.NewsCrawler;
 import org.aksw.simba.rdflivenews.index.IndexManager;
-import org.aksw.simba.rdflivenews.mvn.MavenHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
+import com.github.gerbsen.maven.MavenUtil;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
@@ -41,7 +41,7 @@ public class RssDirectoryReader {
 
         try {
 
-            this.rssFeeds = FileUtils.readLines(MavenHelper.loadFile("/rss-list.txt"), "UTF-8");
+            this.rssFeeds = FileUtils.readLines(MavenUtil.loadFile("/rss-list.txt"), "UTF-8");
             Collections.shuffle(this.rssFeeds);
             this.queue = queue;
         }

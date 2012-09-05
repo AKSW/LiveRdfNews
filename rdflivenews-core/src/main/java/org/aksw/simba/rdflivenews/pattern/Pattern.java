@@ -34,9 +34,10 @@ public interface Pattern {
     public String getNaturalLanguageRepresentation();
     
     /**
+     * @param i 
      * 
      */
-    public void increaseOccurrence();
+    public void increaseOccurrence(int i);
 
     /**
      * 

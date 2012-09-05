@@ -5,13 +5,17 @@ package org.aksw.simba.rdflivenews.pattern.search.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
+import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.entity.Entity;
+import org.aksw.simba.rdflivenews.nlp.ner.NamedEntityTagNormalizer;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.chainsaw.Main;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -89,6 +93,29 @@ public class NamedEntityTagPatternSearcher implements PatternSearcher {
         String lastTag = "";
         String currentTag = "";
         String newToken = "";
+        
+        String quote = "\"_" + NamedEntityTagNormalizer.NAMED_ENTITY_TAG_OTHER;
+        
+        try {
+            
+            while ( nerTaggedSentence.contains("\"_OTHER") ) {
+                
+                // start of the quote "_OTHER with the quote 
+                int start = nerTaggedSentence.indexOf(quote);
+                // end of the quote "_OTHER with the quote 
+                int end = nerTaggedSentence.indexOf(quote, start + quote.length()) + quote.length();
+                
+                // this joins all the words in the quotes
+                String match = nerTaggedSentence.substring(start,end).replace(quote, "")
+                        .replaceAll("_[A-Z]* ?", "__").replaceAll("__$", "").trim() + "_" + NamedEntityTagNormalizer.NAMED_ENTITY_TAG_QUOTE;
+                nerTaggedSentence = nerTaggedSentence.replace(nerTaggedSentence.substring(start,end), match);
+            }
+        }
+        catch (StringIndexOutOfBoundsException e) {
+            
+            // this can happen if a sentence contains a uneven number of " (quotes) bit it does not play any key role
+            // e.printStackTrace();
+        }
 
         for (String currentToken : nerTaggedSentence.split(" ")) {
 
@@ -117,5 +144,12 @@ public class NamedEntityTagPatternSearcher implements PatternSearcher {
             lastTag = currentTag;
         }
         return tokens;
+    }
+    
+    public static void main(String[] args) {
+
+        String nerTaggedSentence = "Mr._PERSON X_PERSON said_OTHER :_OTHER \"_OTHER Test_OTHER Test_OTHER \"_OTHER and_OTHER \"_OTHER Test_OTHER \"_OTHER \"_OTHER";
+        
+        System.out.println(nerTaggedSentence);
     }
 }

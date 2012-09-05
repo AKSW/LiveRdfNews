@@ -121,6 +121,21 @@ public class PatternExtractionTest extends TestCase {
         assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("by this") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("by this"));
     }
     
+    public void testQuotePatternExtraction() {
+        
+        String nerTaggedSentence = "Mr._PERSON X_PERSON said_OTHER :_OTHER \"_OTHER Test_OTHER Test_OTHER \"_OTHER and_OTHER \"_OTHER Test_OTHER \"_OTHER";
+        String nerTaggedSentenceWithError = "Mr._PERSON X_PERSON said_OTHER :_OTHER \"_OTHER Test_OTHER Test_OTHER \"_OTHER and_OTHER \"_OTHER Test_OTHER \"_OTHER \"_OTHER";
+        
+        PatternSearcher patternSearcher = new NamedEntityTagPatternSearcher();
+        List<String> mergedSentence = patternSearcher.mergeTagsInSentences(nerTaggedSentence);
+        List<String> goldSentence   = new ArrayList<String>(Arrays.asList("Mr. X_PERSON", "said_OTHER", ":_OTHER" ,"Test__Test_QUOTE", "and_OTHER", "Test_QUOTE")); 
+        
+        assertEquals(mergedSentence, goldSentence);
+        
+        mergedSentence = patternSearcher.mergeTagsInSentences(nerTaggedSentenceWithError);
+        goldSentence   = new ArrayList<String>(Arrays.asList("Mr. X_PERSON", "said_OTHER", ":_OTHER" ,"Test__Test_QUOTE", "and_OTHER", "Test_QUOTE", "\"_OTHER"));
+    }
+    
     public void testPosPatternMerging() {
         
         String posTestString = "Barack_NNP Obama_NNP was_VBD the_DT first_JJ President_NNPS who_WDT is_VBZ head_NN of_IN Factory_NNP Inc._NNP ._.";

@@ -11,6 +11,7 @@ package org.aksw.simba.rdflivenews.entity;
 public class Entity {
 
     private String label;
+    private String uri;
     private String type;
     
     /**
@@ -54,6 +55,32 @@ public class Entity {
     
         this.type = type;
     }
+    
+    /**
+     * @return the uri
+     */
+    public String getUri() {
+    
+        return uri;
+    }
+
+    
+    /**
+     * @param uri the uri to set
+     */
+    public void setUri(String uri) {
+    
+        this.uri = uri;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+
+        return this.uri + " @en:" + this.label + " (" + this.type + ")";
+    }
 
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -63,8 +90,7 @@ public class Entity {
 
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((label == null) ? 0 : label.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((uri == null) ? 0 : uri.hashCode());
         return result;
     }
 
@@ -81,29 +107,13 @@ public class Entity {
         if (getClass() != obj.getClass())
             return false;
         Entity other = (Entity) obj;
-        if (label == null) {
-            if (other.label != null)
+        if (uri == null) {
+            if (other.uri != null)
                 return false;
         }
         else
-            if (!label.equals(other.label))
-                return false;
-        if (type == null) {
-            if (other.type != null)
-                return false;
-        }
-        else
-            if (!type.equals(other.type))
+            if (!uri.equals(other.uri))
                 return false;
         return true;
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-
-        return this.label + " (" + this.type + ")";
     }
 }

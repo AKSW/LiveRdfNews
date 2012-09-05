@@ -137,7 +137,7 @@ public class PatternSearchThreadManager {
             if ( oldPatterns.containsKey(currentPattern.hashCode())) {
                 
                 Pattern oldPattern = oldPatterns.get(currentPattern.hashCode());
-                oldPattern.increaseOccurrence();
+                oldPattern.increaseOccurrence(currentPattern.getTotalOccurrence());
                 oldPattern.addManyLearnedFromEntities(currentPattern.getLearnedFromEntities());
             }
             // a new pattern was found

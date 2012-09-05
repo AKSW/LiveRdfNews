@@ -61,9 +61,9 @@ public class DefaultPattern implements Pattern {
     /**
      * 
      */
-    public void increaseOccurrence() {
+    public void increaseOccurrence(int i) {
 
-        this.totalOccurrence++;
+        this.totalOccurrence += i;
     }
 
     /**
