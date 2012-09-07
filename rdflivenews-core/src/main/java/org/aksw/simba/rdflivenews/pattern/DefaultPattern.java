@@ -22,8 +22,8 @@ import org.aksw.simba.rdflivenews.pair.Pair;
 public class DefaultPattern implements Pattern {
 
     private String naturalLanguageRepresentation;
-    private String naturalLanguageRepresentationWithTags;
-    
+    private String naturalLanguageRepresentationWithTags = "";
+
     private Map<Integer,EntityPair> entityPairs;
     
     private int totalOccurrence;
@@ -44,6 +44,16 @@ public class DefaultPattern implements Pattern {
         this.favouriteTypeSecondEntity = "";
         this.naturalLanguageRepresentation = patternString;
         this.totalOccurrence = 1;
+    }
+    
+    /**
+     * 
+     * @param patternString
+     */
+    public DefaultPattern(String patternString, String taggedString) {
+        
+        this(patternString);
+        this.naturalLanguageRepresentationWithTags = taggedString;
     }
 
     /**
@@ -69,6 +79,14 @@ public class DefaultPattern implements Pattern {
 
         this.naturalLanguageRepresentation = patternString;
     }
+    
+    /**
+     * 
+     */
+    public String getNaturalLanguageRepresentation() {
+
+        return this.naturalLanguageRepresentation;
+    }
 
     /**
      * 
@@ -77,15 +95,15 @@ public class DefaultPattern implements Pattern {
 
         this.naturalLanguageRepresentationWithTags = patternStringWithTags;
     }
-
-    /**
-     * 
-     */
-    public String getNaturalLanguageRepresentation() {
-
-        return this.naturalLanguageRepresentation;
-    }
     
+    /**
+     * @return the naturalLanguageRepresentationWithTags
+     */
+    public String getNaturalLanguageRepresentationWithTags() {
+    
+        return naturalLanguageRepresentationWithTags;
+    }
+
     /**
      * 
      */

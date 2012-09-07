@@ -3,6 +3,8 @@
  */
 package org.aksw.simba.rdflivenews.entity;
 
+import org.aksw.simba.rdflivenews.Constants;
+
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -79,7 +81,7 @@ public class Entity {
     @Override
     public String toString() {
 
-        return this.uri + " @en:" + this.label + " (" + this.type + ")";
+        return this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:") + " @en:" + this.label + " (" + this.type.replace(Constants.DBPEDIA_ONTOLOGY_PREFIX, "dbpo:") + ")";
     }
 
     /* (non-Javadoc)

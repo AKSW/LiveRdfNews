@@ -26,6 +26,12 @@ public interface Pattern {
      * @param patternStringWithTags
      */
     public void setNaturalLanguageRepresentationWithTags(String patternStringWithTags);
+    
+    /**
+     * 
+     * @return
+     */
+    public String getNaturalLanguageRepresentationWithTags();
  
     /**
      * 

@@ -62,7 +62,7 @@ public class RdfLiveNews {
         List<Pattern> patterns               = new ArrayList<Pattern>();
         Set<Integer> nonDuplicateSentenceIds = new HashSet<Integer>();
         
-        for ( int iteration = 0 ; iteration <= 5/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; iteration++ ) {
+        for ( int iteration = 0 ; iteration <= 10/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; iteration++ ) {
             
             System.out.println("Starting Iteration #" + iteration + "!");
             
@@ -95,6 +95,7 @@ public class RdfLiveNews {
             // 2. Pattern Search and Filtering
             
             System.out.println(String.format("Starting pattern search with %s non duplicate sentences and %s threads!", currentNonDuplicateSentenceIds.size(), RdfLiveNews.CONFIG.getStringSetting("search", "number-of-threads")));
+            start = System.currentTimeMillis();
 
             // search the patterns only in the sentences of the current iteration
             PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
@@ -105,14 +106,19 @@ public class RdfLiveNews {
             patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
             patterns                    = patternSearchManager.mergeNewFoundAndOldPattern(patterns, patternsOfIteration);
 
-            System.out.println(String.format("Finished pattern search with %s patterns in current iteration and %s total patterns!", patternsOfIteration.size(), patterns.size()));
+            System.out.println(String.format("Finished pattern search with %s patterns in current iteration and %s total patterns in %s!", patternsOfIteration.size(), patterns.size(),  TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
             // 3. Pattern Refinement
             
+            System.out.println(String.format("Starting pattern refine patterns with %s strategy!", RdfLiveNews.CONFIG.getStringSetting("refinement", "typing")));
+            start = System.currentTimeMillis();
+            
             // refines the domain and range of the patterns 
             PatternRefiner patternRefiner = new DefaultPatternRefiner();
             patternRefiner.refinePatterns(patterns);
+            
+            System.out.println(String.format("Finished pattern refinement in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ******************************************************
             // ***************** DEBUG ******************************
@@ -121,11 +127,20 @@ public class RdfLiveNews {
             Collections.sort(patterns, new PatternOccurrenceComparator());
             
             BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/patterns.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
-            for ( Pattern p : patterns ) writer.write(p.toString());
+            BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/test/patterns-nlr.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+            for ( Pattern p : patterns ) {
+                if ( p.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("refinement", "refinementOccurrenceThreshold")) {
+
+                    writer.write(p.toString());
+                    writer1.write(p.getNaturalLanguageRepresentation());
+                }
+            }
             writer.close();
+            writer1.close();
             
-            System.out.println("exit");
-            System.exit(0);
+            
+//            System.out.println("exit");
+//            System.exit(0);
             
             // ******************************************************
             // ***************** DEBUG ******************************
@@ -150,7 +165,7 @@ public class RdfLiveNews {
             
             // we need to name the property a single cluster stands for
             ClusterLabeler clusterLabeler = new DefaultClusterLabeling();
-            clusterLabeler.labelCluster(cluster);
+//            clusterLabeler.labelCluster(cluster);
             
             // ##################################################
             // 7. RDF Extraction

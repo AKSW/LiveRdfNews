@@ -16,12 +16,52 @@ import java.util.Set;
 public class Cluster<T> implements Iterable<T>, Set<T> {
 
     private Set<T> cluster;
+    private String name;
+    private String uri;
+    private String rdfsRange;
+    private String rdfsDomain;
     
     public Cluster(){
         
         this.cluster = new HashSet<T>();
     }
     
+    
+    /**
+     * @return the name
+     */
+    public String getName() {
+    
+        return name;
+    }
+
+    
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+    
+        this.name = name;
+    }
+
+    
+    /**
+     * @return the uri
+     */
+    public String getUri() {
+    
+        return uri;
+    }
+
+    
+    /**
+     * @param uri the uri to set
+     */
+    public void setUri(String uri) {
+    
+        this.uri = uri;
+    }
+
     @Override
     public boolean add(T entry) {
 
@@ -98,5 +138,17 @@ public class Cluster<T> implements Iterable<T>, Set<T> {
     public Iterator<T> iterator() {
 
         return this.cluster.iterator();
+    }
+
+
+    public void setRdfsRange(String range) {
+
+        this.rdfsRange = range; 
+    }
+
+
+    public void setRdfsDomain(String domain) {
+
+        this.rdfsDomain = domain;
     }
 }

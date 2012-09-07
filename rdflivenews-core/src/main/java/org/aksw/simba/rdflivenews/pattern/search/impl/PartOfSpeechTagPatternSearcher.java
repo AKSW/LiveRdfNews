@@ -69,8 +69,8 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
                         secondEntity != null && !secondEntity.getLabel().isEmpty() ) {
 
                     pattern.addLearnedFromEntities(new EntityPair(firstEntity,secondEntity,luceneSentenceId));
-                    pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " "));
-                    pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " "));
+                    pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " ").replaceAll(" the$", ""));
+                    pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " ").replaceAll(" the_[A-z]*$", ""));
                     
                     patterns.add(pattern);
                 }

@@ -40,7 +40,7 @@ public class RefactorIndex {
         
         for ( int i = 1; i < reader.maxDoc() ; i++ ) {
 
-            if ( i % 100 == 0 ) {
+            if ( i % 10 == 0 ) {
 
                 Document oldDoc = LuceneManager.getDocumentByNumber(reader, i);
                 

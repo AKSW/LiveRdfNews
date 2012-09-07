@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer;
+import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.DETERMINER_TYPE;
+import org.aksw.simba.rdflivenews.pattern.refinement.type.TypeDeterminer;
 import org.apache.log4j.chainsaw.Main;
 
 import com.github.gerbsen.maven.MavenUtil;
@@ -72,41 +76,13 @@ public class SubclassChecker {
         return ontologyModel.getOntResource(uri).asClass().hasSubClass();
     }
     
-    public static String getDeepestSubclass(Set<String> urisOfClasses) {
-        
-        // we dont need to check anything if we have only one class
-        if ( urisOfClasses.size() == 1 ) return urisOfClasses.iterator().next();
+    public static void main(String[] args) {
 
-        Set<String> uriBlackList = new HashSet<>(Arrays.asList("http://www.w3.org/2000/01/rdf-schema#Resource", "http://dbpedia.org/ontology/Agent", "http://www.w3.org/2002/07/owl#Thing")); 
+        Set<String> uris = new HashSet<String>(Arrays.asList("http://dbpedia.org/ontology/ComicsCharacter", "http://dbpedia.org/ontology/FictionalCharacter", "http://dbpedia.org/ontology/Person"));
         
-        int maximumDepth = -1;
-        String deepestSubclass = "";
-        
-        for ( String clazz : urisOfClasses ) {
-            
-            OntClass ontClass = ontologyModel.getOntResource(clazz).asClass();
-            OntClass superClass = null;
-            int level = 0;
-            
-            do {
-                
-                superClass = ontClass.getSuperClass();
-                
-                if ( superClass != null && !uriBlackList.contains(superClass.getURI()) ) {
-                    
-                    level++;
-                    
-                    if ( maximumDepth < level ) {
-                        
-                        maximumDepth = level;
-                        deepestSubclass = clazz;
-                    }
-                    ontClass = superClass;
-                }
-            }
-            while ( superClass != null && !uriBlackList.contains(superClass.getURI()) );
-        }
-        return deepestSubclass;
+        TypeDeterminer typer = new DefaultTypeDeterminer();
+        System.out.println(typer.getTypeClass(uris, DETERMINER_TYPE.SUPER_CLASS));
+        System.out.println(typer.getTypeClass(uris, DETERMINER_TYPE.SUB_CLASS));
     }
 
     /**

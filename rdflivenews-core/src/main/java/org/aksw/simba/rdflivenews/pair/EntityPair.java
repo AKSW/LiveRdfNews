@@ -115,6 +115,6 @@ public class EntityPair extends Pair<Entity,Entity> {
     @Override
     public String toString() {
 
-        return this.firstEntity.getLabel() +" ("+ this.firstEntity.getType() + ") - " + this.secondEntity.getLabel() +" ("+ this.secondEntity.getType() + ") / sentenceIDs: " + StringUtils.join(this.luceneSentenceIds, ", ") + " / occurrence: " + this.occurrence;
+        return this.firstEntity + " - " + this.secondEntity + " / sentenceIDs: " + StringUtils.join(this.luceneSentenceIds, ", ") + " / occurrence: " + this.occurrence;
     }
 }

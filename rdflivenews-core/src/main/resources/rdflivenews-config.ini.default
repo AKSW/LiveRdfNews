@@ -18,9 +18,15 @@ dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources
 threshold = 1
 window = 1
 
+[refinement]
+; only patterns which were learned from at least refinementOccurrenceThreshold pairs will be refined 
+refinementOccurrenceThreshold = 3
+; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
+typing = SUPER_CLASS
+
 [classes]
 deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.DummyDeduplication
-tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndPartOfSpeechNaturalLanguageTagger
+tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndOrPartOfSpeechNaturalLanguageTagger
 refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner
 scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer
 cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering

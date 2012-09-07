@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.pattern.clustering.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +24,6 @@ public class DefaultPatternClustering implements PatternClustering {
     @Override
     public Set<Cluster<Pattern>> clusterPatterns(List<Pattern> pattern) {
 
-        // TODO Auto-generated method stub
-        return null;
+        return new HashSet<Cluster<Pattern>>();
     }
 }

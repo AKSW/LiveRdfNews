@@ -24,7 +24,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/CurlingLeague">
         <rdfs:label xml:lang="en">curling league</rdfs:label><rdfs:label xml:lang="fr">ligue de curling</rdfs:label><rdfs:comment xml:lang="en">a group of sports teams that compete against each other in Curling</rdfs:comment><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/SportsLeague"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/MusicFestival">
-        <rdfs:label xml:lang="ko">음악제</rdfs:label><rdfs:label xml:lang="fr">festival de musique</rdfs:label><rdfs:label xml:lang="el">φεστιβάλ μουσικής</rdfs:label><rdfs:label xml:lang="es">festival de música</rdfs:label><rdfs:label xml:lang="en">music festival</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Event"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Festival"></rdfs:subClassOf>
+        <rdfs:label xml:lang="ko">음악제</rdfs:label><rdfs:label xml:lang="fr">festival de musique</rdfs:label><rdfs:label xml:lang="el">φεστιβάλ μουσικής</rdfs:label><rdfs:label xml:lang="es">festival de música</rdfs:label><rdfs:label xml:lang="en">music festival</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Event"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Tax">
         <rdfs:label xml:lang="en">tax</rdfs:label><rdfs:label xml:lang="de">Steuer</rdfs:label><rdfs:label xml:lang="es">taxón</rdfs:label><rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/IceHockeyPlayer">
@@ -38,7 +38,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/MilitaryConflict">
         <rdfs:label xml:lang="en">military conflict</rdfs:label><rdfs:label xml:lang="el">στρατιωτική σύγκρουση</rdfs:label><rdfs:label xml:lang="fr">conflit militaire</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Event"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/FilmFestival">
-        <rdfs:label xml:lang="en">film festival</rdfs:label><rdfs:label xml:lang="el">φεστιβάλ κινηματογράφου</rdfs:label><rdfs:label xml:lang="fr">festival du film</rdfs:label><rdfs:label xml:lang="ko">영화제</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Event"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Festival"></rdfs:subClassOf>
+        <rdfs:label xml:lang="en">film festival</rdfs:label><rdfs:label xml:lang="el">φεστιβάλ κινηματογράφου</rdfs:label><rdfs:label xml:lang="fr">festival du film</rdfs:label><rdfs:label xml:lang="ko">영화제</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Event"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Beverage">
         <rdfs:label xml:lang="de">Getränk</rdfs:label><rdfs:label xml:lang="ko">음료</rdfs:label><rdfs:label xml:lang="fr">boisson</rdfs:label><rdfs:label xml:lang="es">bebida</rdfs:label><rdfs:label xml:lang="en">beverage</rdfs:label><rdfs:comment xml:lang="en">A drink, or beverage, is a liquid which is specifically prepared for human consumption.</rdfs:comment><rdfs:comment xml:lang="de">Ein Getränk ist eine zum Trinken zubereitete Flüssigkeiten. Getränke werden entweder zum Stillen von Durst und damit zur Wasseraufnahme des Körpers, als Nahrungsmittel oder auch als reine Genussmittel aufgenommen.</rdfs:comment><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Food"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/SpaceShuttle">
@@ -86,7 +86,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Company">
         <rdfs:label xml:lang="de">Unternehmen</rdfs:label><rdfs:label xml:lang="ko">회사</rdfs:label><rdfs:label xml:lang="fr">entreprise</rdfs:label><rdfs:label xml:lang="el">εταιρία</rdfs:label><rdfs:label xml:lang="pt">empresa</rdfs:label><rdfs:label xml:lang="en">company</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Organisation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Locomotive">
-        <rdfs:label xml:lang="en">locomotive</rdfs:label><rdfs:label xml:lang="de">Lokomotive</rdfs:label><rdfs:label xml:lang="fr">locomotive</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Product"></rdfs:subClassOf>
+        <rdfs:label xml:lang="en">locomotive</rdfs:label><rdfs:label xml:lang="de">Lokomotive</rdfs:label><rdfs:label xml:lang="fr">locomotive</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Wrestler">
         <rdfs:label xml:lang="en">wrestler</rdfs:label><rdfs:label xml:lang="fr">lutteur</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Athlete"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/MotorcycleRacingLeague">
@@ -124,7 +124,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Event">
         <rdfs:label xml:lang="de">Ereignis</rdfs:label><rdfs:label xml:lang="fr">évènement</rdfs:label><rdfs:label xml:lang="el">γεγονός</rdfs:label><rdfs:label xml:lang="pt">evento</rdfs:label><rdfs:label xml:lang="en">event</rdfs:label><rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"></rdfs:subClassOf><owl:equivalentClass rdf:resource="http://schema.org/Event"></owl:equivalentClass>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Band">
-        <rdfs:label xml:lang="de">Musikgruppe</rdfs:label><rdfs:label xml:lang="ko">음악 그룹</rdfs:label><rdfs:label xml:lang="fr">groupe de musique</rdfs:label><rdfs:label xml:lang="el">μουσικό συγκρότημα</rdfs:label><rdfs:label xml:lang="es">banda</rdfs:label><rdfs:label xml:lang="pt">banda</rdfs:label><rdfs:label xml:lang="en">Band</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Organisation"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/MusicGroup"></rdfs:subClassOf>
+        <rdfs:label xml:lang="de">Musikgruppe</rdfs:label><rdfs:label xml:lang="ko">음악 그룹</rdfs:label><rdfs:label xml:lang="fr">groupe de musique</rdfs:label><rdfs:label xml:lang="el">μουσικό συγκρότημα</rdfs:label><rdfs:label xml:lang="es">banda</rdfs:label><rdfs:label xml:lang="pt">banda</rdfs:label><rdfs:label xml:lang="en">Band</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Organisation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Country">
         <rdfs:label xml:lang="de">Staat</rdfs:label><rdfs:label xml:lang="ko">나라</rdfs:label><rdfs:label xml:lang="sl">država</rdfs:label><rdfs:label xml:lang="fr">pays</rdfs:label><rdfs:label xml:lang="el">χώρα</rdfs:label><rdfs:label xml:lang="en">country</rdfs:label><rdfs:label xml:lang="ru">Государство</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/PopulatedPlace"></rdfs:subClassOf><owl:equivalentClass rdf:resource="http://schema.org/Country"></owl:equivalentClass>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/BullFighter">
@@ -180,7 +180,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Writer">
         <rdfs:label xml:lang="ko">작가</rdfs:label><rdfs:label xml:lang="fr">écrivain</rdfs:label><rdfs:label xml:lang="el">συγγραφέας</rdfs:label><rdfs:label xml:lang="es">escritor</rdfs:label><rdfs:label xml:lang="en">writer</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Artist"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Automobile">
-        <rdfs:label xml:lang="de">Automobil</rdfs:label><rdfs:label xml:lang="sl">avtomobil</rdfs:label><rdfs:label xml:lang="fr">automobile</rdfs:label><rdfs:label xml:lang="es">automóvil</rdfs:label><rdfs:label xml:lang="pt">automovel</rdfs:label><rdfs:label xml:lang="en">automobile</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Product"></rdfs:subClassOf>
+        <rdfs:label xml:lang="de">Automobil</rdfs:label><rdfs:label xml:lang="sl">avtomobil</rdfs:label><rdfs:label xml:lang="fr">automobile</rdfs:label><rdfs:label xml:lang="es">automóvil</rdfs:label><rdfs:label xml:lang="pt">automovel</rdfs:label><rdfs:label xml:lang="en">automobile</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Ideology">
         <rdfs:label xml:lang="en">ideology</rdfs:label><rdfs:label xml:lang="de">Ideologie</rdfs:label><rdfs:label xml:lang="pt">ideologia</rdfs:label><rdfs:comment xml:lang="en">for example: Progressivism_in_the_United_States, Classical_liberalism</rdfs:comment><rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/SupremeCourtOfTheUnitedStatesCase">
@@ -232,7 +232,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/PersonFunction">
         <rdfs:label xml:lang="en">person function</rdfs:label><rdfs:label xml:lang="fr">fonction de personne</rdfs:label><rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/MusicalArtist">
-        <rdfs:label xml:lang="ko">음악가</rdfs:label><rdfs:label xml:lang="fr">musicien</rdfs:label><rdfs:label xml:lang="el">μουσικός</rdfs:label><rdfs:label xml:lang="pt">artista musical</rdfs:label><rdfs:label xml:lang="en">musical artist</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Artist"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/MusicGroup"></rdfs:subClassOf>
+        <rdfs:label xml:lang="ko">음악가</rdfs:label><rdfs:label xml:lang="fr">musicien</rdfs:label><rdfs:label xml:lang="el">μουσικός</rdfs:label><rdfs:label xml:lang="pt">artista musical</rdfs:label><rdfs:label xml:lang="en">musical artist</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Artist"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/PoliticalParty">
         <rdfs:label xml:lang="de">politische Partei</rdfs:label><rdfs:label xml:lang="fr">parti politique</rdfs:label><rdfs:label xml:lang="pl">partia polityczna</rdfs:label><rdfs:label xml:lang="ca">partit polític</rdfs:label><rdfs:label xml:lang="pt">partido político</rdfs:label><rdfs:label xml:lang="en">political party</rdfs:label><rdfs:comment xml:lang="en">for example: Democratic_Party_(United_States)</rdfs:comment><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Organisation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Database">
@@ -456,7 +456,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Judge">
         <rdfs:label xml:lang="en">judge</rdfs:label><rdfs:label xml:lang="fr">juge</rdfs:label><rdfs:label xml:lang="el">δικαστής</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Person"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Ship">
-        <rdfs:label xml:lang="de">Schiff</rdfs:label><rdfs:label xml:lang="ko">배</rdfs:label><rdfs:label xml:lang="fr">navire</rdfs:label><rdfs:label xml:lang="pl">statek</rdfs:label><rdfs:label xml:lang="es">barco</rdfs:label><rdfs:label xml:lang="en">ship</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Product"></rdfs:subClassOf>
+        <rdfs:label xml:lang="de">Schiff</rdfs:label><rdfs:label xml:lang="ko">배</rdfs:label><rdfs:label xml:lang="fr">navire</rdfs:label><rdfs:label xml:lang="pl">statek</rdfs:label><rdfs:label xml:lang="es">barco</rdfs:label><rdfs:label xml:lang="en">ship</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Award">
         <rdfs:label xml:lang="de">Auszeichnung</rdfs:label><rdfs:label xml:lang="ko">상</rdfs:label><rdfs:label xml:lang="sl">nagrada</rdfs:label><rdfs:label xml:lang="fr">récompense</rdfs:label><rdfs:label xml:lang="pl">nagroda</rdfs:label><rdfs:label xml:lang="en">award</rdfs:label><rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/CelestialBody">
@@ -590,7 +590,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Fungus">
         <rdfs:label xml:lang="en">fungus</rdfs:label><rdfs:label xml:lang="fr">fungi</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Eukaryote"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Aircraft">
-        <rdfs:label xml:lang="de">Flugzeug</rdfs:label><rdfs:label xml:lang="ko">비행기</rdfs:label><rdfs:label xml:lang="fr">avion</rdfs:label><rdfs:label xml:lang="el">αεροσκάφος</rdfs:label><rdfs:label xml:lang="en">aircraft</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Product"></rdfs:subClassOf>
+        <rdfs:label xml:lang="de">Flugzeug</rdfs:label><rdfs:label xml:lang="ko">비행기</rdfs:label><rdfs:label xml:lang="fr">avion</rdfs:label><rdfs:label xml:lang="el">αεροσκάφος</rdfs:label><rdfs:label xml:lang="en">aircraft</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/MeanOfTransportation"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/FictionalCharacter">
         <rdfs:label xml:lang="en">fictional character</rdfs:label><rdfs:label xml:lang="fr">personnage de fiction</rdfs:label><rdfs:label xml:lang="el">πλασματικός χαρακτήρας</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Person"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Moss">
@@ -628,7 +628,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/VicePrimeMinister">
         <rdfs:label xml:lang="en">vice prime minister</rdfs:label><rdfs:label xml:lang="el">αντιπρωθυπουργός</rdfs:label><rdfs:label xml:lang="fr">vice premier ministre</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Politician"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Instrument">
-        <rdfs:label xml:lang="ko">악기</rdfs:label><rdfs:label xml:lang="sl">Glasbilo</rdfs:label><rdfs:label xml:lang="fr">instrument de musique</rdfs:label><rdfs:label xml:lang="el">Μουσικό Όργανο</rdfs:label><rdfs:label xml:lang="es">Instrumento</rdfs:label><rdfs:label xml:lang="en">Instrument</rdfs:label><rdfs:comment xml:lang="en">Describes all musical instrument</rdfs:comment><rdfs:subClassOf rdf:resource="http://schema.org/Product"></rdfs:subClassOf>
+        <rdfs:label xml:lang="ko">악기</rdfs:label><rdfs:label xml:lang="sl">Glasbilo</rdfs:label><rdfs:label xml:lang="fr">instrument de musique</rdfs:label><rdfs:label xml:lang="el">Μουσικό Όργανο</rdfs:label><rdfs:label xml:lang="es">Instrumento</rdfs:label><rdfs:label xml:lang="en">Instrument</rdfs:label><rdfs:comment xml:lang="en">Describes all musical instrument</rdfs:comment>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Mayor">
         <rdfs:label xml:lang="en">mayor</rdfs:label><rdfs:label xml:lang="de">Bürgermeister</rdfs:label><rdfs:label xml:lang="fr">maire</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Politician"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Species">
@@ -648,7 +648,7 @@
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Asteroid">
         <rdfs:label xml:lang="en">asteroid</rdfs:label><rdfs:label xml:lang="pt">asteróide</rdfs:label><rdfs:label xml:lang="es">asteroide</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/CelestialBody"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Weapon">
-        <rdfs:label xml:lang="en">weapon</rdfs:label><rdfs:label xml:lang="de">Waffe</rdfs:label><rdfs:label xml:lang="fr">arme</rdfs:label><rdfs:label xml:lang="ko">무기</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Device"></rdfs:subClassOf><rdfs:subClassOf rdf:resource="http://schema.org/Product"></rdfs:subClassOf>
+        <rdfs:label xml:lang="en">weapon</rdfs:label><rdfs:label xml:lang="de">Waffe</rdfs:label><rdfs:label xml:lang="fr">arme</rdfs:label><rdfs:label xml:lang="ko">무기</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/Device"></rdfs:subClassOf>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Lake">
         <rdfs:label xml:lang="en">lake</rdfs:label><rdfs:label xml:lang="fr">lac</rdfs:label><rdfs:label xml:lang="ko">호수</rdfs:label><rdfs:subClassOf rdf:resource="http://dbpedia.org/ontology/BodyOfWater"></rdfs:subClassOf><owl:equivalentClass rdf:resource="http://schema.org/LakeBodyOfWater"></owl:equivalentClass>
         </owl:Class><owl:Class rdf:about="http://dbpedia.org/ontology/Lieutenant">

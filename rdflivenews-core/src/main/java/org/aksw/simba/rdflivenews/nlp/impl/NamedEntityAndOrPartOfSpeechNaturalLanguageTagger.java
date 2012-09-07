@@ -6,6 +6,7 @@ package org.aksw.simba.rdflivenews.nlp.impl;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
@@ -25,12 +26,19 @@ import com.github.gerbsen.lucene.LuceneManager;
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
-public class NamedEntityAndPartOfSpeechNaturalLanguageTagger implements NaturalLanguageTagger {
+public class NamedEntityAndOrPartOfSpeechNaturalLanguageTagger implements NaturalLanguageTagger {
 
+    /**
+     * 
+     */
+    @Override 
     public void annotateSentencesInIndex(Set<Integer> newFoundNonDuplicateIds) {
 
-        StanfordNLPNamedEntityRecognition nerTagger = new StanfordNLPNamedEntityRecognition();
-        StanfordNLPPartOfSpeechTagger posTagger     = new StanfordNLPPartOfSpeechTagger();
+        StanfordNLPNamedEntityRecognition nerTagger = null;
+        StanfordNLPPartOfSpeechTagger posTagger = null;
+        
+        if ( RdfLiveNews.CONFIG.getStringSetting("search", "method").equals("POS") ) posTagger = new StanfordNLPPartOfSpeechTagger();
+        if ( RdfLiveNews.CONFIG.getStringSetting("search", "method").equals("POS") ) nerTagger = new StanfordNLPNamedEntityRecognition();
         
         IndexWriter writer      = LuceneManager.openIndexWriterAppend(IndexManager.INDEX);
         IndexSearcher searcher  = LuceneManager.openIndexSearcher(IndexManager.INDEX);
@@ -48,8 +56,8 @@ public class NamedEntityAndPartOfSpeechNaturalLanguageTagger implements NaturalL
             newDoc.add(new NumericField(Constants.LUCENE_FIELD_TIME_SLICE, Field.Store.YES, true).setIntValue(Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))));
             newDoc.add(new NumericField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Field.Store.YES, true).setIntValue(Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE))));
             newDoc.add(new Field(Constants.LUCENE_FIELD_TEXT, oldDoc.get(Constants.LUCENE_FIELD_TEXT), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, posTagger.getAnnotatedSentence(text), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, nerTagger.getAnnotatedSentence(text), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+            if ( posTagger != null ) newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, posTagger.getAnnotatedSentence(text), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+            if ( nerTagger != null ) newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, nerTagger.getAnnotatedSentence(text), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get(Constants.LUCENE_FIELD_URL), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             
             LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId)), newDoc);

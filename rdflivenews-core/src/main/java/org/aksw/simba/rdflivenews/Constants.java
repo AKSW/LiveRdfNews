@@ -89,6 +89,16 @@ public class Constants {
      */
     public static final String DBPEDIA_RESOURCE_PREFIX = "http://dbpedia.org/resource/";
     
+    /**
+     * 
+     */
+    public static final String RDF_LIVE_NEWS_RESOURCE_PREFIX = "http://rdflivenews.aksw.org/resource/";
+    
+    /**
+     * 
+     */
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_PREFIX = "http://rdflivenews.aksw.org/ontology/";
+    
     /* ################################################################ */
     /* ################################################################ */
     /* ################################################################ */
@@ -97,4 +107,9 @@ public class Constants {
                                                                 "how", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "``",
                                                                 "was", "what", "when", "where", "who", "will", "with", "the", "'s", "did", "&",
                                                                 "have", "has", "had", "were", "'", "'ll", ",", "-LRB-", "-RRB-", "''", "--", "-", ";", "..."));
+
+    /**
+     * 
+     */
+    public static final String UNDEFINED_TYPE = "UNDEFINED";
 }
