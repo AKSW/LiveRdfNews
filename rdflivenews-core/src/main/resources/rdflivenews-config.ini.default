@@ -18,6 +18,9 @@ dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources
 threshold = 1
 window = 1
 
+[clustering]
+similarityThreshold = 0.5
+
 [refinement]
 ; only patterns which were learned from at least refinementOccurrenceThreshold pairs will be refined 
 refinementOccurrenceThreshold = 3
@@ -31,5 +34,6 @@ refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatt
 scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer
 cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering
 extraction      = org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction
+similarity      = org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric
 mapping         = org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper
 uriretrieval    = org.aksw.simba.rdflivenews.rdf.uri.impl.DefaultUriRetrieval 

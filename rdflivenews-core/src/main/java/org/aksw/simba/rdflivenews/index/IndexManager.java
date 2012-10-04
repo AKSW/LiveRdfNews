@@ -1,6 +1,8 @@
 package org.aksw.simba.rdflivenews.index;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,9 +28,11 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.NumericUtils;
@@ -287,10 +291,18 @@ public class IndexManager {
         IndexSearcher searcher  = LuceneManager.openIndexSearcher(INDEX);
         IndexWriter writer      = LuceneManager.openIndexWriterAppend(INDEX);
         
-        for ( int i = 0 ; i < searcher.maxDoc() ; i++ ) {
+        TopScoreDocCollector collector = TopScoreDocCollector.create(10_000_000, true);
+        LuceneManager.query(searcher, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, 0, 1000, true, true), collector);
+
+        System.out.println(" found " + collector.getTotalHits());
+        int i = 0;
+        
+        for ( ScoreDoc hit : collector.topDocs().scoreDocs ) {
             
-            Document oldDoc = LuceneManager.getDocument(searcher.getIndexReader(), i);
-            
+            if ( i++ % 1000 == 0 ) System.out.print("\r" + NumberFormat.getPercentInstance().format((double) i / collector.getTotalHits()));
+
+            Document oldDoc = LuceneManager.getDocument(searcher.getIndexReader(), hit.doc);
+
             if ( oldDoc != null ) {
                 
                 Document newDoc = new Document();
@@ -306,6 +318,7 @@ public class IndexManager {
                 LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID)))), newDoc);
             }
         }
+        
         LuceneManager.closeIndexReader(searcher.getIndexReader());
         LuceneManager.closeIndexSearcher(searcher);
         LuceneManager.closeIndexWriter(writer);
@@ -481,6 +494,7 @@ public class IndexManager {
         LuceneManager.query(INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
         
         IndexReader reader = LuceneManager.openIndexReader(INDEX);
+        System.out.println(String.format("Found %s sentences with time slice id %s!", collector.getTotalHits(), timeSlice));
         
         for ( ScoreDoc hit : collector.topDocs().scoreDocs ) {
             

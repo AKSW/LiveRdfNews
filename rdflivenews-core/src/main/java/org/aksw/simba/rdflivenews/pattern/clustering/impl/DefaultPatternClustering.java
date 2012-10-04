@@ -10,6 +10,7 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
+import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 
 
 /**
@@ -22,7 +23,7 @@ public class DefaultPatternClustering implements PatternClustering {
      * @see org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering#clusterPatterns(java.util.List)
      */
     @Override
-    public Set<Cluster<Pattern>> clusterPatterns(List<Pattern> pattern) {
+    public Set<Cluster<Pattern>> clusterPatterns(Set<Similarity> similarities, Double similarityThreshold) {
 
         return new HashSet<Cluster<Pattern>>();
     }

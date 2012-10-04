@@ -44,6 +44,12 @@ public class FastDeduplication extends DefaultDeduplication {
         Set<String> source = new HashSet<String>();
 
         for (int timeslice = this.fromTimeSlice - this.windowSize; timeslice <= this.fromTimeSlice; timeslice++) {
+         
+            // non duplicate sentences are marked with -1,
+            // so if we allow timeslice ids smaller than 0 
+            // we will mix them up with the normal sentences
+            if ( timeslice < 0 ) continue; 
+            
             for ( Map.Entry<Integer, String> entry : manager.getIdsAndTextFromTimeSlice(timeslice).entrySet() ) {
              
                 Integer id  = entry.getKey();

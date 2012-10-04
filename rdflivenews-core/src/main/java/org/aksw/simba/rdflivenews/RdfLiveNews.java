@@ -29,8 +29,13 @@ import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.scoring.PatternScorer;
+import org.aksw.simba.rdflivenews.pattern.scoring.impl.OccurrencePatternScorer;
 import org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
+import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
+import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
+import org.aksw.simba.rdflivenews.pattern.similarity.generator.SimilarityGenerator;
+import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.DefaultSimilarityGenerator;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
@@ -55,14 +60,13 @@ public class RdfLiveNews {
         // load the config, we dont need to configure logging because the log4j config is on the classpath
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         
-        System.out.print("Resetting documents to non duplicate ...");
+        System.out.print("Resetting documents to non duplicate ... ");
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
-        System.out.println(" DONE");
         
         List<Pattern> patterns               = new ArrayList<Pattern>();
         Set<Integer> nonDuplicateSentenceIds = new HashSet<Integer>();
         
-        for ( int iteration = 0 ; iteration <= 10/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; iteration++ ) {
+        for ( int iteration = 0 ; iteration < 10/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; iteration++ ) {
             
             System.out.println("Starting Iteration #" + iteration + "!");
             
@@ -116,7 +120,7 @@ public class RdfLiveNews {
             
             // refines the domain and range of the patterns 
             PatternRefiner patternRefiner = new DefaultPatternRefiner();
-            patternRefiner.refinePatterns(patterns);
+//            patternRefiner.refinePatterns(patterns);
             
             System.out.println(String.format("Finished pattern refinement in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -150,15 +154,20 @@ public class RdfLiveNews {
             // 4. Pattern Scoring
             
             // scores the pattern according to certain features
-            PatternScorer patternScorer = new WekaPatternScorer();
+            PatternScorer patternScorer = new OccurrencePatternScorer();
             patternScorer.scorePatterns(patterns);
             
+            // 5. Generate similarities
+            SimilarityMetric similarityMetric = (SimilarityMetric) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity"));
+            SimilarityGenerator similarityGenerator = new DefaultSimilarityGenerator(similarityMetric, patterns);
+//            Set<Similarity> similarities = similarityGenerator.calculateSimilarities();
+            
             // ##################################################
-            // 5. Pattern Clustering
+            // 5. Pattern Clustering according to similarties
             
             // tries to group similar patterns into the same cluster
             PatternClustering patternClustering = new DefaultPatternClustering();
-            Set<Cluster<Pattern>> cluster = patternClustering.clusterPatterns(patterns);
+//            Set<Cluster<Pattern>> cluster = patternClustering.clusterPatterns(similarities, RdfLiveNews.CONFIG.getDoubleSetting("clustering", "similarityThreshold"));
             
             // ##################################################
             // 6. Cluster Labeling
@@ -172,12 +181,12 @@ public class RdfLiveNews {
             
             // use the patterns to extract rdf from news text
             RdfExtraction rdfExtractor = new DefaultRdfExtraction();
-            rdfExtractor.extractRdf(cluster);
+//            rdfExtractor.extractRdf(cluster);
             
             // ##################################################
             // 8. Mapping to DBpedia
             DbpediaMapper mapper = new DefaultDbpediaMapper();
-            mapper.map(cluster);
+//            mapper.map(cluster);
         }
     }
 }

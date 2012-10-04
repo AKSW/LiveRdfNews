@@ -25,7 +25,7 @@ public class FastNGram {
      * @param source Source strings
      * @param target Target strings
      * @param q Parameter for the tokenizer
-     * @param threshold Similarity threshold
+     * @param threshold SimilarityMetric threshold
      * @return Map source -> target -> similarity
      */
     public static Map<String, Map<String, Double>> compute(Set<String> source, Set<String> target, Tokenizer tokenizer, double threshold) {

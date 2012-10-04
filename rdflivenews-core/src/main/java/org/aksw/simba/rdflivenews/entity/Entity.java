@@ -81,7 +81,15 @@ public class Entity {
     @Override
     public String toString() {
 
-        return this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:") + " @en:" + this.label + " (" + this.type.replace(Constants.DBPEDIA_ONTOLOGY_PREFIX, "dbpo:") + ")";
+        String temp = "";
+        try {
+            
+            temp = this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:") + " @en:" + this.label + " (" + this.type.replace(Constants.DBPEDIA_ONTOLOGY_PREFIX, "dbpo:") + ")";
+        }
+        catch ( Exception e ) {
+            
+        }
+        return temp;
     }
 
     /* (non-Javadoc)

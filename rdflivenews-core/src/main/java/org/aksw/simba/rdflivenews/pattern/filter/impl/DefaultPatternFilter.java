@@ -68,6 +68,13 @@ public class DefaultPatternFilter implements PatternFilter {
                 }
             }
             
+            // to long patterns are useless
+            if ( nlr.length() > 50 ) {
+                
+                patternIterator.remove();
+                continue;
+            }
+            
             // TODO
             // filter patterns where one of the entity it was learned from is almost always the same
             // filter patterns where a "/" is inside
