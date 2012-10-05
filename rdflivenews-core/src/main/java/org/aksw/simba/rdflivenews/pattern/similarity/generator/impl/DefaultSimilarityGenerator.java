@@ -38,7 +38,7 @@ public class DefaultSimilarityGenerator implements SimilarityGenerator {
 
                 // avoid having identities in the set
                 if ( !pattern1.equals(pattern2) )
-                    similarities.add(new Similarity(pattern1, pattern2, this.similarityMetric.calculateSimilartiy(pattern1, pattern2)));
+                    similarities.add(new Similarity(pattern1, pattern2, this.similarityMetric.calculateSimilarity(pattern1, pattern2)));
             }
         }
         return similarities; 

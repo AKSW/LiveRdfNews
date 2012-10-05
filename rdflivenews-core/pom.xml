@@ -45,5 +45,10 @@
 			<artifactId>jena-arq</artifactId>
 			<version>2.9.3</version>
 		</dependency>
+		<dependency>
+			<groupId>edu.cmu.lti</groupId>
+			<artifactId>ws4j</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 </project>

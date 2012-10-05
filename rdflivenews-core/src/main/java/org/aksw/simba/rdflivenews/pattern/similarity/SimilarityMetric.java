@@ -12,5 +12,5 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
  */
 public interface SimilarityMetric {
 
-    public double calculateSimilartiy(Pattern pattern1, Pattern pattern2);
+    public double calculateSimilarity(Pattern pattern1, Pattern pattern2);
 }

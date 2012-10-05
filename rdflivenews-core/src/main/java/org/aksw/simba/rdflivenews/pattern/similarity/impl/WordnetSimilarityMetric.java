@@ -17,7 +17,7 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
      * @see org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric#calculateSimilartiy(org.aksw.simba.rdflivenews.pattern.Pattern, org.aksw.simba.rdflivenews.pattern.Pattern)
      */
     @Override
-    public double calculateSimilartiy(Pattern pattern1, Pattern pattern2) {
+    public double calculateSimilarity(Pattern pattern1, Pattern pattern2) {
 
         return 0;
     }
