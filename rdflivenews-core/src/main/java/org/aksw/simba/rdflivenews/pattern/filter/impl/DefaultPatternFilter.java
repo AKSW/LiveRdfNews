@@ -51,7 +51,8 @@ public class DefaultPatternFilter implements PatternFilter {
             }
             
             // patterns which start or end with "and" are usually crap
-            if ( nlr.startsWith("and ") || nlr.endsWith("and") ) {
+            if ( nlr.startsWith("and ") || nlr.endsWith("and") || nlr.contains(":") || nlr.contains("#") || nlr.contains("http") || nlr.contains("|") || 
+                 (nlr.contains("<") && nlr.contains(">") || nlr.contains("p.m.") || nlr.contains("a.m.") || nlr.contains("/") )   ) {
                 
                 patternIterator.remove();
                 continue;
@@ -69,7 +70,7 @@ public class DefaultPatternFilter implements PatternFilter {
             }
             
             // to long patterns are useless
-            if ( nlr.length() > 50 ) {
+            if ( nlr.length() > 50 || nlr.matches("^[A-Z].*") || nlr.matches(".* [A-Z] .*") ) {
                 
                 patternIterator.remove();
                 continue;
@@ -77,10 +78,6 @@ public class DefaultPatternFilter implements PatternFilter {
             
             // TODO
             // filter patterns where one of the entity it was learned from is almost always the same
-            // filter patterns where a "/" is inside
-            // filter patterns where a single Uppercase letter or a | is contained
-            // patterns starting with ";"
-            // contains "p.m." or "a.m."
         }
         
         return patternsOfIteration;

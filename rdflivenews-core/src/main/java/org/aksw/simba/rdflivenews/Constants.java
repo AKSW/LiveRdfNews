@@ -106,7 +106,7 @@ public class Constants {
     public static final Set<String> STOP_WORDS = new HashSet<String>(Arrays.asList( "i", "a", "about", "an", "and", "are", "as", "at", "be", "by", "for", "from",
                                                                 "how", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "``",
                                                                 "was", "what", "when", "where", "who", "will", "with", "the", "'s", "did", "&",
-                                                                "have", "has", "had", "were", "'", "'ll", ",", "-LRB-", "-RRB-", "''", "--", "-", ";", "..."));
+                                                                "have", "has", "had", "were", "'", "'ll", ",", "-LRB-", "-RRB-", "''", "--", "-", ":", ";", "..."));
 
     /**
      * 

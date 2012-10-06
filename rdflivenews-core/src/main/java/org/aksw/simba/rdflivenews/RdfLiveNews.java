@@ -77,7 +77,7 @@ public class RdfLiveNews {
             
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
             Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
-            deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
+//            deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
             Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(iteration);
             nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
             
@@ -115,7 +115,7 @@ public class RdfLiveNews {
             // ##################################################
             // 3. Pattern Refinement
             
-            System.out.println(String.format("Starting pattern refine patterns with %s strategy!", RdfLiveNews.CONFIG.getStringSetting("refinement", "typing")));
+            System.out.println(String.format("Starting pattern refinement with %s strategy!", RdfLiveNews.CONFIG.getStringSetting("refinement", "typing")));
             start = System.currentTimeMillis();
             
             // refines the domain and range of the patterns 
