@@ -19,6 +19,7 @@
 		<module>rdflivenews-gui</module>
 		<module>rdflivenews-core</module>
 		<module>rdflivenews-crawler</module>
+		<module>rdflivenews-annotator-gui</module>
 	</modules>
 
 	<repositories>
@@ -32,7 +33,7 @@
 		</repository>
  		<repository> 
  			<id>maven.aksw.internal</id> 
- 			<url>http://prod1.aksw.org:8081/archiva/repository/internal</url> 
+ 			<url>http://maven.aksw.org/archiva/repository/internal</url> 
  		</repository> 
 	</repositories>
 
