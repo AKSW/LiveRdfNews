@@ -72,12 +72,20 @@ public class Wordnet {
     
     public static void main(String[] args) {
 
+        String[] one = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
+        String[] two = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
+        
         WS4JConfiguration.getInstance().setMFS(true);
         for ( RelatednessCalculator rc : rcs ) {
 
             System.out.println(rc.getClass().getSimpleName());
             
-            for (double[] asd : MatrixCalculator.getNormalizedSimilarityMatrix(new String[] {"dog","cat","company","yellow","say"}, new String[] {"dog","cat","company","yellow","say"}, rc)) {
+            for (double[] asd : MatrixCalculator.getNormalizedSimilarityMatrix(one, two, rc)) {
+                
+                System.out.println(Arrays.toString(asd));
+            }
+            
+            for (double[] asd : MatrixCalculator.getSimilarityMatrix(one, two, rc)) {
                 
                 System.out.println(Arrays.toString(asd));
             }

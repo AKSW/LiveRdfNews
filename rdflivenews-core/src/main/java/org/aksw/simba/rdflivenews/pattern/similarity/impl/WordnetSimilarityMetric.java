@@ -27,7 +27,7 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
     private Morphology lemmatizer = new Morphology();
     public int counter = 0;
 
-    public BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/templemma.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+//    public BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/templemma.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
 
     /*
      * (non-Javadoc)
@@ -66,7 +66,7 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
             }
         }
 
-        return total == 0D ? 0D : total / comparison;
+        return total;// == 0D ? 0D : total / comparison;
     }
 
     public static void main(String[] args) {

@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
+
+import com.github.gerbsen.maven.MavenUtil;
 
 /**
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>
@@ -36,10 +39,10 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 		// TODO Replace them with the weights learned from annotation.
 		double[] w = { 1, 1, 1, 0.285714, 0.457207, 0.267711, 0.254553,
 				0.110239, 0.249999, 0.115564 };
-		System.out.println("\n" + sentence1 + " | " + sentence2);
+//		System.out.println("\n" + sentence1 + " | " + sentence2);
 		for (int i = 0; i < f.length; i++) {
 			sim += f[i] * w[i];
-			System.out.println(sim_name[i] + "\t" + f[i] + " * " + w[i]);
+//			System.out.println(sim_name[i] + "\t" + f[i] + " * " + w[i]);
 		}
 		double bias = 4.625891026454163;
 		sim = sim / bias;
@@ -59,7 +62,7 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 	private Wordnet wordnet = Wordnet.getInstance();
 
 	private HashMap<String, Double> wweight;
-	private double minwweight = min_wweight();
+	private double minwweight;
 
 	private Sim nyt_sim;
 	// private Sim wiki_sim = new Sim("wikipedia_words.txt",
@@ -68,11 +71,18 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 	private String[] sim_name = { "nfeat", "cmtch", "smtch", "ngram", "wnsim",
 			"wword", "nytds", "nytwd", "rldif", "ridif" };
 
-	public TakelabSimilarityMetric() throws FileNotFoundException {
+	public TakelabSimilarityMetric() {
 
-		wweight = load_wweight_table("word-frequencies.txt");
-		nyt_sim = new Sim("nyt_words.txt", "nyt_word_vectors.txt");
-
+	    try {
+	    
+	        wweight = load_wweight_table();
+	        nyt_sim = new Sim();
+	        minwweight = min_wweight();
+	    }
+	    catch (Exception e) {
+	        
+	        throw new RuntimeException("Bad thing happend! Training files not found in ", e);
+	    }
 	}
 
 	private double min_wweight() {
@@ -152,10 +162,10 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 			return d;
 	}
 
-	private HashMap<String, Double> load_wweight_table(String path)
+	private HashMap<String, Double> load_wweight_table()
 			throws FileNotFoundException {
 		HashMap<String, Double> ww = new HashMap<>();
-		Scanner fs = new Scanner(new File(path));
+		Scanner fs = new Scanner(MavenUtil.loadFile("/similarity/word-frequencies.txt"));
 		double totfreq = 0;
 		if (fs.hasNextLine()) {
 			totfreq = Double.parseDouble(fs.nextLine());
@@ -665,14 +675,14 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 		private HashMap<String, Integer> word_to_idx = new HashMap<>();
 		private double[][] mat;
 
-		private Sim(String words, String vectors) throws FileNotFoundException {
+		private Sim() throws FileNotFoundException {
 			long t = System.currentTimeMillis();
-			Scanner fs = new Scanner(new File(words));
+			Scanner fs = new Scanner(MavenUtil.loadFile("/similarity/nyt_words.txt"));
 			for (int i = 0; fs.hasNextLine(); i++)
 				word_to_idx.put(fs.nextLine().trim(), i);
 			fs.close();
 
-			fs = new Scanner(new File(vectors));
+			fs = new Scanner(MavenUtil.loadFile("/similarity/nyt_word_vectors.txt"));
 			ArrayList<String[]> lines = new ArrayList<>();
 			String[] l = new String[0];
 			while (fs.hasNextLine()) {
@@ -687,7 +697,7 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 					mat[i][j] = Double.parseDouble(lines.get(i)[j]);
 
 			double sec = (System.currentTimeMillis() - t) / 1000.0;
-			System.out.println("Word vectors from " + vectors + " loaded in "
+			System.out.println("Word vectors from nyt_word_vectors.txt loaded in "
 					+ sec + " sec.");
 
 		}
