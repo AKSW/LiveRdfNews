@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.wordnet;
 
+import cern.colt.Arrays;
 import edu.cmu.lti.lexical_db.ILexicalDatabase;
 import edu.cmu.lti.lexical_db.NictWordNet;
 import edu.cmu.lti.ws4j.RelatednessCalculator;
@@ -14,6 +15,7 @@ import edu.cmu.lti.ws4j.impl.Lin;
 import edu.cmu.lti.ws4j.impl.Path;
 import edu.cmu.lti.ws4j.impl.Resnik;
 import edu.cmu.lti.ws4j.impl.WuPalmer;
+import edu.cmu.lti.ws4j.util.MatrixCalculator;
 import edu.cmu.lti.ws4j.util.WS4JConfiguration;
 
 
@@ -66,6 +68,20 @@ public class Wordnet {
         RelatednessCalculator rc = rcs[similarityType];
         
         return rc.calcRelatednessOfWords(word1, word2);
+    }
+    
+    public static void main(String[] args) {
+
+        WS4JConfiguration.getInstance().setMFS(true);
+        for ( RelatednessCalculator rc : rcs ) {
+
+            System.out.println(rc.getClass().getSimpleName());
+            
+            for (double[] asd : MatrixCalculator.getNormalizedSimilarityMatrix(new String[] {"dog","cat","company","yellow","say"}, new String[] {"dog","cat","company","yellow","say"}, rc)) {
+                
+                System.out.println(Arrays.toString(asd));
+            }
+        }
     }
     
 }

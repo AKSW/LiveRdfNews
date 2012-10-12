@@ -14,9 +14,9 @@ public class Similarity {
 
     private Pattern pattern1;
     private Pattern pattern2;
-    private Double similarity;
+    private double similarity;
 
-    public Similarity(Pattern pattern1, Pattern pattern2, Double similarity) {
+    public Similarity(Pattern pattern1, Pattern pattern2, double similarity) {
         
         this.pattern1 = pattern1;
         this.pattern2 = pattern2;
@@ -45,7 +45,7 @@ public class Similarity {
     /**
      * @return the similarity
      */
-    public Double getSimilarity() {
+    public double getSimilarity() {
     
         return similarity;
     }

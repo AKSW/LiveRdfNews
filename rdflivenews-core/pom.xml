@@ -12,6 +12,18 @@
 	<artifactId>rdflivenews-core</artifactId>
 	<packaging>jar</packaging>
 	<name>Crawler And News Extrator</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<dependencies>
 		<dependency>
@@ -44,8 +56,8 @@
 			<groupId>edu.cmu.lti</groupId>
 			<artifactId>ws4j</artifactId>
 			<version>1.0</version>
-	   </dependency>
-        <dependency>
+		</dependency>
+		<dependency>
 			<groupId>uk.ac.shef.wit</groupId>
 			<artifactId>simmetrics</artifactId>
 			<version>1.6.2</version>
