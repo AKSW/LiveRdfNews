@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
@@ -33,12 +34,15 @@ public class DefaultSimilarityGenerator implements SimilarityGenerator {
 
         Set<Similarity> similarities = new HashSet<>();
         
-        for ( Pattern pattern1 : this.patterns ) {
-            for ( Pattern pattern2 : this.patterns ) {
+        for ( Pattern pattern1 : this.patterns ) { 
+            if ( pattern1.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
 
-                // avoid having identities in the set
-                if ( !pattern1.equals(pattern2) )
-                    similarities.add(new Similarity(pattern1, pattern2, this.similarityMetric.calculateSimilarity(pattern1, pattern2)));
+                for ( Pattern pattern2 : this.patterns ) {
+
+                    // avoid having identities in the set
+                    if ( !pattern1.equals(pattern2) )
+                        similarities.add(new Similarity(pattern1, pattern2, this.similarityMetric.calculateSimilarity(pattern1, pattern2)));
+                }
             }
         }
         return similarities; 

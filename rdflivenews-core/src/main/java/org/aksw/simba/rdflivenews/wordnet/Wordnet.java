@@ -61,13 +61,10 @@ public class Wordnet {
     public double getWordnetSimilarity(String word1, String word2, int similarityType) {
     	    	
         WS4JConfiguration.getInstance().setMFS(true);
+        if ( similarityType < 0 || similarityType > 7 ) return 0.0;
+        if ( word1.equals(word2) ) return 1D;
         
-        if(similarityType < 0 || similarityType > 7)
-        	return 0.0;
-        
-        RelatednessCalculator rc = rcs[similarityType];
-        
-        return rc.calcRelatednessOfWords(word1, word2);
+        return rcs[similarityType].calcRelatednessOfWords(word1, word2);
     }
     
     public static void main(String[] args) {

@@ -159,11 +159,13 @@ public class DefaultPatternRefiner implements PatternRefiner {
         int i = 0;
         for ( Pattern pattern : patterns ) {
             
-            if ( pattern.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("refinement", "refinementOccurrenceThreshold")) {
+            if ( pattern.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("scoring", "occurrenceThreshold")) {
 
                 System.out.println("refining pattern " + i++ + " " + pattern.getNaturalLanguageRepresentation());
                 this.refinePattern(pattern);
             }
         }
+        
+        this.luceneRefinementManager.close();
     }
 }

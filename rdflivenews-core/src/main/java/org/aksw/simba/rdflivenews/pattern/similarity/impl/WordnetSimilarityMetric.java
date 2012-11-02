@@ -57,16 +57,16 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
                 String tagTwo = partsOfPattern2[i].substring(partsOfPattern2[i].lastIndexOf("_") + 1);
 
                 if (Constants.STOP_WORDS.contains(tokenTwo.toLowerCase())) continue;
-
+                
                 double sim = Wordnet.getInstance().getWordnetSimilarity(
-                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), Wordnet.JCN_SIMILARITY);
+                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), Wordnet.LIN_SIMILARITY);
 
                 total += sim;
                 comparison++;
             }
         }
 
-        return total;// == 0D ? 0D : total / comparison;
+        return total == 0D ? 0D : total / comparison;
     }
 
     public static void main(String[] args) {

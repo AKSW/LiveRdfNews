@@ -85,4 +85,12 @@ public class LuceneRefinementManager {
         
         return uri;
     }
+
+    /**
+     * 
+     */
+    public void close() {
+
+        LuceneManager.closeIndexSearcher(this.searcher);
+    }
 }

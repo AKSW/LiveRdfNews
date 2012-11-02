@@ -117,4 +117,14 @@ public class EntityPair extends Pair<Entity,Entity> {
 
         return this.firstEntity + " - " + this.secondEntity + " / sentenceIDs: " + StringUtils.join(this.luceneSentenceIds, ", ") + " / occurrence: " + this.occurrence;
     }
+
+    /**
+     * 
+     * @return
+     */
+    public boolean hasValidUris() {
+
+        return this.firstEntity.getUri() != null && this.firstEntity.getUri().startsWith("http://") && 
+                this.secondEntity.getUri() != null && this.secondEntity.getUri().startsWith("http://");
+    }
 }

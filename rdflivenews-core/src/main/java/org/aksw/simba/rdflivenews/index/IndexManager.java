@@ -89,7 +89,7 @@ public class IndexManager {
         indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
         writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
         INDEX = writer.getDirectory();
-        closeLuceneIndex();
+        LuceneManager.closeIndexWriter(this.writer);
     }
     
     /**
@@ -102,14 +102,6 @@ public class IndexManager {
         indexWriterConfig.setRAMBufferSizeMB(1024);
         indexWriterConfig.setOpenMode(OpenMode.APPEND);
         writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
-    }
-    
-    /**
-     * 
-     */
-    public void closeIndexWriter() {
-        
-        closeLuceneIndex();
     }
     
     /**
@@ -142,7 +134,7 @@ public class IndexManager {
 
             openIndexWriter();
             writer.addDocument(sentenceToDocument(sentence));
-            closeIndexWriter();
+            LuceneManager.closeIndexWriter(this.writer);
         }
         catch (CorruptIndexException e) {
 
@@ -169,7 +161,7 @@ public class IndexManager {
             for ( Sentence sentence : sentences ) 
                 writer.addDocument(sentenceToDocument(sentence));
                     
-            closeIndexWriter();
+            LuceneManager.closeIndexWriter(this.writer);
         }
         catch (CorruptIndexException e) {
             // TODO Auto-generated catch block
@@ -243,7 +235,7 @@ public class IndexManager {
         LuceneManager.updateDocument(this.writer, query.getTerm(), newDoc);
         LuceneManager.closeIndexReader(searcher.getIndexReader());
         LuceneManager.closeIndexSearcher(searcher);
-        this.closeIndexWriter();
+        LuceneManager.closeIndexWriter(this.writer);
     }
     
     /**
@@ -327,32 +319,13 @@ public class IndexManager {
     /**
      * 
      */
-    public void closeLuceneIndex() {
-        
-        try {
-            
-            writer.close();
-        }
-        catch (CorruptIndexException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-    
-    /**
-     * 
-     */
     public void deleteIndex() {
         
         try {
             
             this.openIndexWriter();
             this.writer.deleteAll();
-            this.closeIndexWriter();
+            LuceneManager.closeIndexWriter(this.writer);
             
             // reset the primary key
             this.currentId = getNumberOfDocuments();

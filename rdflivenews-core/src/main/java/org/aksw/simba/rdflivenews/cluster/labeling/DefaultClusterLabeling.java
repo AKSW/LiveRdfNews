@@ -3,6 +3,8 @@
  */
 package org.aksw.simba.rdflivenews.cluster.labeling;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -14,6 +16,8 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import com.github.gerbsen.map.DistributionMap;
 import com.github.gerbsen.map.MapUtil;
+
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -44,14 +48,18 @@ public class DefaultClusterLabeling implements ClusterLabeler {
                 if ( range.isEmpty() ) range   = pattern.getFavouriteTypeSecondEntity();
 
                 // remove all the trash from the pattern
-                for ( String stopword : Constants.STOP_WORDS ) nlr = nlr.replace(stopword, "").trim();
+                List<String> nlrTokens = new ArrayList<String>(Arrays.asList(nlr.toLowerCase().split(" ")));
+                nlrTokens.removeAll(Constants.STOP_WORDS);
+                String nameSuggestion = StringUtils.join(nlrTokens, " ");
                 
-                distribution.addElement(nlr);
+//                System.out.println(nlr +  " -> " + nameSuggestion);
+                
+                distribution.addElement(nameSuggestion);
             }
             
             // the name of the cluster will be the most common string of all patterns
             // if this will every throw an error (indexoutofbounds) there is something wrong with the cluster
-            String name = distribution.sort().get(0).getKey();
+            String name = distribution.sort().get(distribution.size() - 1).getKey();
             
             cluster.setName(name);
             cluster.setUri(Constants.RDF_LIVE_NEWS_ONTOLOGY_PREFIX + WordUtils.uncapitalize(WordUtils.capitalize(name).replace(" ", "")));

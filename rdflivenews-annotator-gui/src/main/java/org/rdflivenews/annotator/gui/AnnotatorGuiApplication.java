@@ -41,8 +41,8 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 public class AnnotatorGuiApplication extends com.vaadin.Application implements Button.ClickListener {
     
-    static String dataPath = "/home/gerber/boa-data/rdflivenews/evaluation/";
-//    static String dataPath = "/Users/gerb/test/annotation/evaluation/";
+//    static String dataPath = "/home/gerber/boa-data/rdflivenews/evaluation/";
+    static String dataPath = "/Users/gerb/test/annotation/";
     
     private static List<Pattern> patterns;
     Window main = new Window("RdfLiveNews Annotator GUI");
@@ -75,6 +75,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
             subject = new Label(this.pattern.entityOne);
             subject.setContentMode(Label.CONTENT_XHTML);
             patternLabel = new Label("<b>" + this.pattern.nlr + "</b>");
+            patternLabel.setContentMode(Label.CONTENT_XHTML);
             object = new Label(this.pattern.entityTwo);
             object.setContentMode(Label.CONTENT_XHTML);
             
@@ -96,6 +97,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
             panel.addComponent(layoutPattern);
             panel.addComponent(layoutButtons);
             
+            main.removeAllComponents();
             main.addComponent(panel);
         }
         else getMainWindow().showNotification("No patterns anymore...");

@@ -16,10 +16,10 @@ import java.util.Set;
 public class Cluster<T> implements Iterable<T>, Set<T> {
 
     private Set<T> cluster;
-    private String name;
-    private String uri;
-    private String rdfsRange;
-    private String rdfsDomain;
+    private String name = "";
+    private String uri = "";
+    private String rdfsRange = "";
+    private String rdfsDomain = "";
     
     public Cluster(){
         
@@ -150,5 +150,23 @@ public class Cluster<T> implements Iterable<T>, Set<T> {
     public void setRdfsDomain(String domain) {
 
         this.rdfsDomain = domain;
+    }
+    
+    /**
+     * @return the rdfsRange
+     */
+    public String getRdfsRange() {
+    
+        return rdfsRange;
+    }
+
+
+    
+    /**
+     * @return the rdfsDomain
+     */
+    public String getRdfsDomain() {
+    
+        return rdfsDomain;
     }
 }
