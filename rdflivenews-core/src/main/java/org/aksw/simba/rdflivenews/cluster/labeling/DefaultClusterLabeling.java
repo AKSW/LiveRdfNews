@@ -10,10 +10,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.apache.commons.lang3.text.WordUtils;
 
+import com.github.gerbsen.file.BufferedFileWriter;
+import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.map.DistributionMap;
 import com.github.gerbsen.map.MapUtil;
 
@@ -65,6 +68,31 @@ public class DefaultClusterLabeling implements ClusterLabeler {
             cluster.setUri(Constants.RDF_LIVE_NEWS_ONTOLOGY_PREFIX + WordUtils.uncapitalize(WordUtils.capitalize(name).replace(" ", "")));
             cluster.setRdfsRange(range);
             cluster.setRdfsDomain(domain);
+        }
+        
+        if ( RdfLiveNews.CONFIG.getBooleanSetting("clustering", "writeFile") ) {
+            
+            String fileName = RdfLiveNews.DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "clusters");
+            fileName = fileName.endsWith("/") ? fileName : fileName + System.getProperty("file.separator");
+            fileName += this.getClass().getSimpleName() + "-" + RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").substring(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").lastIndexOf(".") + 1) + "-";
+            fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".clstr";
+            
+            BufferedFileWriter writer = new BufferedFileWriter(fileName, "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+            for ( Cluster<Pattern> cluster : clusters) {
+             
+                writer.write(cluster.getName() + " ("+ cluster.getUri() +") ");
+                writer.write("rdfs:domain > " + cluster.getRdfsDomain() );
+                writer.write("rdfs:range > " + cluster.getRdfsRange() + "\n\n");
+                
+                for ( Pattern pattern : cluster ) {
+
+                    writer.write("\t" + pattern.getNaturalLanguageRepresentation());
+                }
+                
+                writer.write("\n");
+            }
+            
+            writer.close();
         }
     }
 }

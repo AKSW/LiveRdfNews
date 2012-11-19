@@ -48,11 +48,11 @@ public class DefaultClusterMerger implements ClusterMerger {
                            mergedCluster.add(clusterOne);
                            clusters.remove(clusterOne);
                            clusters.remove(clusterTwo);
-//                           System.out.println("Merging " + clusterOne.getName() + " and " + clusterTwo.getName() + 
-//                                   "\nResult:\n" + clusterOne);
-//                           for ( Pattern p : clusterOne ) {
-//                               System.out.println(p.getNaturalLanguageRepresentation());
-//                           }
+                           System.out.println("Merging " + clusterOne.getName() + " and " + clusterTwo.getName() + 
+                                   "\nResult:\n" + clusterOne);
+                           for ( Pattern p : clusterOne ) {
+                               System.out.println(p.getNaturalLanguageRepresentation());
+                           }
                            
                         } else {
 //                            System.out.println(sim);

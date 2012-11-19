@@ -4,6 +4,7 @@
 package org.aksw.simba.rdflivenews.pattern.search.concurrency;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.util.ListUtil;
 import org.apache.log4j.Logger;
+
+import com.github.gerbsen.file.BufferedFileWriter;
+import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 
 
 /**
@@ -148,5 +154,28 @@ public class PatternSearchThreadManager {
         }
         
         return new ArrayList<Pattern>(oldPatterns.values());
+    }
+
+    public void logPatterns(List<Pattern> patterns) {
+
+        String fileName = RdfLiveNews.DATA_DIRECTORY + "patterns/iter-#" + RdfLiveNews.ITERATION + "-";
+        fileName += RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").substring(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").lastIndexOf(".") + 1) + "-";
+        fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold");
+        
+        BufferedFileWriter shortWriter  = new BufferedFileWriter(fileName + "-short.tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter longWriter   = new BufferedFileWriter(fileName + "-long.tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+        
+        Collections.sort(patterns, new PatternOccurrenceComparator());
+        
+        for (Pattern p : patterns) {
+            
+            if (p.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("scoring", "occurrenceThreshold")) {
+
+                longWriter.write(p.toString());
+                shortWriter.write(p.getNaturalLanguageRepresentation() + "\t" + p.getNaturalLanguageRepresentationWithTags());
+            }
+        }
+        shortWriter.close();
+        longWriter.close();
     }
 }

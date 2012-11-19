@@ -6,6 +6,7 @@ package org.aksw.simba.rdflivenews.rdf.impl;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
@@ -80,6 +81,10 @@ public class DefaultRdfExtraction implements RdfExtraction {
             }
         }
         
-        JenaUtil.writeModelToFile("/Users/gerb/test/10percent/rdf/test.ttl", "TURTLE", "http://rdflivenews.org", model);
+        String fileName = RdfLiveNews.DATA_DIRECTORY + "rdf/iter-#" + RdfLiveNews.ITERATION + "-";
+        fileName += RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").substring(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").lastIndexOf(".") + 1) + "-";
+        fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".ttl";
+        JenaUtil.writeModelToFile(fileName, "TURTLE", "http://rdflivenews.org", model);
+        JenaUtil.writeModelToRemoteStore();
     }
 }

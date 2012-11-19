@@ -1,6 +1,6 @@
 [search]
 ; the method how we look for patterns: NER or POS possible
-method = NER
+method = POS
 ; the number of threads which should search for patterns
 number-of-threads = 3
 
@@ -8,32 +8,42 @@ number-of-threads = 3
 ; this directory should not be inside the code repo
 data-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
 ; website sentence crawl index
-index = index
+index = index/10percent
 ; we need this test directory only for the junit tests
 test = test
+; store the similarity scores in this directory
+similarity = similarity
+; store the clusters
+clusters = clusters 
 ; this is an index where the dbpedia types and labels are index TODO create documentation on how to generate it 
 dbpedia = /Users/gerb/Development/workspaces/experimental/solr/dbpedia_resources/data/index
 
+[scoring]
+occurrenceThreshold = 4
+
 [deduplication]
-threshold = 1
-window = 1
+threshold = 0.9
+window = 10
+
+[similarity]
+writeFile = true
+threshold = 0.5
 
 [clustering]
+writeFile = true
 similarityThreshold = 0.5
 
 [refinement]
-; only patterns which were learned from at least refinementOccurrenceThreshold pairs will be refined 
-refinementOccurrenceThreshold = 3
 ; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
 typing = SUPER_CLASS
 
 [classes]
-deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.DummyDeduplication
+deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication
 tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndOrPartOfSpeechNaturalLanguageTagger
 refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner
 scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer
 cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering
+similarity      = org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric
 extraction      = org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction
-similarity      = org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric
 mapping         = org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper
-uriretrieval    = org.aksw.simba.rdflivenews.rdf.uri.impl.DefaultUriRetrieval 
+uriretrieval    = org.aksw.simba.rdflivenews.rdf.uri.impl.DefaultUriRetrieval
