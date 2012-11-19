@@ -22,16 +22,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.maven.MavenUtil;
+import com.vaadin.terminal.ThemeResource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.themes.BaseTheme;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 /**
@@ -52,13 +59,15 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
     Button goodPatternButton = new NativeButton("Good");
     Button badPatternButton = new NativeButton("Bad");
     
-    HorizontalLayout layoutPattern, layoutButtons;
+    private AutocompleteComboBox subjectCombobox, objectCombobox;
+    private SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
+    
+    private HorizontalLayout mainLayout = new HorizontalLayout();
 
     @Override
     public void init() {
         setMainWindow(main);
         setTheme("mytheme");
-        
         try {
 
             patterns = readPatterns();
@@ -72,6 +81,9 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
          
             this.pattern = patterns.get(0);
             
+            GridLayout grid = new GridLayout(3, 2);
+            grid.setSpacing(true);
+            
             subject = new Label(this.pattern.entityOne);
             subject.setContentMode(Label.CONTENT_XHTML);
             patternLabel = new Label("<b>" + this.pattern.nlr + "</b>");
@@ -79,23 +91,26 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
             object = new Label(this.pattern.entityTwo);
             object.setContentMode(Label.CONTENT_XHTML);
             
-            layoutPattern = new HorizontalLayout();
-            layoutPattern.setSpacing(true);
-            layoutPattern.addComponent(subject);
-            layoutPattern.addComponent(patternLabel);
-            layoutPattern.addComponent(object);
+            grid.addComponent(subject, 0, 0);
+            grid.addComponent(patternLabel, 1, 0, 1, 1);
+            grid.addComponent(object, 2, 0);
+            
+            subjectCombobox = new AutocompleteComboBox(index);
+            grid.addComponent(subjectCombobox, 0, 1);
+            objectCombobox = new AutocompleteComboBox(index);
+            grid.addComponent(objectCombobox, 2, 1);
+            
+            subject.setWidth(null);
+            grid.setComponentAlignment(subject, Alignment.MIDDLE_RIGHT);
             
             Panel panel = new Panel();
             
-            layoutButtons = new HorizontalLayout();
-            layoutButtons.setSpacing(true);
-            goodPatternButton.addListener(this);
-            badPatternButton.addListener(this);
-            layoutButtons.addComponent(goodPatternButton);
-            layoutButtons.addComponent(badPatternButton);
+            mainLayout.addComponent(grid);
+            mainLayout.addComponent(createButtonPanel());
+            mainLayout.setWidth(null);
+            panel.setWidth(null);
             
-            panel.addComponent(layoutPattern);
-            panel.addComponent(layoutButtons);
+            panel.addComponent(mainLayout);
             
             main.removeAllComponents();
             main.addComponent(panel);
@@ -104,23 +119,59 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
         
     }
     
+    private Component createButtonPanel(){
+    	VerticalLayout buttons = new VerticalLayout();
+		buttons.setHeight("100%");
+		buttons.addStyleName("buttons");
+		Button posExampleButton = new Button();
+		posExampleButton.setIcon(new ThemeResource("images/thumb_up.png"));
+		posExampleButton.addStyleName(BaseTheme.BUTTON_LINK);
+		posExampleButton.setDescription("Click if this pattern is a good pattern.");
+		posExampleButton.addListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+//				firePositiveExampleSelected();
+			}
+		});
+		buttons.addComponent(posExampleButton);
+		Button negExampleButton = new Button();
+		negExampleButton.setIcon(new ThemeResource("images/thumb_down.png"));
+		negExampleButton.addStyleName(BaseTheme.BUTTON_LINK);
+		negExampleButton.setDescription("Click if this pattern is a bad pattern.");
+		negExampleButton.addListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+//				fireNegativeExampleSelected();
+			}
+		});
+		buttons.addComponent(negExampleButton);
+		buttons.setComponentAlignment(posExampleButton, Alignment.MIDDLE_CENTER);
+		buttons.setComponentAlignment(negExampleButton, Alignment.MIDDLE_CENTER);
+		
+		return buttons;
+    }
+    
     private static List<Pattern> readPatterns() throws IOException {
         
         List<Pattern> patterns = new ArrayList<Pattern>();
         
-        for (String line : FileUtils.readLines(new File(dataPath +"patterns.txt")) ) {
-            
-            try {
-            
-                String[] lineParts = line.split("___");
-                Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]));
-                patterns.add(defaultPattern);
-            }
-            catch (java.lang.NumberFormatException nfe) {
-                
-                System.out.println(line);
-            }
-        }
+//        for (String line : FileUtils.readLines(new File(dataPath +"patterns.txt")) ) {
+//            
+//            try {
+//            
+//                String[] lineParts = line.split("___");
+//                Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]));
+//                patterns.add(defaultPattern);
+//            }
+//            catch (java.lang.NumberFormatException nfe) {
+//                
+//                System.out.println(line);
+//            }
+//        }
+        
+        patterns.add(new Pattern("Brad Pitt", "was born in", "Leipzig", 1));
         
         return patterns;
     }
