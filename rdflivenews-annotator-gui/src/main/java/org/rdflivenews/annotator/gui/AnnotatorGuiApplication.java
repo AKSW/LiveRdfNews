@@ -16,22 +16,16 @@
 
 package org.rdflivenews.annotator.gui;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
-
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.maven.MavenUtil;
 import com.vaadin.terminal.ThemeResource;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.themes.BaseTheme;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -40,13 +34,14 @@ import com.vaadin.ui.NativeButton;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.BaseTheme;
 
 /**
  * Demonstration application that shows how to use a simple custom client-side
  * GWT component, the ColorPicker.
  */
 @SuppressWarnings("serial")
-public class AnnotatorGuiApplication extends com.vaadin.Application implements Button.ClickListener {
+public class AnnotatorGuiApplication extends com.vaadin.Application {
     
 //    static String dataPath = "/home/gerber/boa-data/rdflivenews/evaluation/";
     static String dataPath = "/Users/gerb/test/annotation/";
@@ -105,15 +100,19 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
             
             Panel panel = new Panel();
             
+            
             mainLayout.addComponent(grid);
             mainLayout.addComponent(createButtonPanel());
             mainLayout.setWidth(null);
+            mainLayout.setHeight("100%");
             panel.setWidth(null);
             
             panel.addComponent(mainLayout);
             
             main.removeAllComponents();
             main.addComponent(panel);
+            ((VerticalLayout)main.getContent()).setHeight("100%");
+            ((VerticalLayout)main.getContent()).setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
         }
         else getMainWindow().showNotification("No patterns anymore...");
         
@@ -131,7 +130,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
-//				firePositiveExampleSelected();
+				fireGoodPatternDecision();
 			}
 		});
 		buttons.addComponent(posExampleButton);
@@ -143,7 +142,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
-//				fireNegativeExampleSelected();
+				fireBadPatternDecision();
 			}
 		});
 		buttons.addComponent(negExampleButton);
@@ -175,31 +174,27 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements B
         
         return patterns;
     }
-
-    public void buttonClick(ClickEvent event) {
-
-        if ( event.getButton().equals(badPatternButton) ) {
-            
-            BufferedFileWriter writer = new BufferedFileWriter(dataPath + "bad_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-            writer.write(patternToString(this.pattern));
-            writer.close();
-            
-            patterns.remove(this.pattern);
-            writeTodoPatterns();
-            this.init();
-        }
-        if ( event.getButton().equals(goodPatternButton) ) {
-            
-            BufferedFileWriter writer = new BufferedFileWriter(dataPath + "good_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-            writer.write(patternToString(this.pattern));
-            writer.close();
-            
-            patterns.remove(this.pattern);
-            writeTodoPatterns();
-            this.init();
-        }
+    
+    private void fireGoodPatternDecision(){
+    	BufferedFileWriter writer = new BufferedFileWriter(dataPath + "good_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
+        writer.write(patternToString(this.pattern));
+        writer.close();
+        
+        patterns.remove(this.pattern);
+        writeTodoPatterns();
+        this.init();
     }
     
+    private void fireBadPatternDecision(){
+    	BufferedFileWriter writer = new BufferedFileWriter(dataPath + "bad_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
+        writer.write(patternToString(this.pattern));
+        writer.close();
+        
+        patterns.remove(this.pattern);
+        writeTodoPatterns();
+        this.init();
+    }
+
     public static String patternToString(Pattern pattern) {
         
         return pattern.entityOne + "___" +
