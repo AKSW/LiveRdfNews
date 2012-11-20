@@ -10,14 +10,14 @@ public class SolrItemDescriptionWidget extends VerticalLayout{
 	private SolrItem item;
 	
 	public SolrItemDescriptionWidget(SolrItem item) {
-		Label uriLabel = new Label("<b>" + item.getLabel() + "</b>", Label.CONTENT_XHTML);
+		String description = "<div><b>" + item.getLabel() + "</b></div>";
+		description += "<div>" + item.getDescription() + "</div>";
+		Label uriLabel = new Label(description, Label.CONTENT_XHTML);
+		uriLabel.setWidth("200px");
+		uriLabel.setHeight(null);
 		addComponent(uriLabel);
-		
-		Label descriptionLabel = new Label(item.getDescription(), Label.CONTENT_XHTML);
-		addComponent(descriptionLabel);
-		
-		setExpandRatio(descriptionLabel, 1f);
-		setSpacing(true);
+		setWidth("250px");
+//		setWidth("300px");
 		
 	}
 	
