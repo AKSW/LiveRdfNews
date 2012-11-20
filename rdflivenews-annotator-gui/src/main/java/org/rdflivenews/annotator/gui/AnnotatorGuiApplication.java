@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
@@ -155,7 +156,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             
             panel.addComponent(mainLayout);
             
-            main.removeAllComponents();
+            getMainWindow().removeAllComponents();
             main.addComponent(panel);
             ((VerticalLayout)main.getContent()).setHeight("100%");
             ((VerticalLayout)main.getContent()).setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
@@ -202,7 +203,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         
         List<Pattern> patterns = new ArrayList<Pattern>();
         
-        for (String line : FileUtils.readLines(new File(AnnotatorGuiApplication.class.getResource("/patterns10k.txt").getFile())) ) {
+        for (String line : FileUtils.readLines(new File(dataPath + "/patterns.txt")) ) {
             
             try {
             
@@ -244,7 +245,8 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         return pattern.entityOne + "___" +
                 pattern.nlr + "___" + 
                 pattern.entityTwo + "___" +
-                pattern.luceneId;
+                pattern.luceneId + "___" +
+                pattern.sentence;
     }
     
     /**
@@ -281,30 +283,42 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 
         if ( event.getSource().equals(nextButton) ) {
             
-            String subjectUri = "";
+            String subjectUri   = "";
+            String objectUri    = "";
             
             // no subject uri at all -> need to generate one
             if ( this.getComboBoxUri(subjectCombobox).isEmpty() && ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = generateUri(this.pattern.entityOne);
+            if ( !this.getComboBoxUri(subjectCombobox).isEmpty() && ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = this.getComboBoxUri(subjectCombobox);
+            if ( this.getComboBoxUri(subjectCombobox).isEmpty() && !((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = (String) this.subjectUri.getValue();
+            if ( !this.getComboBoxUri(subjectCombobox).isEmpty() && !((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = (String) this.subjectUri.getValue();
             
             String comment  = ((String) this.comment.getValue()).isEmpty() ? "" : (String) this.comment.getValue();
             String said     = ((String) this.saidObject.getValue()).isEmpty() ? "" : (String) this.saidObject.getValue();
             
-            // we have a pattern which is a pattern from the say cluster
-            if ( !said.isEmpty() ) {
-                
-                // a subject uri was given
-                if ( !((String) this.subjectCombobox.getValue()).isEmpty() ) {
-                    
-                }
-                // we need to generate a subject uri, object is a string literal
-                else {
-                    
-                }
-            }
-            // regular pattern
-            else {
-                
-            }
+             // no subject uri at all -> need to generate one
+            if ( this.getComboBoxUri(objectCombobox).isEmpty() && ((String) this.objectUri.getValue()).isEmpty() ) objectUri = generateUri(this.pattern.entityTwo);
+            if ( !this.getComboBoxUri(objectCombobox).isEmpty() && ((String) this.objectUri.getValue()).isEmpty() ) objectUri = this.getComboBoxUri(objectCombobox);
+            if ( this.getComboBoxUri(objectCombobox).isEmpty() && !((String) this.objectUri.getValue()).isEmpty() ) objectUri = (String) this.objectUri.getValue();
+            if ( !this.getComboBoxUri(objectCombobox).isEmpty() && !((String) this.objectUri.getValue()).isEmpty() ) objectUri = (String) this.objectUri.getValue();
+            
+            List<String> output = new ArrayList<String>();
+            output.add(said.isEmpty() ? "NORMAL" : "SAY");
+            output.add(this.pattern.entityOne);
+            output.add(subjectUri);
+            output.add(this.pattern.nlr);
+            output.add(this.pattern.entityTwo);
+            output.add(said.isEmpty() ? objectUri : said);
+            output.add(comment);
+            output.add(this.pattern.luceneId + "");
+            output.add(this.pattern.sentence);
+            
+            BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns_annotated.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
+            writer.write(StringUtils.join(output, "___"));
+            writer.close();
+            
+            patterns.remove(this.pattern);
+            writeTodoPatterns();
+            this.init();
         }
         else if (event.getSource().equals(trashButton)) {
             
@@ -314,8 +328,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     
     private String getComboBoxUri(ComboBox combobox) {
 
-        // TODO Auto-generated method stub
-        return null;
+        return "";
     }
 
     private String generateUri(String label){
