@@ -51,8 +51,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application {
     
     Label subject, object, patternLabel;
     Pattern pattern;
-    Button goodPatternButton = new NativeButton("Good");
-    Button badPatternButton = new NativeButton("Bad");
     
     private AutocompleteComboBox subjectCombobox, objectCombobox;
     private SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
@@ -122,32 +120,19 @@ public class AnnotatorGuiApplication extends com.vaadin.Application {
     	VerticalLayout buttons = new VerticalLayout();
 		buttons.setHeight("100%");
 		buttons.addStyleName("buttons");
-		Button posExampleButton = new Button();
-		posExampleButton.setIcon(new ThemeResource("images/thumb_up.png"));
-		posExampleButton.addStyleName(BaseTheme.BUTTON_LINK);
-		posExampleButton.setDescription("Click if this pattern is a good pattern.");
-		posExampleButton.addListener(new Button.ClickListener() {
+		Button nextButton = new Button();
+		nextButton.setIcon(new ThemeResource("images/next.png"));
+		nextButton.addStyleName(BaseTheme.BUTTON_LINK);
+		nextButton.setDescription("Click to go to next pattern.");
+		nextButton.addListener(new Button.ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
 				fireGoodPatternDecision();
 			}
 		});
-		buttons.addComponent(posExampleButton);
-		Button negExampleButton = new Button();
-		negExampleButton.setIcon(new ThemeResource("images/thumb_down.png"));
-		negExampleButton.addStyleName(BaseTheme.BUTTON_LINK);
-		negExampleButton.setDescription("Click if this pattern is a bad pattern.");
-		negExampleButton.addListener(new Button.ClickListener() {
-			
-			@Override
-			public void buttonClick(ClickEvent event) {
-				fireBadPatternDecision();
-			}
-		});
-		buttons.addComponent(negExampleButton);
-		buttons.setComponentAlignment(posExampleButton, Alignment.MIDDLE_CENTER);
-		buttons.setComponentAlignment(negExampleButton, Alignment.MIDDLE_CENTER);
+		buttons.addComponent(nextButton);
+		buttons.setComponentAlignment(nextButton, Alignment.MIDDLE_CENTER);
 		
 		return buttons;
     }

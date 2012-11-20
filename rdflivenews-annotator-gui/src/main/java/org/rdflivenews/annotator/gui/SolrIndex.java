@@ -13,6 +13,7 @@ import org.apache.solr.common.SolrDocumentList;
 public class SolrIndex {
 
 	private HttpSolrServer server;
+	private final String searchField = "label";
 
 	public SolrIndex(String serverURL) {
 		server = new HttpSolrServer(serverURL);
@@ -31,8 +32,7 @@ public class SolrIndex {
 	public Set<SolrItem> search(String searchTerm){
 		Set<SolrItem> result = new HashSet<SolrIndex.SolrItem>();
 		
-		SolrQuery q = new SolrQuery("label:" + searchTerm);
-		System.out.println(q);
+		SolrQuery q = new SolrQuery(searchField + "(" + searchTerm  + "*)");
 		try {
 			QueryResponse rsp = server.query(q);
 			SolrDocumentList docs = rsp.getResults();
