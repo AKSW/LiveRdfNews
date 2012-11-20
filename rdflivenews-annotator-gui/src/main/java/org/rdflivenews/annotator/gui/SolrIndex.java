@@ -32,17 +32,20 @@ public class SolrIndex {
 	public Set<SolrItem> search(String searchTerm){
 		Set<SolrItem> result = new HashSet<SolrIndex.SolrItem>();
 		
-		SolrQuery q = new SolrQuery(searchField + "(" + searchTerm  + "*)");
+		SolrQuery q = new SolrQuery(searchField + ":(" + searchTerm  + "*)");
+		System.out.println(q);
 		try {
 			QueryResponse rsp = server.query(q);
 			SolrDocumentList docs = rsp.getResults();
 			String uri = null;
 			String label = null;
+			String description = null;
 			for(SolrDocument doc : docs){
 				uri = (String) doc.get("uri");
 				label = (String) doc.get("label");
+				description = (String) doc.get("comment");
 				System.out.println(uri + ": " + label);
-				result.add(new SolrItem(uri, label));
+				result.add(new SolrItem(uri, label, description));
 			}
 		} catch (SolrServerException e) {
 			// TODO Auto-generated catch block
@@ -55,10 +58,12 @@ public class SolrIndex {
 	public class SolrItem {
 		private String label;
 		private String uri;
+		private String description;
 		
-		public SolrItem(String uri, String label) {
+		public SolrItem(String uri, String label, String description) {
 			this.label = label;
 			this.uri = uri;
+			this.description = description;
 		}
 		
 		public String getLabel() {
@@ -67,6 +72,10 @@ public class SolrIndex {
 		
 		public String getUri() {
 			return uri;
+		}
+		
+		public String getDescription() {
+			return description;
 		}
 	}
 

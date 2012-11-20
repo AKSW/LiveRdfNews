@@ -105,6 +105,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
                     replace(this.pattern.entityTwo, "<b>" + this.pattern.entityTwo + "</b>").
                     replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>");
             
+
             sentence =  new Label(sentenceLabel);
             sentence.setContentMode(Label.CONTENT_XHTML);
             
@@ -113,8 +114,12 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             grid.addComponent(patternLabel, 1, 1, 1, 1);
             grid.addComponent(object, 2, 1);
             
-            subjectCombobox = new AutocompleteComboBox("Subject URI", index);
-            grid.addComponent(subjectCombobox, 0, 2);
+//            subjectCombobox = new AutocompleteComboBox("Subject URI", index);
+//            grid.addComponent(subjectCombobox, 0, 2);
+//          subjectCombobox = new AutocompleteComboBox(index);
+//          grid.addComponent(subjectCombobox, 0, 1);
+          AutocompleteWidget w = new AutocompleteWidget(index);
+          grid.addComponent(w, 0, 2);
             objectCombobox = new AutocompleteComboBox("Object URI", index);
             grid.addComponent(objectCombobox, 2, 2);
             
