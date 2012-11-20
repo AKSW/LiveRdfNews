@@ -69,8 +69,8 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
                         secondEntity != null && !secondEntity.getLabel().isEmpty() ) {
 
                     pattern.addLearnedFromEntities(new EntityPair(firstEntity,secondEntity,luceneSentenceId));
-                    pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " ").replaceAll(" the$", ""));
-                    pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " ").replaceAll(" the_[A-z]*$", ""));
+                    pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " ").replaceAll(" [Tt]he$", ""));
+                    pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " ").replaceAll(" [Tt]he_[A-z]*$", ""));
                     
                     patterns.add(pattern);
                 }
@@ -79,7 +79,7 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
         
         return patterns;
     }
-
+    
     /* (non-Javadoc)
      * @see org.aksw.simba.rdflivenews.simba.rdflivenews.patternsearch.PatternSearcher#mergeTagsInSentences(java.lang.String)
      */

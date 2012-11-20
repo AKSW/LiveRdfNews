@@ -23,11 +23,8 @@ import edu.stanford.nlp.process.Morphology;
  */
 public class WordnetSimilarityMetric implements SimilarityMetric {
 
-    private SimilarityAssessor similarityAssessor = new SimilarityAssessor();
     private Morphology lemmatizer = new Morphology();
     public int counter = 0;
-
-//    public BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/templemma.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
 
     /*
      * (non-Javadoc)
@@ -71,10 +68,10 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
 
     public static void main(String[] args) {
 
-        Pattern pattern1 = new DefaultPattern("says");
-        pattern1.setNaturalLanguageRepresentationWithTags("says_VBZ");
-        Pattern pattern2 = new DefaultPattern("told the `");
-        pattern2.setNaturalLanguageRepresentationWithTags("told_VBD the_DT `_``");
+        Pattern pattern1 = new DefaultPattern("said on");
+        pattern1.setNaturalLanguageRepresentationWithTags("said_VBZ on_DT");
+        Pattern pattern2 = new DefaultPattern("said");
+        pattern2.setNaturalLanguageRepresentationWithTags("said_VBD");
 
         WordnetSimilarityMetric m = new WordnetSimilarityMetric();
         System.out.println(m.calculateSimilarity(pattern1, pattern2));
