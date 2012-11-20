@@ -88,8 +88,10 @@ public class AnnotatorGuiApplication extends com.vaadin.Application {
             grid.addComponent(patternLabel, 1, 0, 1, 1);
             grid.addComponent(object, 2, 0);
             
-            subjectCombobox = new AutocompleteComboBox(index);
-            grid.addComponent(subjectCombobox, 0, 1);
+//            subjectCombobox = new AutocompleteComboBox(index);
+//            grid.addComponent(subjectCombobox, 0, 1);
+            AutocompleteWidget w = new AutocompleteWidget(index);
+            grid.addComponent(w, 0, 1);
             objectCombobox = new AutocompleteComboBox(index);
             grid.addComponent(objectCombobox, 2, 1);
             
