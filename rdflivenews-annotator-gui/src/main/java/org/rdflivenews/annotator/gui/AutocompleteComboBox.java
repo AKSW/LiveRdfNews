@@ -14,8 +14,8 @@ public class AutocompleteComboBox extends ComboBox{
 	private SolrIndex index;
 	private static final int MIN_NUMBER_OF_CHARACTERS = 3;
 	
-	public AutocompleteComboBox(SolrIndex index) {
-		super();
+	public AutocompleteComboBox(String label, SolrIndex index) {
+		super(label);
 		this.index = index;
 		setNewItemsAllowed(true);
 	}
