@@ -121,10 +121,10 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             object = new Label(this.pattern.entityTwo);
             object.setContentMode(Label.CONTENT_XHTML);
             
-            String sentenceLabel = this.pattern.sentence.
+            String sentenceLabel = "<h2>" + this.pattern.sentence.
                     replace(this.pattern.entityOne, "<b>" + this.pattern.entityOne + "</b>").
                     replace(this.pattern.entityTwo, "<b>" + this.pattern.entityTwo + "</b>").
-                    replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>");
+                    replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>") + "</h2>";
             
 
             sentence =  new Label(sentenceLabel);
@@ -163,11 +163,11 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 
             saidObject = new TextArea("Say Cluster Object Value");
             saidObject.setWidth("100%");
-            grid.addComponent(saidObject, 0, 4, 2, 4);
+            grid.addComponent(saidObject, 0, 5, 0, 5);
             
             comment = new TextArea("Comments");
             comment.setWidth("100%");
-            grid.addComponent(comment, 0, 5, 2, 5);
+            grid.addComponent(comment, 2, 5, 2, 5);
             
             mainLayout.addComponent(grid);
             
