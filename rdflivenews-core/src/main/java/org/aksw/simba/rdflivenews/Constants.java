@@ -111,5 +111,5 @@ public class Constants {
     /**
      * 
      */
-    public static final String UNDEFINED_TYPE = "UNDEFINED";
+    public static final String OWL_THING = "http://www.w3.org/2002/07/owl#Thing";
 }

@@ -73,11 +73,11 @@ public class SimilarityAnnotationGenerator {
 
         double threshold = 0.5;
         
-//        SimilarityMetric sim = new QGramSimilarityMCetric();
-        SimilarityMetric sim = new WordnetSimilarityMetric();
+        SimilarityMetric sim = new QGramSimilarityMetric();
+//        SimilarityMetric sim = new WordnetSimilarityMetric();
 //        SimilarityMetric sim = new TakelabSimilarityMetric();
-        List<String> patterns = FileUtils.readLines(new File("/Users/gerb/test/patterns-nlr.txt")).subList(0, 100);
-        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/test-patterns-nlr-"+sim.getClass().getSimpleName()+"-"+threshold+".tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+        List<String> patterns = FileUtils.readLines(new File("/Users/gerb/test/10percent/10percent-#4-patterns-nlr.txt"));
+        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/10percent/sim-patterns-nlr-"+sim.getClass().getSimpleName()+"-"+threshold+".tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
         
         double max = 1; 
         List<Similarity> sims = new ArrayList<>();
@@ -104,7 +104,6 @@ public class SimilarityAnnotationGenerator {
                     Pattern p2 = new DefaultPattern(nlr2, pos2);
                     
                     double similarity = sim.calculateSimilarity(p1,p2);
-                    System.out.println(similarity);
                     if ( similarity > max && similarity != Double.MAX_VALUE ) max = similarity;
                     
                     sims.add(new Similarity(p1, p2, similarity));
@@ -112,17 +111,17 @@ public class SimilarityAnnotationGenerator {
             }
         }
         
-        ((WordnetSimilarityMetric) sim).writer.close();
+//        ((WordnetSimilarityMetric) sim).writer.close();
         System.out.println( "Maximum-Score: " + max);
         for ( Similarity simi : sims ) {
             
             double value = 0;
             
-            if ( simi.getSimilarity() == Double.MAX_VALUE ) value = 1; 
-            else {
+//            if ( simi.getSimilarity() == Double.MAX_VALUE ) value = 1; 
+//            else {
                     value = simi.getSimilarity() / max;
-            }
-            if ( value > 0.1 )          
+//            }
+            if ( value > 0.5 )          
                 writer.write(String.format("%s\t%s\t%s", simi.getPattern1().getNaturalLanguageRepresentation(), simi.getPattern2().getNaturalLanguageRepresentation(), value));
         }
         

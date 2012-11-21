@@ -96,6 +96,11 @@
         <artifactId>maven-jetty-plugin</artifactId>
         <version>6.1.24</version>
         <configuration>
+        <connectors>
+        <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+        <port>9092</port>
+      </connector>
+        </connectors>
           <stopPort>9966</stopPort>
           <stopKey>rdflivenews-annotator-gui</stopKey>
           <!-- Redeploy every x seconds if changes are detected, 0 for no automatic redeployment -->
@@ -202,6 +207,11 @@
   </pluginRepositories>
 
   <dependencies>
+      <dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.3</version>
+		</dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin</artifactId>
@@ -227,6 +237,17 @@
       <classifier>sources</classifier>
       <scope>provided</scope>
 	</dependency>
+    <dependency>
+    	<groupId>org.apache.solr</groupId>
+    	<artifactId>solr-solrj</artifactId>
+    	<version>4.0.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.solr</groupId>
+    	<artifactId>solr-core</artifactId>
+    	<version>4.0.0</version>
+    </dependency>
   </dependencies>
+
 
 </project>

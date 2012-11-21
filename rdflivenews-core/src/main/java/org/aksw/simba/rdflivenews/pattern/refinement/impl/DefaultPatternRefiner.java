@@ -73,7 +73,7 @@ public class DefaultPatternRefiner implements PatternRefiner {
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUPER_CLASS) : 
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUB_CLASS));
                     
-                    else pair.getFirstEntity().setType(Constants.UNDEFINED_TYPE);
+                    else pair.getFirstEntity().setType(Constants.OWL_THING);
                 }
                     
                 
@@ -96,10 +96,10 @@ public class DefaultPatternRefiner implements PatternRefiner {
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUPER_CLASS) : 
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUB_CLASS));
                     
-                    else pair.getSecondEntity().setType(Constants.UNDEFINED_TYPE);
+                    else pair.getSecondEntity().setType(Constants.OWL_THING);
                 }
                 
-                System.out.println(pair);
+//                System.out.println(pair);
                 
 //                System.out.println("\n\n");
                 
@@ -126,7 +126,7 @@ public class DefaultPatternRefiner implements PatternRefiner {
         //  add them all to the list
         for ( String foundType : foundTypes ) {
             
-            if ( !foundType.equals(Constants.UNDEFINED_TYPE) ) {
+            if ( !foundType.equals(Constants.OWL_THING) ) {
 
                 if ( types.containsKey(foundType) ) types.put(foundType, types.get(foundType) + 1);
                 else types.put(foundType, 1);
@@ -159,11 +159,13 @@ public class DefaultPatternRefiner implements PatternRefiner {
         int i = 0;
         for ( Pattern pattern : patterns ) {
             
-            if ( pattern.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("refinement", "refinementOccurrenceThreshold")) {
+            if ( pattern.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("scoring", "occurrenceThreshold")) {
 
-                System.out.println("refining pattern " + i++ + " " + pattern.getNaturalLanguageRepresentation());
+//                System.out.println("refining pattern " + i++ + " " + pattern.getNaturalLanguageRepresentation());
                 this.refinePattern(pattern);
             }
         }
+        
+        this.luceneRefinementManager.close();
     }
 }

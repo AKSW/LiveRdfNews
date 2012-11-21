@@ -8,13 +8,16 @@ import de.uni_leipzig.gk.cluster.BorderFlowHard;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -82,7 +85,13 @@ public class BorderFlowPatternClustering implements PatternClustering {
         return new HashSet<Cluster<Pattern>>();
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws IOException {
+        
+        testThreshold();
+    }
+    
+    private static void testClustering () {
+        
         Set<Similarity> test = new HashSet<>();
         List<Pattern> p = new ArrayList<>();
         int size = 10;
@@ -113,6 +122,30 @@ public class BorderFlowPatternClustering implements PatternClustering {
                 System.out.print(pattern.getNaturalLanguageRepresentation()+"\t");
             }
             System.out.print("\n");
+        }
+    }
+    
+    private static void testThreshold() throws IOException {
+        
+        Set<Similarity> test = new HashSet<Similarity>();        
+        for (String line : FileUtils.readLines(new File("/Users/gerb/Development/workspaces/experimental/rdflivenews/similarity/sim-WordnetSimilarityMetric-0.5.tsv"))) {
+            
+            String[] lineParts = line.split("\t");
+            test.add(new Similarity(new DefaultPattern(lineParts[0]), new DefaultPattern(lineParts[1]), Double.valueOf(lineParts[2])));
+        }
+        
+        PatternClustering pc = new BorderFlowPatternClustering();
+        Set<Cluster<Pattern>> clusters = pc.clusterPatterns(test , 0.5);
+        for(Cluster<Pattern> cp: clusters)
+        {
+            if ( cp.size() > 1) {
+
+                for(Pattern pattern: cp)
+                {
+                    System.out.print(pattern.getNaturalLanguageRepresentation()+"\t");
+                }
+                System.out.print("\n");
+            }
         }
     }
 }

@@ -3,6 +3,8 @@
  */
 package org.aksw.simba.rdflivenews.pattern.filter.impl;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,6 +15,8 @@ import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.chainsaw.Main;
 
 
 /**
@@ -70,7 +74,20 @@ public class DefaultPatternFilter implements PatternFilter {
             }
             
             // to long patterns are useless
-            if ( nlr.length() > 50 || nlr.matches("^[A-Z].*") || nlr.matches(".* [A-Z] .*") ) {
+            if ( nlr.length() > 50 || Character.isUpperCase(pattern.getNaturalLanguageRepresentation().charAt(0)) 
+                    || pattern.getNaturalLanguageRepresentation().matches(".* [A-Z] .*") ) {
+                
+                patternIterator.remove();
+                continue;
+            }
+            
+            if ( nlr.length() - nlr.replaceAll("[^A-Za-z0-9 ,'`]", "").length() > 1 ) {
+                
+                patternIterator.remove();
+                continue;
+            }
+            
+            if ( nlr.matches("; [Ee]diting by") ) {
                 
                 patternIterator.remove();
                 continue;

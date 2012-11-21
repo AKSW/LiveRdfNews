@@ -3,8 +3,15 @@
  */
 package org.aksw.simba.rdflivenews.pattern.similarity.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
+
+import edu.stanford.nlp.util.StringUtils;
 
 import uk.ac.shef.wit.simmetrics.SimpleExample;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
@@ -25,7 +32,15 @@ public class QGramSimilarityMetric implements SimilarityMetric {
     @Override
     public double calculateSimilarity(Pattern pattern1, Pattern pattern2) {
 
-        return this.metric.getSimilarity(pattern1.getNaturalLanguageRepresentation(), pattern2.getNaturalLanguageRepresentation());
+        List<String> patternOne = new ArrayList<String>(Arrays.asList(pattern1.getNaturalLanguageRepresentation().toLowerCase().split(" ")));
+        patternOne.removeAll(Constants.STOP_WORDS);
+        String firstPattern = StringUtils.join(patternOne, " ");
+        
+        List<String> patternTwo = new ArrayList<String>(Arrays.asList(pattern2.getNaturalLanguageRepresentation().toLowerCase().split(" ")));
+        patternTwo.removeAll(Constants.STOP_WORDS);
+        String secondPattern = StringUtils.join(patternTwo, " ");
+        
+        return this.metric.getSimilarity(firstPattern, secondPattern);
     }
 
 }

@@ -23,11 +23,8 @@ import edu.stanford.nlp.process.Morphology;
  */
 public class WordnetSimilarityMetric implements SimilarityMetric {
 
-    private SimilarityAssessor similarityAssessor = new SimilarityAssessor();
     private Morphology lemmatizer = new Morphology();
     public int counter = 0;
-
-//    public BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/templemma.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
 
     /*
      * (non-Javadoc)
@@ -57,24 +54,24 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
                 String tagTwo = partsOfPattern2[i].substring(partsOfPattern2[i].lastIndexOf("_") + 1);
 
                 if (Constants.STOP_WORDS.contains(tokenTwo.toLowerCase())) continue;
-
+                
                 double sim = Wordnet.getInstance().getWordnetSimilarity(
-                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), Wordnet.JCN_SIMILARITY);
+                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), Wordnet.LIN_SIMILARITY);
 
                 total += sim;
                 comparison++;
             }
         }
 
-        return total;// == 0D ? 0D : total / comparison;
+        return total == 0D ? 0D : total / comparison;
     }
 
     public static void main(String[] args) {
 
-        Pattern pattern1 = new DefaultPattern("says");
-        pattern1.setNaturalLanguageRepresentationWithTags("says_VBZ");
-        Pattern pattern2 = new DefaultPattern("told the `");
-        pattern2.setNaturalLanguageRepresentationWithTags("told_VBD the_DT `_``");
+        Pattern pattern1 = new DefaultPattern("said on");
+        pattern1.setNaturalLanguageRepresentationWithTags("said_VBZ on_DT");
+        Pattern pattern2 = new DefaultPattern("said");
+        pattern2.setNaturalLanguageRepresentationWithTags("said_VBD");
 
         WordnetSimilarityMetric m = new WordnetSimilarityMetric();
         System.out.println(m.calculateSimilarity(pattern1, pattern2));
