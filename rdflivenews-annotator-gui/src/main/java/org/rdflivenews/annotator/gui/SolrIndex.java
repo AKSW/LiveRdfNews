@@ -43,11 +43,13 @@ public class SolrIndex {
 			String uri = null;
 			String label = null;
 			String description = null;
+			String imageURL = null;
 			for(SolrDocument doc : docs){
 				uri = (String) doc.get("uri");
 				label = (String) doc.get("label");
 				description = (String) doc.get("comment");
-				result.add(new SolrItem(uri, label, description));
+				imageURL = (String) doc.get("imageURL");
+				result.add(new SolrItem(uri, label, description, imageURL));
 			}
 		} catch (SolrServerException e) {
 			e.printStackTrace();
@@ -60,11 +62,13 @@ public class SolrIndex {
 		private String label;
 		private String uri;
 		private String description;
+		private String imageURL;
 		
-		public SolrItem(String uri, String label, String description) {
+		public SolrItem(String uri, String label, String description, String imageURL) {
 			this.label = label;
 			this.uri = uri;
 			this.description = description;
+			this.imageURL = imageURL;
 		}
 		
 		public String getLabel() {
@@ -77,6 +81,10 @@ public class SolrIndex {
 		
 		public String getDescription() {
 			return description;
+		}
+		
+		public String getImageURL() {
+			return imageURL;
 		}
 	}
 

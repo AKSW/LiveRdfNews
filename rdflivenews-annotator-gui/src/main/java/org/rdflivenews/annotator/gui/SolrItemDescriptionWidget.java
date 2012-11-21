@@ -14,6 +14,11 @@ public class SolrItemDescriptionWidget extends VerticalLayout{
 		setHeight("60px");
 		
 		String description = "<div><b>" + item.getLabel() + "</b></div>";
+		if(item.getImageURL() != null){
+			description += "<div style='float: right; height: 40px; width: 60px'>" +
+	    	 		"<div style='height: 100%;'><img style='height: 100%;' src=\"" + item.getImageURL() + "\"/></div>" +
+	    	 		"</div>";
+		}
 		description += "<div style='white-space:normal;'>" + item.getDescription() + "</div>";
 		Label uriLabel = new Label(description, Label.CONTENT_XHTML);
 		uriLabel.setHeight("100%");

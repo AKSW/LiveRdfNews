@@ -91,11 +91,11 @@ public class AutocompleteWidget extends VerticalLayout{
 	
 	private Set<SolrItem> getDummyItems(){
 		Set<SolrItem> items = new HashSet<SolrItem>();
-		items.add(new SolrItem("a", "Leipzig", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkam klamlkakamkmaka"));
-		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkank lalamka lkamkla mlkakam kmaka"));
-		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkamklamlkakamkmaka ssssssss "));
-		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkamklamlkakamkmaka gggg"));
-		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkamklamlkakamkmaka"));
+		items.add(new SolrItem("a", "Leipzig", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkam klamlkakamkmaka", "http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Coat_of_arms_of_Leipzig.svg/200px-Coat_of_arms_of_Leipzig.svg.png"));
+		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkank lalamka lkamkla mlkakam kmaka", "http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Coat_of_arms_of_Leipzig.svg/200px-Coat_of_arms_of_Leipzig.svg.png"));
+		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkamklamlkakamkmaka ssssssss ", "http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Coat_of_arms_of_Leipzig.svg/200px-Coat_of_arms_of_Leipzig.svg.png"));
+		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkamklamlkakamkmaka gggg", "http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Coat_of_arms_of_Leipzig.svg/200px-Coat_of_arms_of_Leipzig.svg.png"));
+		items.add(new SolrItem("b", "Dresden", "Leipzig is a city in Saxony, Germany. It has b la bkanklalamkalkamklamlkakamkmaka", "http://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Coat_of_arms_of_Leipzig.svg/200px-Coat_of_arms_of_Leipzig.svg.png"));
 		return items;
 	}
 	
