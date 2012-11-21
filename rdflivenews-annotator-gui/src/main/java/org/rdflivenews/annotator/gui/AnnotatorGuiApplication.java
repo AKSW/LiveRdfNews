@@ -28,6 +28,9 @@ import org.apache.commons.io.FileUtils;
 import org.rdflivenews.annotator.gui.AutocompleteWidget.SelectionListener;
 import org.rdflivenews.annotator.gui.SolrIndex.SolrItem;
 import org.apache.commons.lang3.StringUtils;
+import org.ini4j.Config;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
@@ -66,12 +69,27 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     
     Pattern pattern;
     
-    private SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
+    private SolrIndex index;
 //    private SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/#/dbpedia_resources/");
     
     private VerticalLayout mainLayout = new VerticalLayout();
 
     private NativeButton nextButton, trashButton;
+    
+    private Ini config;
+    
+    public AnnotatorGuiApplication() {
+        
+        try {
+            
+            config = new Ini(AnnotatorGuiApplication.class.getResourceAsStream("/annotator.ini"));
+            index  = new SolrIndex(config.get("general", "luceneIndex"));
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void init() {
@@ -218,22 +236,23 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         
         List<Pattern> patterns = new ArrayList<Pattern>();
         
-        try {
-			for (String line : FileUtils.readLines(new File(this.getClass().getClassLoader().getResource("patterns.txt").toURI()))) {
-			    
-			    try {
-			    
-			        String[] lineParts = line.split("___");
-			        Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]), lineParts[4]);
-			        patterns.add(defaultPattern);
-			    }
-			    catch (java.lang.NumberFormatException nfe) {
-			        
-			        System.out.println(line);
-			    }
-			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
+        // copy the file so that we dont need to recopy this over and over again
+        File file = new File(config.get("general", "dataDirectory") + config.get("general", "patternFileName"));
+        File newFile = new File(config.get("general", "dataDirectory") + config.get("general", "patternFileName").replace(".txt", "_todo.txt"));
+        if (!newFile.exists()) FileUtils.copyFile(file, newFile);
+        
+		for (String line : FileUtils.readLines(newFile) ) {
+		    
+		    try {
+		    
+		        String[] lineParts = line.split("___");
+		        Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]), lineParts[4]);
+		        patterns.add(defaultPattern);
+		    }
+		    catch (java.lang.NumberFormatException nfe) {
+		        
+		        System.out.println(line);
+		    }
 		}
         
         return patterns;
@@ -274,7 +293,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
      */
     private synchronized void writeTodoPatterns() {
         
-        BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer = new BufferedFileWriter(config.get("general", "dataDirectory") + config.get("general", "patternFileName").replace(".txt", "_todo.txt"), "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
         for ( Pattern pattern : patterns) 
             writer.write(patternToString(pattern));
         writer.close();
