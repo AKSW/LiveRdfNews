@@ -24,12 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.rdflivenews.annotator.gui.AutocompleteWidget.SelectionListener;
+import org.rdflivenews.annotator.gui.SolrIndex.SolrItem;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.vaadin.ui.AbstractField;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.ComboBox;
@@ -64,7 +64,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     
     Pattern pattern;
     
-    private AutocompleteComboBox subjectCombobox, objectCombobox;
     private SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
 //    private SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/#/dbpedia_resources/");
     
@@ -113,14 +112,24 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             grid.addComponent(patternLabel, 1, 1, 1, 1);
             grid.addComponent(object, 2, 1);
             
-//            subjectCombobox = new AutocompleteComboBox("Subject URI", index);
-//            grid.addComponent(subjectCombobox, 0, 2);
-//          subjectCombobox = new AutocompleteComboBox(index);
-//          grid.addComponent(subjectCombobox, 0, 1);
-          AutocompleteWidget w = new AutocompleteWidget(index);
-          grid.addComponent(w, 0, 2);
-            objectCombobox = new AutocompleteComboBox("Object URI", index);
-            grid.addComponent(objectCombobox, 2, 2);
+            AutocompleteWidget subject = new AutocompleteWidget(index);
+            subject.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void itemSelected(SolrItem item) {
+					subjectUri.setValue(item.getUri());
+				}
+			});
+            grid.addComponent(subject, 0, 2);
+            AutocompleteWidget object = new AutocompleteWidget(index);
+            object.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void itemSelected(SolrItem item) {
+					objectUri.setValue(item.getUri());
+				}
+			});
+            grid.addComponent(object, 2, 2);
             
             subjectUri = new TextField("Subject URI");
             objectUri = new TextField("Object URI");
@@ -289,7 +298,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             String subjectUri = "";
             
             // no subject uri at all -> need to generate one
-            if ( this.getComboBoxUri(subjectCombobox).isEmpty() && ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = generateUri(this.pattern.entityOne);
+            if ( this.subjectUri.getValue() == null || ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = generateUri(this.pattern.entityOne);
             
             String comment  = ((String) this.comment.getValue()).isEmpty() ? "" : (String) this.comment.getValue();
             String said     = ((String) this.saidObject.getValue()).isEmpty() ? "" : (String) this.saidObject.getValue();
@@ -298,7 +307,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             if ( !said.isEmpty() ) {
                 
                 // a subject uri was given
-                if ( !((String) this.subjectCombobox.getValue()).isEmpty() ) {
+                if ( !((String) this.subjectUri.getValue()).isEmpty() ) {
                     
                 }
                 // we need to generate a subject uri, object is a string literal
@@ -315,12 +324,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             
             getMainWindow().showNotification("trash");
         }
-    }
-    
-    private String getComboBoxUri(ComboBox combobox) {
-
-        // TODO Auto-generated method stub
-        return null;
     }
 
     private String generateUri(String label){

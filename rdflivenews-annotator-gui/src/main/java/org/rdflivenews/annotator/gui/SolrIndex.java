@@ -1,6 +1,9 @@
 package org.rdflivenews.annotator.gui;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
@@ -29,8 +32,8 @@ public class SolrIndex {
 		server.setMaxRetries(1); // defaults to 0. > 1 not recommended.
 	}
 	
-	public Set<SolrItem> search(String searchTerm){
-		Set<SolrItem> result = new HashSet<SolrIndex.SolrItem>();
+	public Collection<SolrItem> search(String searchTerm){
+		List<SolrItem> result = new ArrayList<SolrIndex.SolrItem>();
 		
 		SolrQuery q = new SolrQuery(searchField + ":(" + searchTerm  + "*)");
 		System.out.println(q);
@@ -44,18 +47,16 @@ public class SolrIndex {
 				uri = (String) doc.get("uri");
 				label = (String) doc.get("label");
 				description = (String) doc.get("comment");
-				System.out.println(uri + ": " + label);
 				result.add(new SolrItem(uri, label, description));
 			}
 		} catch (SolrServerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return result;
 	}
 	
-	public class SolrItem {
+	public static class SolrItem {
 		private String label;
 		private String uri;
 		private String description;
