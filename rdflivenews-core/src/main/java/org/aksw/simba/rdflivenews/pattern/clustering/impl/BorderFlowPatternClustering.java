@@ -85,7 +85,7 @@ public class BorderFlowPatternClustering implements PatternClustering {
     public static void main(String args[]) {
         Set<Similarity> test = new HashSet<>();
         List<Pattern> p = new ArrayList<>();
-        int size = 8;
+        int size = 10;
         for (int i = 0; i < size; i++) {
             Pattern pat = new DefaultPattern();
             pat.setNaturalLanguageRepresentation(i * i + "");
@@ -94,15 +94,18 @@ public class BorderFlowPatternClustering implements PatternClustering {
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                double sim = Double.parseDouble(p.get(i).getNaturalLanguageRepresentation())
-                        - Double.parseDouble(p.get(j).getNaturalLanguageRepresentation());
+                double sim = Math.abs(Double.parseDouble(p.get(i).getNaturalLanguageRepresentation())
+                        - Double.parseDouble(p.get(j).getNaturalLanguageRepresentation()));
                 sim = 1/(1+sim);
                 test.add(new Similarity(p.get(i), p.get(j), sim)); 
+                if(sim > 0.1)
+                System.out.println(p.get(i).getNaturalLanguageRepresentation() +"\t"
+                        +p.get(j).getNaturalLanguageRepresentation() +"\t"+sim);
             }
         }
         
         PatternClustering pc = new BorderFlowPatternClustering();
-        Set<Cluster<Pattern>> clusters = pc.clusterPatterns(test, 0.5);
+        Set<Cluster<Pattern>> clusters = pc.clusterPatterns(test, 0.1);
         for(Cluster<Pattern> cp: clusters)
         {
             for(Pattern pattern: cp)
