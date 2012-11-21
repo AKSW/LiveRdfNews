@@ -42,6 +42,7 @@ import org.aksw.simba.rdflivenews.pattern.similarity.generator.SimilarityGenerat
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.DefaultSimilarityGenerator;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
+import org.aksw.simba.rdflivenews.statistics.Statistics;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
@@ -86,7 +87,7 @@ public class RdfLiveNews {
         List<Pattern> patterns               = new ArrayList<Pattern>();
         Set<Integer> nonDuplicateSentenceIds = new HashSet<Integer>();
         
-        for ( ; ITERATION < 50/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+        for ( ; ITERATION < 40/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
             
             System.out.println("Starting Iteration #" + ITERATION + "!");
             
@@ -232,6 +233,13 @@ public class RdfLiveNews {
             // 8. Mapping to DBpedia
             DbpediaMapper mapper = new DefaultDbpediaMapper();
             mapper.map(clusters);
+            
+            // ##################################################
+            // ##################################################
+            // ##################################################
+            // 9. Create statistics like pos tag distribution
+            Statistics stats = new Statistics();
+            stats.createStatistics(patterns);
         }
     }
 }

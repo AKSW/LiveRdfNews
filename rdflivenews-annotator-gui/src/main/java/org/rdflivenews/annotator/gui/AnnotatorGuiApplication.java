@@ -331,6 +331,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             output.add(comment);
             output.add(this.pattern.luceneId + "");
             output.add(this.pattern.sentence);
+            output.add(this.clusterCategoriesBox.getValue().toString());
             
             BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns_annotated.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
             writer.write(StringUtils.join(output, "___"));

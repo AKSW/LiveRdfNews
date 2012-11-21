@@ -17,8 +17,7 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.map.DistributionMap;
-import com.github.gerbsen.map.MapUtil;
+import com.github.gerbsen.math.Frequency;
 
 import edu.stanford.nlp.util.StringUtils;
 
@@ -37,7 +36,7 @@ public class DefaultClusterLabeling implements ClusterLabeler {
             
             if ( cluster.isEmpty() ) throw new RuntimeException("A cluster may not be empty!");
             
-            DistributionMap<String> distribution = new DistributionMap<String>();
+            Frequency frequency = new Frequency();
             
             String domain = "";
             String range  = "";
@@ -57,12 +56,12 @@ public class DefaultClusterLabeling implements ClusterLabeler {
                 
 //                System.out.println(nlr +  " -> " + nameSuggestion);
                 
-                distribution.addElement(nameSuggestion);
+                frequency.addValue(nameSuggestion);
             }
             
             // the name of the cluster will be the most common string of all patterns
             // if this will every throw an error (indexoutofbounds) there is something wrong with the cluster
-            String name = distribution.sort().get(distribution.size() - 1).getKey();
+            String name = (String) frequency.sortByValue().get(0).getKey();
             
             cluster.setName(name);
             cluster.setUri(Constants.RDF_LIVE_NEWS_ONTOLOGY_PREFIX + WordUtils.uncapitalize(WordUtils.capitalize(name).replace(" ", "")));
@@ -74,6 +73,7 @@ public class DefaultClusterLabeling implements ClusterLabeler {
             
             String fileName = RdfLiveNews.DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "clusters");
             fileName = fileName.endsWith("/") ? fileName : fileName + System.getProperty("file.separator");
+            fileName += "iter-#" + RdfLiveNews.ITERATION + "-";
             fileName += this.getClass().getSimpleName() + "-" + RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").substring(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").lastIndexOf(".") + 1) + "-";
             fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".clstr";
             

@@ -53,7 +53,8 @@ public class DefaultSimilarityGenerator implements SimilarityGenerator {
                         if ( domainAndRangeMatch(pattern1, pattern2) ) {
                             
                             double similarity = this.similarityMetric.calculateSimilarity(pattern1, pattern2);
-                            if ( similarity > 0 ) similarities.add(new Similarity(pattern1, pattern2, similarity));
+                            if ( similarity >= RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) 
+                                similarities.add(new Similarity(pattern1, pattern2, similarity));
                         }
                     }
                 }
