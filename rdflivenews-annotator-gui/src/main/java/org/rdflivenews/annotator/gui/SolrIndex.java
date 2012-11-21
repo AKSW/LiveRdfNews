@@ -17,6 +17,7 @@ public class SolrIndex {
 
 	private HttpSolrServer server;
 	private final String searchField = "label";
+	private final int maxNrOfItems = 25;
 
 	public SolrIndex(String serverURL) {
 		server = new HttpSolrServer(serverURL);
@@ -36,6 +37,7 @@ public class SolrIndex {
 		List<SolrItem> result = new ArrayList<SolrIndex.SolrItem>();
 		
 		SolrQuery q = new SolrQuery(searchField + ":(" + searchTerm  + "*)");
+		q.setRows(maxNrOfItems);
 		System.out.println(q);
 		try {
 			QueryResponse rsp = server.query(q);

@@ -193,6 +193,10 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             main.addComponent(panel);
             ((VerticalLayout)main.getContent()).setHeight("100%");
             ((VerticalLayout)main.getContent()).setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
+            
+            //force URI search with given labels
+            subject.setSearchTerm(this.pattern.entityOne);
+            object.setSearchTerm(this.pattern.entityTwo);
         }
         else getMainWindow().showNotification("No patterns anymore...");
         

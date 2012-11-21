@@ -24,17 +24,22 @@ public class AutocompleteWidget extends VerticalLayout{
 	}
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
+	private TextField textField;
+	private Table table;
+	private SolrIndex index;
 	
 	public AutocompleteWidget(final SolrIndex index) {
+		this.index = index;
+		
 		setWidth("400px");
 		
-		TextField textField = new TextField();
+		textField = new TextField();
 		textField.setWidth("100%");
 		textField.setTextChangeEventMode(TextChangeEventMode.LAZY);
 		textField.setTextChangeTimeout(200);
 		addComponent(textField);
 		
-		final Table table = new Table();
+		table = new Table();
 		table.setColumnHeaderMode(Table.COLUMN_HEADER_MODE_HIDDEN);
 		table.addContainerProperty("item", SolrItemDescriptionWidget.class, null);
 		table.setImmediate(true);
@@ -48,31 +53,40 @@ public class AutocompleteWidget extends VerticalLayout{
 
 		    public void textChange(TextChangeEvent event) {
 		        if(event.getText().length() > 2){
-		        	table.removeAllItems();
-		        	Collection<SolrItem> newItems = index.search(event.getText());//getDummyItems();
-		        	SolrItemDescriptionWidget widget;
-		        	for(final SolrItem item : newItems){
-		        		widget = new SolrItemDescriptionWidget(item);
-		        		widget.addListener(new LayoutClickListener() {
-							
-							@Override
-							public void layoutClick(LayoutClickEvent event) {
-								if (table.isSelected(item)) {
-									table.unselect(item);
-								} else {
-									table.select(item);
-									fireItemSelectionChanged(item);
-								}
-							}
-						});
-		        		table.addItem(item).getItemProperty("item").setValue(widget);
-		        	}
+		        	onRefreshTable(event.getText());
 		        }
 		    }
 		});
 		
 		setExpandRatio(table, 1f);
 		setSpacing(true);
+	}
+	
+	public void setSearchTerm(String searchTerm){
+		textField.setValue(searchTerm);
+		onRefreshTable(searchTerm);
+	}
+	
+	private void onRefreshTable(String searchTerm){
+		table.removeAllItems();
+    	Collection<SolrItem> newItems = index.search(searchTerm);//getDummyItems();
+    	SolrItemDescriptionWidget widget;
+    	for(final SolrItem item : newItems){
+    		widget = new SolrItemDescriptionWidget(item);
+    		widget.addListener(new LayoutClickListener() {
+				
+				@Override
+				public void layoutClick(LayoutClickEvent event) {
+					if (table.isSelected(item)) {
+						table.unselect(item);
+					} else {
+						table.select(item);
+						fireItemSelectionChanged(item);
+					}
+				}
+			});
+    		table.addItem(item).getItemProperty("item").setValue(widget);
+    	}
 	}
 	
 	private void fireItemSelectionChanged(SolrItem item){
