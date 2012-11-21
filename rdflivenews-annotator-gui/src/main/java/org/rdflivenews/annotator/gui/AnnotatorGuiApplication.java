@@ -19,6 +19,7 @@ package org.rdflivenews.annotator.gui;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.rdflivenews.annotator.gui.AutocompleteWidget.SelectionListener;
 import org.rdflivenews.annotator.gui.SolrIndex.SolrItem;
-//import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
@@ -213,23 +214,27 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 //		return buttons;
 //    }
     
-    private static List<Pattern> readPatterns() throws IOException {
+    private List<Pattern> readPatterns() throws IOException {
         
         List<Pattern> patterns = new ArrayList<Pattern>();
         
-        for (String line : FileUtils.readLines(new File(dataPath + "/patterns.txt")) ) {
-            
-            try {
-            
-                String[] lineParts = line.split("___");
-                Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]), lineParts[4]);
-                patterns.add(defaultPattern);
-            }
-            catch (java.lang.NumberFormatException nfe) {
-                
-                System.out.println(line);
-            }
-        }
+        try {
+			for (String line : FileUtils.readLines(new File(this.getClass().getClassLoader().getResource("patterns.txt").toURI()))) {
+			    
+			    try {
+			    
+			        String[] lineParts = line.split("___");
+			        Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]), lineParts[4]);
+			        patterns.add(defaultPattern);
+			    }
+			    catch (java.lang.NumberFormatException nfe) {
+			        
+			        System.out.println(line);
+			    }
+			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
         
         return patterns;
     }
@@ -301,11 +306,18 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             String objectUri    = "";
             
             // no subject uri at all -> need to generate one
-            if ( this.subjectUri.getValue() == null || ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = generateUri(this.pattern.entityOne);
-//            if ( this.getComboBoxUri(subjectCombobox).isEmpty() && ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = generateUri(this.pattern.entityOne);
-//            if ( !this.getComboBoxUri(subjectCombobox).isEmpty() && ((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = this.getComboBoxUri(subjectCombobox);
-//            if ( this.getComboBoxUri(subjectCombobox).isEmpty() && !((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = (String) this.subjectUri.getValue();
-//            if ( !this.getComboBoxUri(subjectCombobox).isEmpty() && !((String) this.subjectUri.getValue()).isEmpty() ) subjectUri = (String) this.subjectUri.getValue();
+            if ( this.subjectUri.getValue() == null || ((String) this.subjectUri.getValue()).isEmpty() ) {
+            	subjectUri = generateUri(this.pattern.entityOne);
+            } else {
+            	subjectUri = (String) this.subjectUri.getValue();
+            }
+            
+            // no object uri at all -> need to generate one
+            if ( this.objectUri.getValue() == null || ((String) this.objectUri.getValue()).isEmpty() ) {
+            	objectUri = generateUri(this.pattern.entityOne);
+            } else {
+            	objectUri = (String) this.objectUri.getValue();
+            }
             
             String comment  = ((String) this.comment.getValue()).isEmpty() ? "" : (String) this.comment.getValue();
             String said     = ((String) this.saidObject.getValue()).isEmpty() ? "" : (String) this.saidObject.getValue();
@@ -326,11 +338,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             else {
                 
             }
-             // no subject uri at all -> need to generate one
-//            if ( this.getComboBoxUri(objectCombobox).isEmpty() && ((String) this.objectUri.getValue()).isEmpty() ) objectUri = generateUri(this.pattern.entityTwo);
-//            if ( !this.getComboBoxUri(objectCombobox).isEmpty() && ((String) this.objectUri.getValue()).isEmpty() ) objectUri = this.getComboBoxUri(objectCombobox);
-//            if ( this.getComboBoxUri(objectCombobox).isEmpty() && !((String) this.objectUri.getValue()).isEmpty() ) objectUri = (String) this.objectUri.getValue();
-//            if ( !this.getComboBoxUri(objectCombobox).isEmpty() && !((String) this.objectUri.getValue()).isEmpty() ) objectUri = (String) this.objectUri.getValue();
             
             List<String> output = new ArrayList<String>();
             output.add(said.isEmpty() ? "NORMAL" : "SAY");
@@ -344,7 +351,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             output.add(this.pattern.sentence);
             
             BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns_annotated.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-//            writer.write(StringUtils.join(output, "___"));
+            writer.write(StringUtils.join(output, "___"));
             writer.close();
             
             patterns.remove(this.pattern);
@@ -357,11 +364,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         }
     }
     
-    private String getComboBoxUri(ComboBox combobox) {
-
-        return "";
-    }
-
     private String generateUri(String label){
         
         try {
