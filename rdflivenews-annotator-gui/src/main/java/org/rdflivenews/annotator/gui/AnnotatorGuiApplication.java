@@ -135,6 +135,9 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             grid.addComponent(subject, 0, 1);
             grid.addComponent(patternLabel, 1, 1, 2, 1);
             grid.addComponent(object, 3, 1);
+            grid.setComponentAlignment(subject, Alignment.MIDDLE_LEFT);
+            grid.setComponentAlignment(patternLabel, Alignment.MIDDLE_RIGHT);
+            grid.setComponentAlignment(object, Alignment.MIDDLE_RIGHT);
             
             AutocompleteWidget subject = new AutocompleteWidget(index);
             subject.addSelectionListener(new SelectionListener() {
@@ -144,7 +147,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 					subjectUri.setValue(item.getUri());
 				}
 			});
-            grid.addComponent(subject, 0, 2);
+            grid.addComponent(subject, 0, 2, 1, 2);
             AutocompleteWidget object = new AutocompleteWidget(index);
             object.addSelectionListener(new SelectionListener() {
 				
@@ -153,7 +156,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 					objectUri.setValue(item.getUri());
 				}
 			});
-            grid.addComponent(object, 3, 2);
+            grid.addComponent(object, 2, 2 , 3, 2);
             
             subjectUri = new TextField("Subject URI");
             objectUri = new TextField("Object URI");
@@ -172,6 +175,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             
             //cluster category combobox
             clusterCategoriesBox = new ComboBox();
+            clusterCategoriesBox.setWidth("100%");
             clusterCategoriesBox.setCaption("Cluster Category");
             clusterCategoriesBox.addContainerProperty("name", String.class, null);
             clusterCategoriesBox.setItemCaptionMode(ComboBox.ITEM_CAPTION_MODE_ITEM);
