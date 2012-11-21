@@ -105,6 +105,9 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         }
         
         if ( !patterns.isEmpty() ) {
+            
+            mainLayout.removeAllComponents();
+            main.removeAllComponents();
          
             this.pattern = patterns.get(0);
             
@@ -166,7 +169,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             comment.setWidth("100%");
             grid.addComponent(comment, 0, 5, 2, 5);
             
-            Panel panel = new Panel();
             mainLayout.addComponent(grid);
             
             HorizontalLayout submitButtonslayout = new HorizontalLayout();
@@ -185,11 +187,10 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             mainLayout.setSpacing(true);
             mainLayout.setWidth(null);
             mainLayout.setHeight("100%");
+            Panel panel = new Panel();
             panel.setWidth(null);
-            
             panel.addComponent(mainLayout);
             
-            getMainWindow().removeAllComponents();
             main.addComponent(panel);
             ((VerticalLayout)main.getContent()).setHeight("100%");
             ((VerticalLayout)main.getContent()).setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
@@ -198,41 +199,12 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         
     }
     
-//    private Component createButtonPanel(){
-//    	VerticalLayout buttons = new VerticalLayout();
-//		buttons.setHeight("100%");
-//		buttons.addStyleName("buttons");
-//		Button posExampleButton = new Button();
-//		posExampleButton.setIcon(new ThemeResource("images/thumb_up.png"));
-//		posExampleButton.addStyleName(BaseTheme.BUTTON_LINK);
-//		posExampleButton.setDescription("Click if this pattern is a good pattern.");
-//		posExampleButton.addListener(new Button.ClickListener() {
-//			
-//			@Override
-//			public void buttonClick(ClickEvent event) {
-//				fireGoodPatternDecision();
-//			}
-//		});
-//		buttons.addComponent(posExampleButton);
-//		Button negExampleButton = new Button();
-//		negExampleButton.setIcon(new ThemeResource("images/thumb_down.png"));
-//		negExampleButton.addStyleName(BaseTheme.BUTTON_LINK);
-//		negExampleButton.setDescription("Click if this pattern is a bad pattern.");
-//		negExampleButton.addListener(new Button.ClickListener() {
-//			
-//			@Override
-//			public void buttonClick(ClickEvent event) {
-//				fireBadPatternDecision();
-//			}
-//		});
-//		buttons.addComponent(negExampleButton);
-//		buttons.setComponentAlignment(posExampleButton, Alignment.MIDDLE_CENTER);
-//		buttons.setComponentAlignment(negExampleButton, Alignment.MIDDLE_CENTER);
-//		
-//		return buttons;
-//    }
-    
-    private List<Pattern> readPatterns() throws IOException {
+    /**
+     * 
+     * @return
+     * @throws IOException
+     */
+    private synchronized List<Pattern> readPatterns() throws IOException {
         
         List<Pattern> patterns = new ArrayList<Pattern>();
         
@@ -241,7 +213,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         File newFile = new File(config.get("general", "dataDirectory") + config.get("general", "patternFileName").replace(".txt", "_todo.txt"));
         if (!newFile.exists()) FileUtils.copyFile(file, newFile);
         
-		for (String line : FileUtils.readLines(newFile) ) {
+		for (String line : FileUtils.readLines(newFile, "UTF-8") ) {
 		    
 		    try {
 		    
@@ -257,27 +229,12 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         
         return patterns;
     }
-    
-//    private void fireGoodPatternDecision(){
-//    	BufferedFileWriter writer = new BufferedFileWriter(dataPath + "good_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-//        writer.write(patternToString(this.pattern));
-//        writer.close();
-//        
-//        patterns.remove(this.pattern);
-//        writeTodoPatterns();
-//        this.init();
-//    }
-//    
-//    private void fireBadPatternDecision(){
-//    	BufferedFileWriter writer = new BufferedFileWriter(dataPath + "bad_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-//        writer.write(patternToString(this.pattern));
-//        writer.close();
-//        
-//        patterns.remove(this.pattern);
-//        writeTodoPatterns();
-//        this.init();
-//    }
 
+    /**
+     * 
+     * @param pattern
+     * @return
+     */
     public static String patternToString(Pattern pattern) {
         
         return pattern.entityOne + "___" +
@@ -317,7 +274,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     }
 
     @Override
-    public void buttonClick(ClickEvent event) {
+    public synchronized void buttonClick(ClickEvent event) {
 
         if ( event.getSource().equals(nextButton) ) {
             
@@ -341,23 +298,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             String comment  = ((String) this.comment.getValue()).isEmpty() ? "" : (String) this.comment.getValue();
             String said     = ((String) this.saidObject.getValue()).isEmpty() ? "" : (String) this.saidObject.getValue();
             
-            // we have a pattern which is a pattern from the say cluster
-            if ( !said.isEmpty() ) {
-                
-                // a subject uri was given
-                if ( !((String) this.subjectUri.getValue()).isEmpty() ) {
-                    
-                }
-                // we need to generate a subject uri, object is a string literal
-                else {
-                    
-                }
-            }
-            // regular pattern
-            else {
-                
-            }
-            
             List<String> output = new ArrayList<String>();
             output.add(said.isEmpty() ? "NORMAL" : "SAY");
             output.add(this.pattern.entityOne);
@@ -379,7 +319,12 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         }
         else if (event.getSource().equals(trashButton)) {
             
-            getMainWindow().showNotification("trash");
+            BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns_trash.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
+            writer.write(patternToString(this.pattern));
+            writer.close();
+            patterns.remove(this.pattern);
+            writeTodoPatterns();
+            this.init();
         }
     }
     
