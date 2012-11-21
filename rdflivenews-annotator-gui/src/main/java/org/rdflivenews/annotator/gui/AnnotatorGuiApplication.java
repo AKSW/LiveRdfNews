@@ -78,6 +78,8 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     
     private Ini config;
     
+    private ComboBox clusterCategoriesBox;
+    
     public AnnotatorGuiApplication() {
         
         try {
@@ -111,7 +113,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
          
             this.pattern = patterns.get(0);
             
-            GridLayout grid = new GridLayout(3, 6);
+            GridLayout grid = new GridLayout(4, 6);
             grid.setSpacing(true);
             
             subject = new Label("<span style=\"font-size:130%\">" + this.pattern.entityOne + "</span>");
@@ -129,10 +131,10 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             sentence =  new Label(sentenceLabel);
             sentence.setContentMode(Label.CONTENT_XHTML);
             
-            grid.addComponent(sentence, 0, 0, 2, 0);
+            grid.addComponent(sentence, 0, 0, 3, 0);
             grid.addComponent(subject, 0, 1);
-            grid.addComponent(patternLabel, 1, 1, 1, 1);
-            grid.addComponent(object, 2, 1);
+            grid.addComponent(patternLabel, 1, 1, 2, 1);
+            grid.addComponent(object, 3, 1);
             
             AutocompleteWidget subject = new AutocompleteWidget(index);
             subject.addSelectionListener(new SelectionListener() {
@@ -151,22 +153,36 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 					objectUri.setValue(item.getUri());
 				}
 			});
-            grid.addComponent(object, 2, 2);
+            grid.addComponent(object, 3, 2);
             
             subjectUri = new TextField("Subject URI");
             objectUri = new TextField("Object URI");
             subjectUri.setWidth("100%");
             objectUri.setWidth("100%");
             grid.addComponent(subjectUri, 0, 3);
-            grid.addComponent(objectUri, 2, 3);
+            grid.addComponent(objectUri, 3, 3);
 
             saidObject = new TextArea("Say Cluster Object Value");
             saidObject.setWidth("100%");
-            grid.addComponent(saidObject, 0, 5, 0, 5);
+            grid.addComponent(saidObject, 0, 5, 1, 5);
             
             comment = new TextArea("Comments");
             comment.setWidth("100%");
-            grid.addComponent(comment, 2, 5, 2, 5);
+            grid.addComponent(comment, 2, 5, 3, 5);
+            
+            //cluster category combobox
+            clusterCategoriesBox = new ComboBox();
+            clusterCategoriesBox.setCaption("Cluster Category");
+            clusterCategoriesBox.addContainerProperty("name", String.class, null);
+            clusterCategoriesBox.setItemCaptionMode(ComboBox.ITEM_CAPTION_MODE_ITEM);
+            for(ClusterCategory cat : ClusterCategory.values()){
+            	clusterCategoriesBox.addItem(cat).getItemProperty("name").setValue(cat.getName());
+            }
+            clusterCategoriesBox.setImmediate(true);
+            clusterCategoriesBox.setValue(ClusterCategory.UNKNOWN);
+            clusterCategoriesBox.setNullSelectionAllowed(false);
+            grid.addComponent(clusterCategoriesBox, 1, 3, 2, 3);
+            grid.setComponentAlignment(clusterCategoriesBox, Alignment.BOTTOM_CENTER);
             
             mainLayout.addComponent(grid);
             
