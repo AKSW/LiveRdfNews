@@ -114,19 +114,18 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             GridLayout grid = new GridLayout(3, 6);
             grid.setSpacing(true);
             
-            subject = new Label(this.pattern.entityOne);
+            subject = new Label("<span style=\"font-size:130%\">" + this.pattern.entityOne + "</span>");
             subject.setContentMode(Label.CONTENT_XHTML);
-            patternLabel = new Label("<b>" + this.pattern.nlr + "</b>");
+            patternLabel = new Label("<span style=\"font-size:130%;color:red\">" + this.pattern.nlr + "</span>");
             patternLabel.setContentMode(Label.CONTENT_XHTML);
-            object = new Label(this.pattern.entityTwo);
+            object = new Label("<span style=\"font-size:130%\">" + this.pattern.entityTwo + "</span>");
             object.setContentMode(Label.CONTENT_XHTML);
             
-            String sentenceLabel = "<h2>" + this.pattern.sentence.
-                    replace(this.pattern.entityOne, "<b>" + this.pattern.entityOne + "</b>").
-                    replace(this.pattern.entityTwo, "<b>" + this.pattern.entityTwo + "</b>").
-                    replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>") + "</h2>";
+            String sentenceLabel = "<span style=\"font-size:130%\">" + this.pattern.sentence.
+                    replace(this.pattern.entityOne, "<span style=\"font-weight:bold\">" + this.pattern.entityOne + "</span>").
+                    replace(this.pattern.entityTwo, "<span style=\"font-weight:bold\">" + this.pattern.entityTwo + "</span>").
+                    replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>") + "</span>";
             
-
             sentence =  new Label(sentenceLabel);
             sentence.setContentMode(Label.CONTENT_XHTML);
             
