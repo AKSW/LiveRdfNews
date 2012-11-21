@@ -25,7 +25,7 @@ public class AutocompleteWidget extends VerticalLayout{
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	
-	public AutocompleteWidget(SolrIndex solrIndex) {
+	public AutocompleteWidget(final SolrIndex index) {
 		setWidth("400px");
 		
 		TextField textField = new TextField();
@@ -49,7 +49,7 @@ public class AutocompleteWidget extends VerticalLayout{
 		    public void textChange(TextChangeEvent event) {
 		        if(event.getText().length() > 2){
 		        	table.removeAllItems();
-		        	Collection<SolrItem> newItems = getDummyItems();//index.search(event.getText());
+		        	Collection<SolrItem> newItems = index.search(event.getText());//getDummyItems();
 		        	SolrItemDescriptionWidget widget;
 		        	for(final SolrItem item : newItems){
 		        		widget = new SolrItemDescriptionWidget(item);
