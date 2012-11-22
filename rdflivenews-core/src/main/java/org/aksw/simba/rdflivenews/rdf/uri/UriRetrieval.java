@@ -3,6 +3,8 @@
  */
 package org.aksw.simba.rdflivenews.rdf.uri;
 
+import java.util.List;
+
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -10,5 +12,5 @@ package org.aksw.simba.rdflivenews.rdf.uri;
  */
 public interface UriRetrieval {
 
-    public String getUri(String label);
+    public String getUri(String text, List<String> entityLabels);
 }
