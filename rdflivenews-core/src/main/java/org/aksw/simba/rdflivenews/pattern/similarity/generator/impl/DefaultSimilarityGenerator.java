@@ -29,43 +29,57 @@ import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 public class DefaultSimilarityGenerator implements SimilarityGenerator {
 
     private SimilarityMetric similarityMetric;
-    private Set<Similarity> similarities;
+    private Set<Similarity> similaritiesAboveThreshold;
+    private Set<Similarity> similaritiesBelowThreshold;
 
     public DefaultSimilarityGenerator(SimilarityMetric similarityMetric) {
 
-        this.similarityMetric   = similarityMetric;
-        this.similarities       = new HashSet<>();
+        this.similarityMetric           = similarityMetric;
+        this.similaritiesAboveThreshold = new HashSet<>();
+        this.similaritiesBelowThreshold = new HashSet<>();
     }
 
     @Override
     public Set<Similarity> calculateSimilarities(List<Pattern> patterns) {
         
-        System.out.println(this.similarities.size() + " similarities cached! Worst case: " + patterns.size() * patterns.size() + " comparisons!");
+        int numberOfPatternsAboveThreshold = this.countPatternsAboveThreshold(patterns);
+        System.out.println(this.similaritiesAboveThreshold.size() + " similarities above threshold and " + this.similaritiesBelowThreshold.size() + " below threshold cached! Worst case: " + ((numberOfPatternsAboveThreshold * numberOfPatternsAboveThreshold) - numberOfPatternsAboveThreshold) + " comparisons!");
 
-        for ( Pattern pattern1 : patterns ) { 
+        for ( Pattern pattern1 : patterns ) {
+            // this greatly reduces the number of comparisons since the patterns are zipf distributed with a very long tail
             if ( pattern1.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
+                
                 for ( Pattern pattern2 : patterns ) {
+                    // this greatly reduces the number of comparisons since the patterns are zipf distributed with a very long tail
+                    if ( pattern2.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
 
-                    Similarity sim = new Similarity(pattern1, pattern2); 
-                    
-                    // avoid recalculation in every iteration and avoid having identities in the set
-                    // and make sure that we only generate similarities for identical type patterns
-                    if ( !this.similarities.contains(sim) && !pattern1.equals(pattern2) ) {
+                        Similarity sim = new Similarity(pattern1, pattern2);
                         
-                        if ( RdfLiveNews.CONFIG.getBooleanSetting("similarity", "checkDomainAndRange") && 
-                                domainAndRangeMatch(pattern1, pattern2) ) {
+                        // avoid recalculation in every iteration and avoid having identities in the set
+                        // and make sure that we only generate similaritiesAboveThreshold for identical type patterns
+                        if ( (!this.similaritiesAboveThreshold.contains(sim) && !this.similaritiesBelowThreshold.contains(sim)) &&
+                                !pattern1.equals(pattern2) ) {
                             
-                            sim.setSimilarity(this.similarityMetric.calculateSimilarity(pattern1, pattern2));
-                            
-                            if ( sim.getSimilarity() >= RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) 
-                                similarities.add(sim);
-                        }
-                        else {
-                            
-                            sim.setSimilarity(this.similarityMetric.calculateSimilarity(pattern1, pattern2));
-                            
-                            if ( sim.getSimilarity() >= RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) 
-                                similarities.add(sim);
+                            if ( RdfLiveNews.CONFIG.getBooleanSetting("similarity", "checkDomainAndRange") ) {
+                                if ( this.domainAndRangeMatch(pattern1, pattern2) ) {
+
+                                    sim.setSimilarity(this.similarityMetric.calculateSimilarity(pattern1, pattern2));
+                                    
+                                    if ( sim.getSimilarity() >= RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) 
+                                        similaritiesAboveThreshold.add(sim);
+                                    else 
+                                        similaritiesBelowThreshold.add(sim);
+                                }
+                            }
+                            else {
+                                
+                                sim.setSimilarity(this.similarityMetric.calculateSimilarity(pattern1, pattern2));
+                                
+                                if ( sim.getSimilarity() >= RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) 
+                                    similaritiesAboveThreshold.add(sim);
+                                else
+                                    similaritiesBelowThreshold.add(sim);
+                            }
                         }
                     }
                 }
@@ -81,15 +95,7 @@ public class DefaultSimilarityGenerator implements SimilarityGenerator {
             fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".tsv";
                     
             List<String> lines = new ArrayList<String>();
-            
-            for ( Similarity sim : similarities ) {
-                
-                String line = sim.getPattern1().getNaturalLanguageRepresentation() + "\t";
-                line += sim.getPattern2().getNaturalLanguageRepresentation() + "\t";
-                line += sim.getSimilarity();
-                
-                lines.add(line);
-            }
+            for ( Similarity sim : similaritiesAboveThreshold ) lines.add(sim.toString());
 
             Collections.sort(lines);
             BufferedFileWriter writer = new BufferedFileWriter(fileName, "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
@@ -97,7 +103,15 @@ public class DefaultSimilarityGenerator implements SimilarityGenerator {
             writer.close();
         }
         
-        return similarities; 
+        return similaritiesAboveThreshold; 
+    }
+
+    private int countPatternsAboveThreshold(List<Pattern> patterns) {
+
+        int count = 0;
+        for ( Pattern p : patterns ) if ( p.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) count++;
+        
+        return count;
     }
 
     private boolean domainAndRangeMatch(Pattern pattern1, Pattern pattern2) {

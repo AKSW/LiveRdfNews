@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.pattern.refinement.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,8 @@ import org.aksw.simba.rdflivenews.pattern.refinement.type.TypeDeterminer;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.DETERMINER_TYPE;
 import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
+
+import com.github.gerbsen.math.Frequency;
 
 
 /**
@@ -51,6 +54,9 @@ public class DefaultPatternRefiner implements PatternRefiner {
         for ( EntityPair pair : pattern.getLearnedFromEntities() ) {
             
             if ( pair.isNew() ) {
+                
+                // mark the pair as not no, so that we dont process it again in subsequent iterations
+                pair.setNew(false);
 
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
                 pair.getFirstEntity().setUri(this.uriRetrieval.getUri(pair.getFirstEntity().getLabel()));
@@ -66,8 +72,6 @@ public class DefaultPatternRefiner implements PatternRefiner {
                                 RdfLiveNews.CONFIG.getStringSetting("refinement", "typing").equals(DETERMINER_TYPE.SUPER_CLASS.toString()) ? 
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUPER_CLASS) : 
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUB_CLASS));
-                    
-                    else pair.getFirstEntity().setType(Constants.OWL_THING);
                 }
                 
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
@@ -84,12 +88,7 @@ public class DefaultPatternRefiner implements PatternRefiner {
                                 RdfLiveNews.CONFIG.getStringSetting("refinement", "typing").equals(DETERMINER_TYPE.SUPER_CLASS.toString()) ? 
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUPER_CLASS) : 
                                 typer.getTypeClass(types, DETERMINER_TYPE.SUB_CLASS));
-                    
-                    else pair.getSecondEntity().setType(Constants.OWL_THING);
                 }
-                
-                // mark the pair as not no, so that we dont process it again in subsequent iterations
-                pair.setNew(false);
             }
         }
         
@@ -106,32 +105,16 @@ public class DefaultPatternRefiner implements PatternRefiner {
      */
     private String generateFavouriteType(List<String> foundTypes) {
         
-        Map<String,Integer> types = new HashMap<String,Integer>();
+        String type = Constants.OWL_THING;
         
-        //  add them all to the list
-        for ( String foundType : foundTypes ) {
+        if ( !foundTypes.isEmpty() ) {
             
-            if ( !foundType.equals(Constants.OWL_THING) ) {
-
-                if ( types.containsKey(foundType) ) types.put(foundType, types.get(foundType) + 1);
-                else types.put(foundType, 1);
-            }
+            Frequency frequency = new Frequency();
+            for ( String foundType : foundTypes ) frequency.addValue(foundType);
+            type = (String) frequency.sortByValue().get(0).getKey();
         }
         
-        // find the maximum
-        int maximum          = -1;
-        String favouriteType = "";
-        
-        for ( Map.Entry<String, Integer> entry : types.entrySet() ) {
-            
-            if ( entry.getValue() > maximum ) {
-                
-                maximum         = entry.getValue();
-                favouriteType   = entry.getKey();
-            }
-        }
-        
-        return favouriteType;
+        return type;
     }
     
     /**
@@ -141,16 +124,7 @@ public class DefaultPatternRefiner implements PatternRefiner {
      */
     public void refinePatterns(List<Pattern> patterns) {
 
-        int i = 0;
-        for ( Pattern pattern : patterns ) {
-            
-            if ( pattern.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("scoring", "occurrenceThreshold")) {
-
-//                System.out.println("refining pattern " + i++ + " " + pattern.getNaturalLanguageRepresentation());
-                this.refinePattern(pattern);
-            }
-        }
-        
+        for ( Pattern pattern : patterns ) this.refinePattern(pattern);
         this.luceneRefinementManager.close();
     }
 }

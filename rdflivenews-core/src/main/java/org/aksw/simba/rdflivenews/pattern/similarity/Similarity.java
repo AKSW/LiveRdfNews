@@ -108,4 +108,13 @@ public class Similarity {
                 return false;
         return true;
     }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+
+        return this.pattern1.getNaturalLanguageRepresentation() + "\t" + this.pattern2.getNaturalLanguageRepresentation() + "\t" + this.similarity;
+    }
 }

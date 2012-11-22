@@ -45,5 +45,6 @@ public class DefaultUriRetrieval implements UriRetrieval {
         }
         System.out.println(new LuceneRefinementManager().getPossibleUri("Mississippi"));
         System.out.println(new LuceneRefinementManager().getPossibleUri("Environmental Protection"));
+        System.out.println(new LuceneRefinementManager().getPossibleUri("Prince Edward Island"));
     }
 }

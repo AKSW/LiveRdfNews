@@ -8,6 +8,7 @@ import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
+import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
 import org.apache.log4j.chainsaw.Main;
 
 import com.github.gerbsen.file.BufferedFileWriter;
@@ -56,7 +57,7 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
                 if (Constants.STOP_WORDS.contains(tokenTwo.toLowerCase())) continue;
                 
                 double sim = Wordnet.getInstance().getWordnetSimilarity(
-                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), Wordnet.LIN_SIMILARITY);
+                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), WordnetSimilarity.LIN);
 
                 total += sim;
                 comparison++;

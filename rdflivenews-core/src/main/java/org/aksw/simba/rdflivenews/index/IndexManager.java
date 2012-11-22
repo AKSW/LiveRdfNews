@@ -293,7 +293,7 @@ public class IndexManager {
             
             if ( i++ % 1000 == 0 ) System.out.print("\r" + NumberFormat.getPercentInstance().format((double) i / collector.getTotalHits()));
 
-            Document oldDoc = LuceneManager.getDocument(searcher.getIndexReader(), hit.doc);
+            Document oldDoc = LuceneManager.getDocumentByNumber(searcher.getIndexReader(), hit.doc);
 
             if ( oldDoc != null ) {
                 
@@ -486,17 +486,17 @@ public class IndexManager {
      * @throws CorruptIndexException
      * @throws IOException
      */
-    public int getHighestTimeSliceId() throws CorruptIndexException, IOException {
+    public int getHighestTimeSliceId() {
         
-        IndexReader reader = IndexReader.open(INDEX);
+        IndexReader reader = LuceneManager.openIndexReader(INDEX);
         IndexSearcher searcher = new IndexSearcher(reader);
         int maxTimeSliceId = 0;
         
         for ( int i = 0; i < reader.maxDoc() ; i++ ) 
-            maxTimeSliceId = Math.max(Integer.valueOf(searcher.doc(i).get(Constants.LUCENE_FIELD_TIME_SLICE)), maxTimeSliceId);
+            maxTimeSliceId = Math.max(Integer.valueOf(LuceneManager.getDocumentByNumber(reader, i).get(Constants.LUCENE_FIELD_TIME_SLICE)), maxTimeSliceId);
         
-        reader.close();
-        searcher.close();
+        LuceneManager.closeIndexReader(reader);
+        LuceneManager.closeIndexSearcher(searcher);
         
         return maxTimeSliceId;
     }
@@ -505,7 +505,7 @@ public class IndexManager {
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
         LuceneManager.query(searcher, query, collector);
-        return LuceneManager.getDocument(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
+        return LuceneManager.getDocumentByNumber(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
     }
 
     /**
@@ -531,11 +531,36 @@ public class IndexManager {
         // add the primary key of each document to the list
         for ( ScoreDoc doc : collector.topDocs().scoreDocs )
             nonDuplicateSentencesUntilIteration.add(
-                    Integer.valueOf(LuceneManager.getDocument(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_ID)));
+                    Integer.valueOf(LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_ID)));
         
         LuceneManager.closeIndexReader(searcher.getIndexReader());
         LuceneManager.closeIndexSearcher(searcher);
         
         return nonDuplicateSentencesUntilIteration;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public Set<Integer> getNonDuplicateSentences() {
+
+        Query duplicate = new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(Constants.NOT_DUPLICATE_SENTENCE)));
+        
+        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(2_000_000, false);
+        LuceneManager.query(searcher, duplicate, collector);
+        
+        Set<Integer> nonDuplicateSentences = new HashSet<>();
+        
+        // add the primary key of each document to the list
+        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
+            nonDuplicateSentences.add(
+                    Integer.valueOf(LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_ID)));
+        
+        LuceneManager.closeIndexReader(searcher.getIndexReader());
+        LuceneManager.closeIndexSearcher(searcher);
+        
+        return nonDuplicateSentences;
     }
 }

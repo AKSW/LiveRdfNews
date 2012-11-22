@@ -92,7 +92,8 @@ public class RdfLiveNews {
         SimilarityGenerator similarityGenerator = new DefaultSimilarityGenerator(
                 (SimilarityMetric) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")));
         
-        for ( ; ITERATION < 10/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+//        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+        for ( ; ITERATION < IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
             
             System.out.println("Starting Iteration #" + ITERATION + "!");
             
@@ -107,6 +108,7 @@ public class RdfLiveNews {
             Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
 //            deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
             Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
+//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
             nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
             
             System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
@@ -121,7 +123,8 @@ public class RdfLiveNews {
 
             // we can only find patterns if we have NER or POS tags annotated
             NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
-            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+//            if you have not yet tagged all sentences in the index you need to uncomment this
+//            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
 
             System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -141,7 +144,6 @@ public class RdfLiveNews {
             PatternFilter patternFilter = new DefaultPatternFilter();
             patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
             patterns                    = patternSearchManager.mergeNewFoundAndOldPattern(patterns, patternsOfIteration);
-            patternSearchManager.logPatterns(patterns);
 
             System.out.println(String.format("Finished pattern search with %s patterns in current iteration and %s total patterns in %s!", patternsOfIteration.size(), patterns.size(),  TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -170,6 +172,7 @@ public class RdfLiveNews {
             // scores the pattern according to certain features
             PatternScorer patternScorer = new OccurrencePatternScorer();
             patternScorer.scorePatterns(patterns);
+            patternSearchManager.logPatterns(patterns);
             
             System.out.println(String.format("Finished pattern scoring in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -214,8 +217,8 @@ public class RdfLiveNews {
             // ##################################################
             // ##################################################
             // 6.2 we can merge the clusters
-            // ClusterMerger clusterMerger = new DefaultClusterMerger();
-            // clusterMerger.mergeCluster(clusters);
+             ClusterMerger clusterMerger = new DefaultClusterMerger();
+             clusterMerger.mergeCluster(clusters);
             
             // ##################################################
             // ##################################################
@@ -245,7 +248,7 @@ public class RdfLiveNews {
             stats.createStatistics(patterns);
         }
     }
-    
+
     private static void initializeDataDirectory() {
 
         if ( !new File(RdfLiveNews.DATA_DIRECTORY + "clusters").exists()) 
