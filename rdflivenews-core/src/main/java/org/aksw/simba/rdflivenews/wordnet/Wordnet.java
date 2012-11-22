@@ -28,22 +28,45 @@ public class Wordnet {
     private static Wordnet INSTANCE;
     
     private static ILexicalDatabase db = new NictWordNet();
-    private static RelatednessCalculator[] rcs = {
-                    /* way too slow new HirstStOnge(db),*/ new LeacockChodorow(db), new Lesk(db),  new WuPalmer(db), 
-                    new Resnik(db), new JiangConrath(db), new Lin(db), new Path(db)
-                    };
-    public static final int HSO_SIMILARITY = 0;
-    public static final int LCH_SIMILARITY = 1;
-    public static final int LESK_SIMILARITY = 2;
-    public static final int WUP_SIMILARITY = 3;
-    public static final int RES_SIMILARITY = 4;
-    public static final int JCN_SIMILARITY = 5;
-    public static final int LIN_SIMILARITY = 6;
-    public static final int PATH_SIMILARITY = 7;
-    
-    private Wordnet() {
+
+    /**
+     * 
+     * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
+     *
+     */
+    public enum WordnetSimilarity {
         
+        LEACOCK_CHODOROW (new LeacockChodorow(db)),
+        LEST             (new Lesk(db)),
+        WU_PALMER        (new WuPalmer(db)), 
+        RESNIK           (new Resnik(db)), 
+        JIANG_CONRATH    (new JiangConrath(db)), 
+        LIN              (new Lin(db)), 
+        PATH             (new Path(db));
+
+        public final RelatednessCalculator relatednessCalculator;
+        
+        /**
+         * 
+         * @param rc
+         */
+        WordnetSimilarity(RelatednessCalculator rc) {
+            this.relatednessCalculator = rc;
+        }
+
+        /**
+         * 
+         * @param word1
+         * @param word2
+         * @return
+         */
+        public double calcRelatednessOfWords(String word1, String word2) {
+
+            return this.relatednessCalculator.calcRelatednessOfWords(word1, word2);
+        }
     }
+    
+    private Wordnet() { /* singleton*/ }
     
     public static Wordnet getInstance() {
         
@@ -58,32 +81,34 @@ public class Wordnet {
      * @param similarityType
      * @return
      */
-    public double getWordnetSimilarity(String word1, String word2, int similarityType) {
+    public double getWordnetSimilarity(String word1, String word2, WordnetSimilarity similarity) {
     	    	
         WS4JConfiguration.getInstance().setMFS(true);
-        if ( similarityType < 0 || similarityType > 7 ) return 0.0;
         if ( word1.equals(word2) ) return 1D;
         
-        return rcs[similarityType].calcRelatednessOfWords(word1, word2);
+        return similarity.calcRelatednessOfWords(word1, word2);
     }
     
     public static void main(String[] args) {
 
-        String[] one = new String[] {"dog","cat","company"};
-        String[] two = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
+//      String[] one = new String[] {"dog","cat","company"};  
+        String[] one = new String[] {"spokesman", "spokeswoman"};
+//        String[] two = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
         
         WS4JConfiguration.getInstance().setMFS(true);
-        for ( RelatednessCalculator rc : rcs ) {
+        for ( WordnetSimilarity rc : WordnetSimilarity.values() ) {
 
-            
-            long start = System.currentTimeMillis();
-            
-            for ( int i = 0; i < 10 ; i++ ) {
-                MatrixCalculator.getSimilarityMatrix(two, two, rc);
-            }
+            System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("car", "car"));
+            System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("spokesman", "spokeswoman"));
+            System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("man", "woman"));
+            System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("tree", "company"));
             
             
-            System.out.println(rc.getClass().getSimpleName() + ": " + (System.currentTimeMillis() - start) + "ms");
+//            long start = System.currentTimeMillis();
+//            for ( int i = 0; i < 10 ; i++ ) {
+//                MatrixCalculator.getSimilarityMatrix(two, two, rc);
+//            }
+//            System.out.println(rc.getClass().getSimpleName() + ": " + (System.currentTimeMillis() - start) + "ms");
         }
     }
     

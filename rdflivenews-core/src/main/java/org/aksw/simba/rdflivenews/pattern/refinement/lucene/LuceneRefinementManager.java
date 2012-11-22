@@ -56,7 +56,7 @@ public class LuceneRefinementManager {
         LuceneManager.query(this.searcher, new TermQuery(new Term(Constants.DBPEDIA_LUCENE_FIELD_URI, uri)), collector);
 
         for ( ScoreDoc hit : collector.topDocs().scoreDocs )
-            for (String type : LuceneManager.getDocument(this.searcher.getIndexReader(), hit.doc).getValues(Constants.DBPEDIA_LUCENE_FIELD_TYPES))
+            for (String type : LuceneManager.getDocumentByNumber(this.searcher.getIndexReader(), hit.doc).getValues(Constants.DBPEDIA_LUCENE_FIELD_TYPES))
                 // we want to exclude schema.org stuff or owl:thing
                 if ( type.startsWith(Constants.DBPEDIA_ONTOLOGY_PREFIX) ) types.add(type);
                 
@@ -80,7 +80,7 @@ public class LuceneRefinementManager {
             LuceneManager.query(this.searcher, query, collector);
 
             if ( collector.getTotalHits() > 0 ) 
-                uri = LuceneManager.getDocument(this.searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc).get(Constants.DBPEDIA_LUCENE_FIELD_URI);
+                uri = LuceneManager.getDocumentByNumber(this.searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc).get(Constants.DBPEDIA_LUCENE_FIELD_URI);
         }
         
         return uri;

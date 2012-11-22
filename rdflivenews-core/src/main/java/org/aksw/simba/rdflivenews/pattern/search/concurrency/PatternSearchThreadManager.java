@@ -169,11 +169,11 @@ public class PatternSearchThreadManager {
         
         for (Pattern p : patterns) {
             
-            if (p.getLearnedFromEntities().size() >= RdfLiveNews.CONFIG.getIntegerSetting("scoring", "occurrenceThreshold")) {
+//            if ( p.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
 
                 longWriter.write(p.toString());
                 shortWriter.write(p.getNaturalLanguageRepresentation() + "\t" + p.getNaturalLanguageRepresentationWithTags());
-            }
+//            }
         }
         shortWriter.close();
         longWriter.close();

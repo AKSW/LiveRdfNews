@@ -14,7 +14,7 @@ public class Entity {
 
     private String label;
     private String uri;
-    private String type;
+    private String type = Constants.OWL_THING;
     
     /**
      * @param label
@@ -85,13 +85,14 @@ public class Entity {
 
         if ( this.uri != null ) {
             
-            entity += this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:").replace(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX, "rln:");
+            entity += this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:")
+                    .replace(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX, "rln:");
         }
         
         entity += " @en:" + this.label;
         
         if ( this.type != null )
-            entity += " (" + this.type.replace(Constants.DBPEDIA_ONTOLOGY_PREFIX, "dbpo:") + ")";
+            entity += " (" + this.type.replace(Constants.DBPEDIA_ONTOLOGY_PREFIX, "dbpo:").replace(Constants.OWL_THING, "owl:Thing") + ")";
         
         return entity;
     }

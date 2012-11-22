@@ -6,6 +6,7 @@ package org.aksw.simba.rdflivenews.pattern.search.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
@@ -35,8 +36,7 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
             else {
                 
                 Pattern pattern             = new DefaultPattern();
-                Entity firstEntity          = new Entity(mergedSentence.get(i).substring(0, mergedSentence.get(i).lastIndexOf("_")), 
-                                                         mergedSentence.get(i).substring(mergedSentence.get(i).lastIndexOf("_") + 1));
+                Entity firstEntity          = new Entity(mergedSentence.get(i).substring(0, mergedSentence.get(i).lastIndexOf("_")), Constants.OWL_THING);
                 Entity secondEntity         = null;
 
                 List<String> nlrWithoutTags = new ArrayList<String>();
@@ -55,8 +55,7 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
                     // pattern is finished, so add the second argument
                     else {
 
-                        secondEntity = new Entity(argument2.substring(0, argument2.lastIndexOf("_")), 
-                                                  argument2.substring(argument2.lastIndexOf("_") + 1));
+                        secondEntity = new Entity(argument2.substring(0, argument2.lastIndexOf("_")), Constants.OWL_THING);
                         
                         i = j - 1;
                         break;

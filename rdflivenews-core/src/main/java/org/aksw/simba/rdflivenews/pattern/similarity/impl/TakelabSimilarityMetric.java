@@ -10,6 +10,7 @@ import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
+import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
 
 import com.github.gerbsen.maven.MavenUtil;
 
@@ -314,7 +315,7 @@ public class TakelabSimilarityMetric implements SimilarityMetric {
 		 * In the original implementation the overall similarity was the maximum
 		 * similarity of the synset pairs.
 		 */
-		double ps = wordnet.getWordnetSimilarity(a, b, Wordnet.PATH_SIMILARITY);
+		double ps = wordnet.getWordnetSimilarity(a, b, WordnetSimilarity.PATH);
 		wpathsimcache.remove(p);
 		wpathsimcache.put(p, ps);
 		return ps;

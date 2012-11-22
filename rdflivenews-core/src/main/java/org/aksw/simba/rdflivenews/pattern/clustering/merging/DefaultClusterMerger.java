@@ -10,6 +10,7 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
+import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
 
 
 /**
@@ -41,7 +42,7 @@ public class DefaultClusterMerger implements ClusterMerger {
                         if ( clusterOne.getName().equals(clusterTwo.getName() ) ) sim = 1D; 
                         else     
                             sim = Wordnet.getInstance().getWordnetSimilarity(
-                                    clusterOne.getName(), clusterTwo.getName(), Wordnet.LIN_SIMILARITY);
+                                    clusterOne.getName(), clusterTwo.getName(), WordnetSimilarity.PATH);
                         if(sim > threshold) {
                            merged = true; 
                            clusterOne.addAll(clusterTwo);

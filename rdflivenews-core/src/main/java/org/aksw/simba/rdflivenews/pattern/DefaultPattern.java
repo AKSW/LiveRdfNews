@@ -44,6 +44,7 @@ public class DefaultPattern implements Pattern {
         this.favouriteTypeSecondEntity = "";
         this.naturalLanguageRepresentation = patternString;
         this.totalOccurrence = 1;
+        this.score = 0D;
     }
     
     /**
