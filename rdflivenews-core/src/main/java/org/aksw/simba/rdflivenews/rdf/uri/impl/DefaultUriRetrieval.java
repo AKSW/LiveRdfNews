@@ -5,12 +5,14 @@ package org.aksw.simba.rdflivenews.rdf.uri.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementManager;
 import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
-import org.apache.log4j.chainsaw.Main;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
@@ -24,9 +26,11 @@ public class DefaultUriRetrieval implements UriRetrieval {
     private final LuceneRefinementManager luceneRefinementManager = new LuceneRefinementManager();
     
     @Override
-    public String getUri(String label) {
-
-        return luceneRefinementManager.getPossibleUri(label);
+    public Map<String, String> getUris(String text, List<String> labels) {
+        HashMap<String, String> output = new HashMap<>();
+        for(String l: labels)
+        output.put(l, luceneRefinementManager.getPossibleUri(l));
+        return output;
     }
     
     public static void main(String[] args) {

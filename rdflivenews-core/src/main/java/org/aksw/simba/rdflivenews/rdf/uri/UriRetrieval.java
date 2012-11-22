@@ -4,6 +4,7 @@
 package org.aksw.simba.rdflivenews.rdf.uri;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -12,5 +13,5 @@ import java.util.List;
  */
 public interface UriRetrieval {
 
-    public String getUri(String text, List<String> entityLabels);
+    public Map<String, String> getUris(String text, List<String> entityLabels);
 }
