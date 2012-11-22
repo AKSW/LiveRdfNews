@@ -51,7 +51,6 @@ import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.time.TimeUtil;
 
-
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
@@ -67,6 +66,8 @@ public class RdfLiveNews {
         // load the config, we dont need to configure logging because the log4j config is on the classpath
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
+        
+        initializeDataDirectory();
         
 //        for ( String dataDir : Arrays.asList(/*"index/1percent", "index/10percent") ) {
 //            for ( Integer occ : Arrays.asList(1,2,3,4,5,6,7,8,9,10)) {
@@ -84,10 +85,14 @@ public class RdfLiveNews {
         System.out.print("Resetting documents to non duplicate ... ");
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
-        List<Pattern> patterns               = new ArrayList<Pattern>();
-        Set<Integer> nonDuplicateSentenceIds = new HashSet<Integer>();
+        List<Pattern> patterns                  = new ArrayList<Pattern>();
+        Set<Integer> nonDuplicateSentenceIds    = new HashSet<Integer>();
         
-        for ( ; ITERATION < 40/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+        // we need this to be an instance variable because we need to save the similarities which we computed for each iteration
+        SimilarityGenerator similarityGenerator = new DefaultSimilarityGenerator(
+                (SimilarityMetric) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")));
+        
+        for ( ; ITERATION < 10/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
             
             System.out.println("Starting Iteration #" + ITERATION + "!");
             
@@ -175,9 +180,7 @@ public class RdfLiveNews {
             System.out.println(String.format("Starting to generate similarities between patterns with %s!", RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")));
             start = System.currentTimeMillis();
             
-            SimilarityGenerator similarityGenerator = new DefaultSimilarityGenerator(
-                    (SimilarityMetric) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")), patterns);
-            Set<Similarity> similarities = similarityGenerator.calculateSimilarities();
+            Set<Similarity> similarities = similarityGenerator.calculateSimilarities(patterns);
             
             System.out.println(String.format("Finished generate similarities in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -241,5 +244,23 @@ public class RdfLiveNews {
             Statistics stats = new Statistics();
             stats.createStatistics(patterns);
         }
+    }
+    
+    private static void initializeDataDirectory() {
+
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "clusters").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "clusters").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "patterns").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "patterns").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "rdf").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "rdf").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "similarity").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "similarity").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "statistics").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "statistics").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "test").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "test").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "index").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "index").mkdir();        
     }
 }

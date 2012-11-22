@@ -26,6 +26,7 @@ threshold = 0.9
 window = 10
 
 [similarity]
+checkDomainAndRange = true
 writeFile = true
 threshold = 0.5
 

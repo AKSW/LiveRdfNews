@@ -70,7 +70,7 @@ public class DefaultRdfExtraction implements RdfExtraction {
                         }
                         else {
                             
-                            System.out.println("NON VALID URIS: " + pair);
+                            System.out.println("NON VALID URIS: \n" + pattern);
                         }
                     }
                 }

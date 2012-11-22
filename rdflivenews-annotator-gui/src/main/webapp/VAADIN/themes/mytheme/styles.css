@@ -1,2 +1,11 @@
 @import url(../reindeer/styles.css);
 
+.center {
+	
+	text-align: center;
+}
+
+.right {
+	
+	text-align: right;
+}

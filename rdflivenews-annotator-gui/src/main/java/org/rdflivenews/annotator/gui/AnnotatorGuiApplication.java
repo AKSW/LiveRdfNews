@@ -116,12 +116,20 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             GridLayout grid = new GridLayout(4, 6);
             grid.setSpacing(true);
             
+            HorizontalLayout labels = new HorizontalLayout();
+            labels.setSizeFull();
+            
             subject = new Label("<span style=\"font-size:130%\">" + this.pattern.entityOne + "</span>");
             subject.setContentMode(Label.CONTENT_XHTML);
-            patternLabel = new Label("<span style=\"font-size:130%;color:red\">" + this.pattern.nlr + "</span>");
+            subject.setSizeFull();
+            patternLabel = new Label("<span style=\"font-size:130%;color:red;\">" + this.pattern.nlr + "</span>");
             patternLabel.setContentMode(Label.CONTENT_XHTML);
-            object = new Label("<span style=\"font-size:130%\">" + this.pattern.entityTwo + "</span>");
+            patternLabel.setSizeFull();
+            patternLabel.setStyleName("center");
+            object = new Label("<span style=\"font-size:130%;text-align:right;\">" + this.pattern.entityTwo + "</span>");
             object.setContentMode(Label.CONTENT_XHTML);
+            object.setSizeFull();
+            object.setStyleName("right");
             
             String sentenceLabel = "<span style=\"font-size:130%\">" + this.pattern.sentence.
                     replace(this.pattern.entityOne, "<span style=\"font-weight:bold\">" + this.pattern.entityOne + "</span>").
@@ -132,12 +140,16 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             sentence.setContentMode(Label.CONTENT_XHTML);
             
             grid.addComponent(sentence, 0, 0, 3, 0);
-            grid.addComponent(subject, 0, 1);
-            grid.addComponent(patternLabel, 1, 1, 2, 1);
-            grid.addComponent(object, 3, 1);
-            grid.setComponentAlignment(subject, Alignment.MIDDLE_LEFT);
-            grid.setComponentAlignment(patternLabel, Alignment.MIDDLE_RIGHT);
-            grid.setComponentAlignment(object, Alignment.MIDDLE_RIGHT);
+            labels.addComponent(subject);
+            labels.addComponent(patternLabel);
+            labels.addComponent(object);
+//            grid.addComponent(subject, 0, 1);
+//            grid.addComponent(patternLabel, 1, 1, 2, 1);
+//            grid.addComponent(object, 3, 1);
+            labels.setComponentAlignment(subject, Alignment.MIDDLE_LEFT);
+            labels.setComponentAlignment(patternLabel, Alignment.MIDDLE_CENTER);
+            labels.setComponentAlignment(object, Alignment.MIDDLE_RIGHT);
+            grid.addComponent(labels, 0, 1, 3, 1);
             
             AutocompleteWidget subject = new AutocompleteWidget(index);
             subject.addSelectionListener(new SelectionListener() {
@@ -158,13 +170,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
 			});
             grid.addComponent(object, 2, 2 , 3, 2);
             
-            subjectUri = new TextField("Subject URI");
-            objectUri = new TextField("Object URI");
-            subjectUri.setWidth("100%");
-            objectUri.setWidth("100%");
-            grid.addComponent(subjectUri, 0, 3);
-            grid.addComponent(objectUri, 3, 3);
-
             saidObject = new TextArea("Say Cluster Object Value");
             saidObject.setWidth("100%");
             grid.addComponent(saidObject, 0, 5, 1, 5);
@@ -173,20 +178,37 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             comment.setWidth("100%");
             grid.addComponent(comment, 2, 5, 3, 5);
             
+            HorizontalLayout urisAndCluster = new HorizontalLayout();
+            subjectUri = new TextField("Subject URI");
+            objectUri = new TextField("Object URI");
+            subjectUri.setSizeFull();
+            objectUri.setSizeFull();
+            
             //cluster category combobox
             clusterCategoriesBox = new ComboBox();
-            clusterCategoriesBox.setWidth("100%");
+            clusterCategoriesBox.setWidth("40%");
             clusterCategoriesBox.setCaption("Cluster Category");
             clusterCategoriesBox.addContainerProperty("name", String.class, null);
             clusterCategoriesBox.setItemCaptionMode(ComboBox.ITEM_CAPTION_MODE_ITEM);
             for(ClusterCategory cat : ClusterCategory.values()){
-            	clusterCategoriesBox.addItem(cat).getItemProperty("name").setValue(cat.getName());
+                clusterCategoriesBox.addItem(cat).getItemProperty("name").setValue(cat.getName());
             }
             clusterCategoriesBox.setImmediate(true);
             clusterCategoriesBox.setValue(ClusterCategory.UNKNOWN);
             clusterCategoriesBox.setNullSelectionAllowed(false);
-            grid.addComponent(clusterCategoriesBox, 1, 3, 2, 3);
-            grid.setComponentAlignment(clusterCategoriesBox, Alignment.BOTTOM_CENTER);
+            
+            urisAndCluster.setSizeFull();
+            urisAndCluster.addComponent(subjectUri);
+            urisAndCluster.addComponent(clusterCategoriesBox);
+            urisAndCluster.addComponent(objectUri);
+            urisAndCluster.setComponentAlignment(subjectUri, Alignment.MIDDLE_LEFT);
+            urisAndCluster.setComponentAlignment(clusterCategoriesBox, Alignment.MIDDLE_CENTER);
+            urisAndCluster.setComponentAlignment(objectUri, Alignment.MIDDLE_RIGHT);
+            
+            grid.addComponent(urisAndCluster, 0, 3, 3, 3);
+            
+//            grid.addComponent(clusterCategoriesBox, 1, 3, 2, 3);
+//            grid.setComponentAlignment(clusterCategoriesBox, Alignment.BOTTOM_CENTER);
             
             mainLayout.addComponent(grid);
             

@@ -18,6 +18,15 @@ public class SolrIndex {
 	private HttpSolrServer server;
 	private final String searchField = "label";
 	private final int maxNrOfItems = 25;
+	
+	public static void main(String[] args) {
+
+        SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
+        for ( SolrItem item : index.search("Mississippi")) {
+            
+            System.out.println(item.getUri());
+        }
+    }
 
 	public SolrIndex(String serverURL) {
 		server = new HttpSolrServer(serverURL);
@@ -36,7 +45,13 @@ public class SolrIndex {
 	public Collection<SolrItem> search(String searchTerm){
 		List<SolrItem> result = new ArrayList<SolrIndex.SolrItem>();
 		
-		SolrQuery q = new SolrQuery(searchField + ":(" + searchTerm  + "*)");
+		SolrQuery q;
+		
+		if ( searchTerm.contains(" ") ) 
+		    q = new SolrQuery(searchField + ":(" + searchTerm  + ")");
+		else
+		    q = new SolrQuery(searchField + ":\"" + searchTerm  + "\"");
+		 
 		q.setRows(maxNrOfItems);
 		System.out.println(q);
 		try {

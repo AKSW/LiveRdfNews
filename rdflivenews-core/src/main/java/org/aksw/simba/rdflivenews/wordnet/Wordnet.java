@@ -29,7 +29,7 @@ public class Wordnet {
     
     private static ILexicalDatabase db = new NictWordNet();
     private static RelatednessCalculator[] rcs = {
-                    new HirstStOnge(db), new LeacockChodorow(db), new Lesk(db),  new WuPalmer(db), 
+                    /* way too slow new HirstStOnge(db),*/ new LeacockChodorow(db), new Lesk(db),  new WuPalmer(db), 
                     new Resnik(db), new JiangConrath(db), new Lin(db), new Path(db)
                     };
     public static final int HSO_SIMILARITY = 0;
@@ -69,23 +69,21 @@ public class Wordnet {
     
     public static void main(String[] args) {
 
-        String[] one = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
+        String[] one = new String[] {"dog","cat","company"};
         String[] two = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
         
         WS4JConfiguration.getInstance().setMFS(true);
         for ( RelatednessCalculator rc : rcs ) {
 
-            System.out.println(rc.getClass().getSimpleName());
             
-            for (double[] asd : MatrixCalculator.getNormalizedSimilarityMatrix(one, two, rc)) {
-                
-                System.out.println(Arrays.toString(asd));
+            long start = System.currentTimeMillis();
+            
+            for ( int i = 0; i < 10 ; i++ ) {
+                MatrixCalculator.getSimilarityMatrix(two, two, rc);
             }
             
-            for (double[] asd : MatrixCalculator.getSimilarityMatrix(one, two, rc)) {
-                
-                System.out.println(Arrays.toString(asd));
-            }
+            
+            System.out.println(rc.getClass().getSimpleName() + ": " + (System.currentTimeMillis() - start) + "ms");
         }
     }
     

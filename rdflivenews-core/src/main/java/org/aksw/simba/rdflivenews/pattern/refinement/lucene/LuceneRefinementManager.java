@@ -73,7 +73,7 @@ public class LuceneRefinementManager {
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, true);
         Query query = LuceneManager.parse(this.dbpediaLabelQueryParser, QueryParser.escape(label));
 
-        String uri = Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label, Encoding.ASCII);
+        String uri = Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label, Encoding.UTF_8);
         
         if ( query != null ) {
 

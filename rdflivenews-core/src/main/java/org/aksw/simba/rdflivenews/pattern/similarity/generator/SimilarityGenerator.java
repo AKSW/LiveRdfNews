@@ -3,8 +3,10 @@
  */
 package org.aksw.simba.rdflivenews.pattern.similarity.generator;
 
+import java.util.List;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 
 
@@ -14,5 +16,5 @@ import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
  */
 public interface SimilarityGenerator {
 
-    public Set<Similarity> calculateSimilarities();
+    public Set<Similarity> calculateSimilarities(List<Pattern> patterns);
 }

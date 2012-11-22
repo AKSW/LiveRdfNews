@@ -52,14 +52,8 @@ public class DefaultPatternRefiner implements PatternRefiner {
             
             if ( pair.isNew() ) {
 
-//                System.out.println(pair);
-                
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
                 pair.getFirstEntity().setUri(this.uriRetrieval.getUri(pair.getFirstEntity().getLabel()));
-                
-//                System.out.println(pair);
-//                System.out.println(pair.getFirstEntity().getUri());
-//                System.out.println(luceneRefinementManager.getTypesOfResource(pair.getFirstEntity().getUri()));
                 
                 // we can only find types if we have a uri from dbpedia
                 if (   pair.getFirstEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX) 
@@ -75,14 +69,9 @@ public class DefaultPatternRefiner implements PatternRefiner {
                     
                     else pair.getFirstEntity().setType(Constants.OWL_THING);
                 }
-                    
-                
-//                System.out.println(pair);
                 
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
                 pair.getSecondEntity().setUri(this.uriRetrieval.getUri(pair.getSecondEntity().getLabel()));
-                
-//                System.out.println(pair);
                 
                 // we can only find types if we have a uri from dbpedia
                 if (    pair.getSecondEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX)
@@ -98,10 +87,6 @@ public class DefaultPatternRefiner implements PatternRefiner {
                     
                     else pair.getSecondEntity().setType(Constants.OWL_THING);
                 }
-                
-//                System.out.println(pair);
-                
-//                System.out.println("\n\n");
                 
                 // mark the pair as not no, so that we dont process it again in subsequent iterations
                 pair.setNew(false);

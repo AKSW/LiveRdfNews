@@ -83,8 +83,10 @@ public class Entity {
 
         String entity = "";
 
-        if ( this.uri != null )
-            entity += this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:");
+        if ( this.uri != null ) {
+            
+            entity += this.uri.replace(Constants.DBPEDIA_RESOURCE_PREFIX, "dbpr:").replace(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX, "rln:");
+        }
         
         entity += " @en:" + this.label;
         

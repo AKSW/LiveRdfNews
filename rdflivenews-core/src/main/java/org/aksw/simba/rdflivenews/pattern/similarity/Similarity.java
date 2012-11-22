@@ -22,7 +22,13 @@ public class Similarity {
         this.pattern2 = pattern2;
         this.similarity = similarity;
     }
-
+    
+    public Similarity(Pattern pattern1, Pattern pattern2) {
+        
+        this.pattern1 = pattern1;
+        this.pattern2 = pattern2;
+        this.similarity = 0D;
+    }
     
     /**
      * @return the pattern1
@@ -48,5 +54,58 @@ public class Similarity {
     public double getSimilarity() {
     
         return similarity;
+    }
+    
+    /**
+     * 
+     * @param similarity
+     */
+    public void setSimilarity(double similarity) {
+
+        this.similarity = similarity;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((pattern1 == null) ? 0 : pattern1.hashCode());
+        result = prime * result + ((pattern2 == null) ? 0 : pattern2.hashCode());
+        return result;
+    }
+
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Similarity other = (Similarity) obj;
+        if (pattern1 == null) {
+            if (other.pattern1 != null)
+                return false;
+        }
+        else
+            if (!pattern1.equals(other.pattern1))
+                return false;
+        if (pattern2 == null) {
+            if (other.pattern2 != null)
+                return false;
+        }
+        else
+            if (!pattern2.equals(other.pattern2))
+                return false;
+        return true;
     }
 }
