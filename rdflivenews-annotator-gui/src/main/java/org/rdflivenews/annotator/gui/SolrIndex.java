@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -18,12 +19,13 @@ public class SolrIndex {
 
 	private HttpSolrServer server;
 	private final String searchField = "label";
-	private final int maxNrOfItems = 1000;
+	private final String sortField = "pagerank";
+	private final int maxNrOfItems = 25;
 	
 	public static void main(String[] args) {
 
-//        SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/dbpedia_resources/");
-        SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
+        SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/dbpedia_resources/");
+//        SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
         System.out.println(index.search("Mississippi").size());
         System.out.println(index.search("Leip").size());
         System.out.println(index.search("Brad Pitt").size());
@@ -69,6 +71,7 @@ public class SolrIndex {
 		    q = new SolrQuery(searchField + ":" + searchTerm  + "*");
 		 
 		q.setRows(maxNrOfItems);
+		q.setSortField(sortField, ORDER.desc);
 //		System.out.println(q);
 		try {
 			QueryResponse rsp = server.query(q);
