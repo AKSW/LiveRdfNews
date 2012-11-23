@@ -2,6 +2,7 @@ package org.rdflivenews.annotator.gui;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,12 +18,27 @@ public class SolrIndex {
 
 	private HttpSolrServer server;
 	private final String searchField = "label";
-	private final int maxNrOfItems = 25;
+	private final int maxNrOfItems = 1000;
 	
 	public static void main(String[] args) {
 
+//        SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/dbpedia_resources/");
         SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
+        System.out.println(index.search("Mississippi").size());
+        System.out.println(index.search("Leip").size());
+        System.out.println(index.search("Brad Pitt").size());
+        
         for ( SolrItem item : index.search("Mississippi")) {
+            
+            System.out.println(item.getUri());
+        }
+        System.out.println();
+        for ( SolrItem item : index.search("Leip")) {
+            
+            System.out.println(item.getUri());
+        }
+        System.out.println();
+        for ( SolrItem item : index.search("Brad Pitt")) {
             
             System.out.println(item.getUri());
         }
@@ -50,10 +66,10 @@ public class SolrIndex {
 		if ( searchTerm.contains(" ") ) 
 		    q = new SolrQuery(searchField + ":(" + searchTerm  + ")");
 		else
-		    q = new SolrQuery(searchField + ":\"" + searchTerm  + "\"");
+		    q = new SolrQuery(searchField + ":" + searchTerm  + "*");
 		 
 		q.setRows(maxNrOfItems);
-		System.out.println(q);
+//		System.out.println(q);
 		try {
 			QueryResponse rsp = server.query(q);
 			SolrDocumentList docs = rsp.getResults();
@@ -72,11 +88,14 @@ public class SolrIndex {
 			e.printStackTrace();
 		}
 		
+		Collections.sort(result);
+		
 		return result;
 	}
 	
-	public static class SolrItem {
-		private String label;
+	public static class SolrItem implements Comparable<SolrItem> {
+
+        private String label;
 		private String uri;
 		private String description;
 		private String imageURL;
@@ -103,6 +122,12 @@ public class SolrIndex {
 		public String getImageURL() {
 			return imageURL;
 		}
+
+        @Override
+        public int compareTo(SolrItem o) {
+
+            return Integer.valueOf(this.uri.length()).compareTo(Integer.valueOf(o.uri.length()));
+        }
 	}
 
 }
