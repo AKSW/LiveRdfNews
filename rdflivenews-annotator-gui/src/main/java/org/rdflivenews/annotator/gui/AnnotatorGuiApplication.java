@@ -55,9 +55,6 @@ import com.vaadin.ui.Window;
 @SuppressWarnings("serial")
 public class AnnotatorGuiApplication extends com.vaadin.Application implements ClickListener {
     
-//    static String dataPath = "/home/gerber/boa-data/rdflivenews/evaluation/";
-    static String dataPath = "/Users/gerb/test/annotation/";
-    
     private final String RDFLIVENEWS_PREFIX = "http://rdflivenews.aksw.org/resource/";
     
     private static List<Pattern> patterns;
@@ -84,7 +81,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         
         try {
             
-            config = new Ini(AnnotatorGuiApplication.class.getResourceAsStream("/annotator.ini"));
+            config = new Ini(AnnotatorGuiApplication.class.getClassLoader().getResourceAsStream("annotator.ini"));
             index  = new SolrIndex(config.get("general", "luceneIndex"));
         }
         catch (IOException e) {
@@ -355,7 +352,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             output.add(this.pattern.sentence);
             output.add(this.clusterCategoriesBox.getValue().toString());
             
-            BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns_annotated.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
+            BufferedFileWriter writer = new BufferedFileWriter(config.get("general", "dataDirectory")  + "patterns_annotated.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
             writer.write(StringUtils.join(output, "___"));
             writer.close();
             
@@ -365,7 +362,7 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         }
         else if (event.getSource().equals(trashButton)) {
             
-            BufferedFileWriter writer = new BufferedFileWriter(dataPath + "patterns_trash.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
+            BufferedFileWriter writer = new BufferedFileWriter(config.get("general", "dataDirectory")  + "patterns_trash.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
             writer.write(patternToString(this.pattern));
             writer.close();
             patterns.remove(this.pattern);
