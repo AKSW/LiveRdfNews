@@ -17,8 +17,8 @@ updateRssInterval = 1800000
 feedlist = rss-list.txt
 
 [general]
-; this directory should not be inside the code repo
-data-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews
+; this directory should not be inside the code repo !!!!!!!!!!! needs to have a / at the end
+data-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews/crawl/
 ; website sentence crawl index
 index = index
 statistics = statistics 

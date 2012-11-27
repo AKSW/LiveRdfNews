@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -47,7 +47,7 @@ public class RssDirectoryReader {
         }
         catch (IOException e) {
 
-            throw new RuntimeException(String.format("Could not load the rss feed list from %s.", NewsCrawler.CONFIG.getStringSetting("rss", "feedlist")), e);
+            throw new RuntimeException(String.format("Could not load the rss feed list from %s.", RdfLiveNewsCrawler.CONFIG.getStringSetting("rss", "feedlist")), e);
         }
     }
 

@@ -7,7 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.crawler.ArticleCrawlerThread;
 
 /**
@@ -28,7 +28,7 @@ public class CrawlRssFeedEntryThread implements Runnable {
      */
     public void run() {
 
-        int numberOfThreads = NewsCrawler.CONFIG.getIntegerSetting("crawl", "numberOfThreads");
+        int numberOfThreads = RdfLiveNewsCrawler.CONFIG.getIntegerSetting("crawl", "numberOfThreads");
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
         
         for ( int i = 0 ; i < numberOfThreads ; i++ )

@@ -8,7 +8,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.concurrency.RssDirectoryReader;
 import org.aksw.simba.rdflivenews.config.Config;
@@ -50,7 +50,7 @@ public class FeedParserTest extends TestCase {
     public void testApp() throws InvalidFileFormatException, IOException {
 
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
+        RdfLiveNewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
         RssDirectoryReader reader = new RssDirectoryReader(new LinkedBlockingQueue<String>());
      
 //        try {

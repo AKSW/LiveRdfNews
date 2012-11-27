@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.TimerTask;
 
-import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.concurrency.QueueManager;
 import org.aksw.simba.rdflivenews.config.Config;
@@ -45,9 +45,9 @@ public class StatisticsTask  extends TimerTask {
     public void run() {
 
         StringBuffer buffer = new StringBuffer();
-        buffer.append(NewsCrawler.TIME_SLICE_ID).append(splitter);
-        buffer.append(NewsCrawler.queue.size()).append(splitter);
-        buffer.append(IndexManager.getInstance().getSentenceIdsFromTimeSlice(NewsCrawler.TIME_SLICE_ID).size()).append(splitter);
+        buffer.append(RdfLiveNewsCrawler.TIME_SLICE_ID).append(splitter);
+        buffer.append(RdfLiveNewsCrawler.queue.size()).append(splitter);
+        buffer.append(IndexManager.getInstance().getSentenceIdsFromTimeSlice(RdfLiveNewsCrawler.TIME_SLICE_ID).size()).append(splitter);
         buffer.append(IndexManager.getInstance().getNumberOfDocuments()).append(splitter);
         buffer.append("\n");
         this.write(buffer.toString());
@@ -57,7 +57,7 @@ public class StatisticsTask  extends TimerTask {
 
         try {
             
-            File statisticsFolder = new File(Config.RDF_LIVE_NEWS_DATA_DIRECTORY + NewsCrawler.CONFIG.getStringSetting("general", "statistics"));
+            File statisticsFolder = new File(Config.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "statistics"));
             if ( !statisticsFolder.exists() )
                 statisticsFolder.mkdir();
             

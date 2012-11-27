@@ -12,7 +12,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.index.Sentence;
 import org.ini4j.Ini;
@@ -53,7 +53,7 @@ public class ArticleCrawlerThreadTest extends TestCase {
      */
     public void testCrawling() throws InvalidFileFormatException, IOException {
         
-        NewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
+        RdfLiveNewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
         ArticleCrawlerThread t = new ArticleCrawlerThread(new LinkedBlockingQueue<String>());
         List<Sentence> sentences = t.crawlArticle("http://www.nytimes.com/2012/07/24/world/middleeast/chemical-weapons-wont-be-used-in-rebellion-syria-says.html?_r=1&ref=global-home");
         

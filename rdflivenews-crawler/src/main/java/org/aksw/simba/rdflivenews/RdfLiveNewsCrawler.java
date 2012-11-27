@@ -23,11 +23,11 @@ import org.ini4j.InvalidFileFormatException;
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
-public class NewsCrawler {
+public class RdfLiveNewsCrawler {
 
     public static Integer TIME_SLICE_ID = -1;
     public static Config CONFIG = null;
-    private static Logger logger = Logger.getLogger(NewsCrawler.class);
+    private static Logger logger = Logger.getLogger(RdfLiveNewsCrawler.class);
     public static BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
     
     /**
@@ -39,8 +39,12 @@ public class NewsCrawler {
     public static void main(String[] args) throws InvalidFileFormatException, IOException, InterruptedException {
 
         // load the config, we dont need to configure logging because the log4j config is on the classpath
-        NewsCrawler.CONFIG = new Config(new Ini(NewsCrawler.class.getResourceAsStream("/newscrawler-config.ini")));
-        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getResourceAsStream("/rdflivenews-config.ini")));
+        RdfLiveNewsCrawler.CONFIG = new Config(new Ini(RdfLiveNewsCrawler.class.getClassLoader().getResourceAsStream("newscrawler-config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+        
+        IndexManager.getInstance();
+        IndexManager.INDEX_DIRECTORY = RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "data-directory") 
+                + RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "index");
         
         // with this hook we can guaranty that the lucene index is closed correctly
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
@@ -54,13 +58,13 @@ public class NewsCrawler {
         // start to update the rss entries which are then crawled periodically
         Timer updateFeedTimer = new Timer();
         UpdateRssFeedsTask updateFeeds = new UpdateRssFeedsTask(queue);
-        updateFeedTimer.schedule(updateFeeds, 0, NewsCrawler.CONFIG.getLongSetting("crawl", "updateRssInterval"));
+        updateFeedTimer.schedule(updateFeeds, 0, RdfLiveNewsCrawler.CONFIG.getLongSetting("crawl", "updateRssInterval"));
         logger.info("Started RSS update task!");
         
         // start the statistics module
         Timer statisticsTimer = new Timer();
         StatisticsTask statTask = new StatisticsTask();
-        statisticsTimer.schedule(statTask, 0, NewsCrawler.CONFIG.getLongSetting("statistics", "updateStatisticsInterval"));
+        statisticsTimer.schedule(statTask, 0, RdfLiveNewsCrawler.CONFIG.getLongSetting("statistics", "updateStatisticsInterval"));
 
         // this thread get's started and will never and, it opens a new thread pool where one thread crawls one rss entry
         CrawlRssFeedEntryThread crawlRssFeedsThread = new CrawlRssFeedEntryThread(queue);
@@ -71,10 +75,10 @@ public class NewsCrawler {
         while ( true ) {
 
             // the time has come to create a new slice
-            if ( System.currentTimeMillis() - startTime >= NewsCrawler.CONFIG.getLongSetting("timeSlice", "duration") ) {
+            if ( System.currentTimeMillis() - startTime >= RdfLiveNewsCrawler.CONFIG.getLongSetting("timeSlice", "duration") ) {
                 
                 // increase the timeslice and reset the start time
-                NewsCrawler.TIME_SLICE_ID++;
+                RdfLiveNewsCrawler.TIME_SLICE_ID++;
                 startTime = System.currentTimeMillis();
             }
             

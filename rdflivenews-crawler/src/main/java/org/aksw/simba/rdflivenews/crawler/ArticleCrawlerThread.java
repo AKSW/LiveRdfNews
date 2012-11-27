@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-import org.aksw.simba.rdflivenews.NewsCrawler;
+import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
 import org.aksw.simba.rdflivenews.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
@@ -65,7 +65,7 @@ public class ArticleCrawlerThread extends Thread {
             // wait so that we dont run this method over and over if no rss feeds are avaiable
             try {
                 
-                sleep(NewsCrawler.CONFIG.getLongSetting("crawl", "crawlerWaitTime"));
+                sleep(RdfLiveNewsCrawler.CONFIG.getLongSetting("crawl", "crawlerWaitTime"));
             }
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block
@@ -88,7 +88,7 @@ public class ArticleCrawlerThread extends Thread {
         
         try {
             
-            JResult res = fetcher.fetchAndExtract(url, NewsCrawler.CONFIG.getIntegerSetting("crawl", "timeout"), true);
+            JResult res = fetcher.fetchAndExtract(url, RdfLiveNewsCrawler.CONFIG.getIntegerSetting("crawl", "timeout"), true);
             
             // some articles are read protected so they only show a small warning
             if ( res.getText() != null && res.getText().length() > 1000 ) {
@@ -102,7 +102,7 @@ public class ArticleCrawlerThread extends Thread {
                     Sentence sentence = new Sentence();
                     sentence.setArticleUrl(url);
                     sentence.setText(sentenceText);
-                    sentence.setTimeSliceID(NewsCrawler.TIME_SLICE_ID);
+                    sentence.setTimeSliceID(RdfLiveNewsCrawler.TIME_SLICE_ID);
                     sentence.setExtractionDate(this.parseDate(res.getDate()));
                     
                     sentences.add(sentence);
