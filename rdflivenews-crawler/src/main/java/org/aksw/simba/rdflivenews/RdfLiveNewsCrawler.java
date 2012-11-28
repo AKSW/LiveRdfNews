@@ -45,6 +45,7 @@ public class RdfLiveNewsCrawler {
         IndexManager.getInstance();
         IndexManager.INDEX_DIRECTORY = RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "data-directory") 
                 + RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "index");
+        IndexManager.getInstance().createIndex();
         
         // with this hook we can guaranty that the lucene index is closed correctly
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
