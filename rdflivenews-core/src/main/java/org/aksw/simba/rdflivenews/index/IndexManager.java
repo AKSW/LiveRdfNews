@@ -37,6 +37,8 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.NumericUtils;
 import org.apache.lucene.util.Version;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
 
 import com.github.gerbsen.lucene.LuceneManager;
 
@@ -45,7 +47,7 @@ import com.github.gerbsen.lucene.LuceneManager;
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  */
 public class IndexManager {
-
+    
     public static final int UNDEFINED_SENTENCE_ID = -1;
     
     /**
@@ -188,7 +190,7 @@ public class IndexManager {
         luceneDocument.add(new Field(Constants.LUCENE_FIELD_TEXT, sentence.getText(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
         luceneDocument.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, sentence.getPosTaggedSentence(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
         luceneDocument.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, sentence.getNerTaggedSentence(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-        luceneDocument.add(new Field(Constants.LUCENE_FIELD_URL, sentence.getArticleUrl(), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+        luceneDocument.add(new Field(Constants.LUCENE_FIELD_URL, sentence.getArticleUrl(), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
         
         return luceneDocument;
     }
@@ -217,7 +219,7 @@ public class IndexManager {
         
         TermQuery query     = new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(documentId)));
         IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-        Document oldDoc = IndexManager.getInstance().getDocumentById(searcher, query);
+        Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, query);
             
         Integer oldDuplicateTimeSlice = Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE)));
         
@@ -246,6 +248,8 @@ public class IndexManager {
      * @param timeSlice
      */
     public void setDocumentsDuplicateInTimeSlice(Set<Integer> duplicateIds, int timeSlice) {
+        
+        System.out.println("Setting " + duplicateIds.size()  + " sentences duplicate!");
 
         IndexSearcher searcher  = LuceneManager.openIndexSearcher(INDEX);
         IndexWriter writer      = LuceneManager.openIndexWriterAppend(INDEX);
@@ -253,7 +257,7 @@ public class IndexManager {
         for ( Integer id : duplicateIds ) {
             
             TermQuery query     = new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(id)));
-            Document oldDoc = IndexManager.getInstance().getDocumentById(searcher, query);
+            Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, query);
                 
             Document newDoc = new Document();
             newDoc.add(new NumericField(Constants.LUCENE_FIELD_ID, Field.Store.YES, true).setIntValue(Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID))));
@@ -500,11 +504,30 @@ public class IndexManager {
         
         return maxTimeSliceId;
     }
-
-    public Document getDocumentById(IndexSearcher searcher, Query query) {
+    
+    /**
+     * 
+     * @param searcher
+     * @param query
+     * @return
+     */
+    public Document getDocumentByQuery(IndexSearcher searcher, Query query) {
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
         LuceneManager.query(searcher, query, collector);
+        return LuceneManager.getDocumentByNumber(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
+    }
+
+    /**
+     * 
+     * @param searcher
+     * @param id
+     * @return
+     */
+    public Document getDocumentById(IndexSearcher searcher, Integer id) {
+        
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
+        LuceneManager.query(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(id))), collector);
         return LuceneManager.getDocumentByNumber(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
     }
 
@@ -562,5 +585,35 @@ public class IndexManager {
         LuceneManager.closeIndexSearcher(searcher);
         
         return nonDuplicateSentences;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public Set<String> getSentencesFromArticle(String articleUrl) {
+
+        Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
+        
+        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
+        LuceneManager.query(searcher, articles, collector);
+        System.out.println(articles);
+        Set<String> sentences = new HashSet<>();
+        
+        // add the primary key of each document to the list
+        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
+            sentences.add(
+                    LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_TEXT));
+        
+        LuceneManager.closeIndexReader(searcher.getIndexReader());
+        LuceneManager.closeIndexSearcher(searcher);
+        
+        return sentences;
+    }
+
+    public void closeIndexWriter() {
+
+        LuceneManager.closeIndexWriter(this.writer);
     }
 }

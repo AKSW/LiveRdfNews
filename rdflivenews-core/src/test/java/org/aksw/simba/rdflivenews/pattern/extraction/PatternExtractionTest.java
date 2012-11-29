@@ -114,7 +114,7 @@ public class PatternExtractionTest extends TestCase {
         assertTrue(mergedSentence.equals(goldSentence));
         
         long start = System.nanoTime();
-        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns(nerTestString, 1));
+        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns("", nerTestString, 1));
         System.out.println("NER Took " + (System.nanoTime() - start) + "ns");
         assertTrue(patterns.size() == 2);
         assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("of clean") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("of clean"));
@@ -147,7 +147,7 @@ public class PatternExtractionTest extends TestCase {
         assertTrue(mergedSentence.equals(goldSentence));
         
         long start = System.nanoTime();
-        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns(posTestString, 1));
+        List<Pattern> patterns = new ArrayList<Pattern>(patternSearcher.extractPatterns("", posTestString, 1));
         System.out.println("POS Took " + (System.nanoTime() - start) + "ns");
         assertTrue(patterns.size() == 2);
         assertTrue(patterns.get(0).getNaturalLanguageRepresentation().equals("was the first") ^ patterns.get(1).getNaturalLanguageRepresentation().equals("was the first"));

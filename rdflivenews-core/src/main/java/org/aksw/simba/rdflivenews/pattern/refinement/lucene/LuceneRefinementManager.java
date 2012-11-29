@@ -17,6 +17,8 @@ import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
@@ -72,17 +74,16 @@ public class LuceneRefinementManager {
 
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, true);
         Query query = LuceneManager.parse(this.dbpediaLabelQueryParser, QueryParser.escape(label));
-
-        String uri = Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label, Encoding.UTF_8);
+        
+        String uri = Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label.replace(" ", "_"), Encoding.UTF_8);
         
         if ( query != null ) {
-
+            
             LuceneManager.query(this.searcher, query, collector);
 
             if ( collector.getTotalHits() > 0 ) 
                 uri = LuceneManager.getDocumentByNumber(this.searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc).get(Constants.DBPEDIA_LUCENE_FIELD_URI);
         }
-        
         return uri;
     }
 

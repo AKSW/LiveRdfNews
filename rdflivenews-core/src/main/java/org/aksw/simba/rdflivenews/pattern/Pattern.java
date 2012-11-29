@@ -126,4 +126,20 @@ public interface Pattern {
      * @return
      */
     public Double getScore();
+    
+    /**
+     * 
+     * @return
+     */
+    public String getExampleSentence();
+    
+    /**
+     * @param exampleSentence the exampleSentence to set
+     */
+    public void setExampleSentence(String exampleSentence);
+
+    public boolean isAboveThresholds();
+
+    public void setClazz(String key);
+    public String getClazz();
 }

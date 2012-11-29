@@ -159,8 +159,6 @@ public class Cluster<T> implements Iterable<T>, Set<T> {
     
         return rdfsRange;
     }
-
-
     
     /**
      * @return the rdfsDomain

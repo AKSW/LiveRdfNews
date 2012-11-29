@@ -13,5 +13,7 @@ import java.util.Map;
  */
 public interface UriRetrieval {
 
+    public String getUri(String label);
+    
     public Map<String, String> getUris(String text, List<String> entityLabels);
 }

@@ -7,7 +7,6 @@ import java.util.Comparator;
 
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 
-
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
@@ -23,3 +22,4 @@ public class PatternOccurrenceComparator implements Comparator<Pattern> {
         return o2.getTotalOccurrence() - o1.getTotalOccurrence() ;
     }
 }
+

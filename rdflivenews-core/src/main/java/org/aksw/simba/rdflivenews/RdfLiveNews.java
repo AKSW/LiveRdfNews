@@ -44,11 +44,14 @@ import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.search.IndexSearcher;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
+import com.github.gerbsen.lucene.LuceneManager;
 import com.github.gerbsen.time.TimeUtil;
 
 /**
@@ -64,11 +67,11 @@ public class RdfLiveNews {
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
         
         // load the config, we dont need to configure logging because the log4j config is on the classpath
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
         RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
         
-        initializeDataDirectory();
         
+//        initializeDataDirectory();
 //        for ( String dataDir : Arrays.asList(/*"index/1percent", "index/10percent") ) {
 //            for ( Integer occ : Arrays.asList(1,2,3,4,5,6,7,8,9,10)) {
                 
@@ -79,22 +82,24 @@ public class RdfLiveNews {
 //            }
 //        }
     }
-
+    
     private static void run() {
 
         System.out.print("Resetting documents to non duplicate ... ");
+//        we only need to do this, if the deduplication is running again
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
         List<Pattern> patterns                  = new ArrayList<Pattern>();
-        Set<Integer> nonDuplicateSentenceIds    = new HashSet<Integer>();
+//        Set<Integer> nonDuplicateSentenceIds    = new HashSet<Integer>(); probably not needed any more
         
         // we need this to be an instance variable because we need to save the similarities which we computed for each iteration
         SimilarityGenerator similarityGenerator = new DefaultSimilarityGenerator(
                 (SimilarityMetric) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")));
         
-//        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
-        for ( ; ITERATION < IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
+        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+//        for ( ; ITERATION < IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
             
+            long iterationTime = System.currentTimeMillis();
             System.out.println("Starting Iteration #" + ITERATION + "!");
             
             // ##################################################
@@ -106,10 +111,10 @@ public class RdfLiveNews {
             
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
             Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
-//            deduplication.runDeduplication(iteration, iteration + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
-            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
-//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
-            nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
+//            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
+//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
+            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+//            nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
             
             System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
@@ -124,7 +129,7 @@ public class RdfLiveNews {
             // we can only find patterns if we have NER or POS tags annotated
             NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
 //            if you have not yet tagged all sentences in the index you need to uncomment this
-//            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
 
             System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -152,14 +157,14 @@ public class RdfLiveNews {
             // ##################################################
             // 3. Pattern Refinement
             
-            System.out.println(String.format("Starting pattern refinement with %s strategy!", RdfLiveNews.CONFIG.getStringSetting("refinement", "typing")));
+            System.out.println(String.format("Starting pattern refinement with %s strategy!", RdfLiveNews.CONFIG.getStringSetting("refiner", "typing")));
             start = System.currentTimeMillis();
             
             // refines the domain and range of the patterns 
-            PatternRefiner patternRefiner = new DefaultPatternRefiner();
+            PatternRefiner patternRefiner = (PatternRefiner) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "refiner"));
             patternRefiner.refinePatterns(patterns);
             
-            System.out.println(String.format("Finished pattern refinement in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
+            System.out.println(String.format("Finished pattern refinement in %s!", /*TimeUtil.convertMilliSeconds(*/System.currentTimeMillis() - start)/*)*/);
             
             // ##################################################
             // ##################################################
@@ -217,8 +222,8 @@ public class RdfLiveNews {
             // ##################################################
             // ##################################################
             // 6.2 we can merge the clusters
-             ClusterMerger clusterMerger = new DefaultClusterMerger();
-             clusterMerger.mergeCluster(clusters);
+            ClusterMerger clusterMerger = new DefaultClusterMerger();
+            clusterMerger.mergeCluster(clusters);
             
             // ##################################################
             // ##################################################
@@ -246,6 +251,8 @@ public class RdfLiveNews {
             // 9. Create statistics like pos tag distribution
             Statistics stats = new Statistics();
             stats.createStatistics(patterns);
+            
+            System.out.println("Finished iteration #" + ITERATION + " in " + TimeUtil.convertMilliSeconds(System.currentTimeMillis() - iterationTime) + ".");
         }
     }
 
@@ -265,5 +272,31 @@ public class RdfLiveNews {
             new File(RdfLiveNews.DATA_DIRECTORY + "test").mkdir();
         if ( !new File(RdfLiveNews.DATA_DIRECTORY + "index").exists()) 
             new File(RdfLiveNews.DATA_DIRECTORY + "index").mkdir();        
+    }
+    
+private static void test() {
+        
+        IndexManager.getInstance();
+        IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
+        
+        Set<String> urls = new HashSet<>();
+        
+        for (int i = 0; i < 1000 ; i++) {
+        
+            Document doc = LuceneManager.getDocumentByNumber(searcher.getIndexReader(), i);
+            String url = doc.get(Constants.LUCENE_FIELD_URL);
+            
+            if ( !urls.contains(url) ) {
+                
+                urls.add(url);
+                
+                System.out.println(url);
+                
+                for ( String s : IndexManager.getInstance().getSentencesFromArticle(url)) {
+                    
+                    System.out.println(s);
+                }
+            }
+        }
     }
 }

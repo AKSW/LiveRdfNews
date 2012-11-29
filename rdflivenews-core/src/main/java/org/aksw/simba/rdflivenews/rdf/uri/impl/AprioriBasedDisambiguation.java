@@ -11,7 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
+
+import com.github.gerbsen.encoding.Encoder;
+import com.github.gerbsen.encoding.Encoder.Encoding;
 
 /**
  *
@@ -89,15 +94,23 @@ public class AprioriBasedDisambiguation implements UriRetrieval {
     }
 
     public Map<String, String> getUris(String text, List<String> entityLabels) {
+        
         Map<String, String> result = new HashMap<>();
+        
         for (String e : entityLabels) {
+            
             List<String> uris = getUriCandidates(e);
-            if (uris.isEmpty()) {
-                result.put(e, "http://boa.aksw.org/" + e);
-            } else {
+            
+            // if we dont find uri candidates, we need to generate our own based on dbpedia style
+            if (uris.isEmpty()) 
+                result.put(e, Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(e.replace(" ", "_"), Encoding.UTF_8));
+            else {
+                
                 double max = 0, score;
                 String uri = "";
+                
                 for (String u : uris) {
+                    
                     score = getAprioriScore(u);
                     if (score > max) {
                         max = score;
@@ -108,5 +121,11 @@ public class AprioriBasedDisambiguation implements UriRetrieval {
             }
         }
         return result;
+    }
+
+    @Override
+    public String getUri(String label) {
+    
+        throw new RuntimeException("This method is not supported for Apriori based disambiguation!");
     }
 }

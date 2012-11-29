@@ -47,11 +47,11 @@ public class DefaultSimilarityGenerator implements SimilarityGenerator {
 
         for ( Pattern pattern1 : patterns ) {
             // this greatly reduces the number of comparisons since the patterns are zipf distributed with a very long tail
-            if ( pattern1.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
+            if ( pattern1.isAboveThresholds() ) {
                 
                 for ( Pattern pattern2 : patterns ) {
                     // this greatly reduces the number of comparisons since the patterns are zipf distributed with a very long tail
-                    if ( pattern2.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
+                    if ( pattern2.isAboveThresholds() ) {
 
                         Similarity sim = new Similarity(pattern1, pattern2);
                         

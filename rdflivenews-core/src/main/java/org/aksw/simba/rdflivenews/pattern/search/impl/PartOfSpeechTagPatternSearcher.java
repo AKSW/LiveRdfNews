@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.Enums;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
@@ -20,11 +22,11 @@ import org.apache.commons.lang3.StringUtils;
  *
  */
 public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
-
+    
     /* (non-Javadoc)
      * @see org.aksw.simba.rdflivenews.simba.rdflivenews.patternsearch.PatternSearcher#extractPatterns(java.lang.String)
      */
-    public List<Pattern> extractPatterns(String posTaggedSentence, int luceneSentenceId) {
+    public List<Pattern> extractPatterns(String sentence, String posTaggedSentence, int luceneSentenceId) {
 
         List<Pattern> patterns       = new ArrayList<Pattern>();
         List<String> mergedSentence = mergeTagsInSentences(posTaggedSentence);
@@ -66,10 +68,17 @@ public class PartOfSpeechTagPatternSearcher implements PatternSearcher {
                 // also filter out empty patterns
                 if ( nlrWithoutTags != null && !nlrWithoutTags.isEmpty() && 
                         secondEntity != null && !secondEntity.getLabel().isEmpty() ) {
+                    
+                    if ( RdfLiveNews.CONFIG.getBooleanSetting("search", "ignoreDays") ) 
+                        if ( Constants.WEEK_DAYS.contains(firstEntity.getLabel()) || 
+                             Constants.WEEK_DAYS.contains(secondEntity.getLabel()) || 
+                             firstEntity.getLabel().equals(secondEntity.getLabel()) ) 
+                                    continue;
 
                     pattern.addLearnedFromEntities(new EntityPair(firstEntity,secondEntity,luceneSentenceId));
                     pattern.setNaturalLanguageRepresentation(StringUtils.join(nlrWithoutTags, " ").replaceAll(" [Tt]he$", ""));
                     pattern.setNaturalLanguageRepresentationWithTags(StringUtils.join(nlrWithTags, " ").replaceAll(" [Tt]he_[A-z]*$", ""));
+                    pattern.setExampleSentence(sentence);
                     
                     patterns.add(pattern);
                 }

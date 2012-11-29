@@ -26,7 +26,7 @@ public class NamedEntityTagPatternSearcher implements PatternSearcher {
     /**
      * 
      */
-    public List<Pattern> extractPatterns(String nerTaggedSentence, int luceneSentenceId) {
+    public List<Pattern> extractPatterns(String sentence, String nerTaggedSentence, int luceneSentenceId) {
 
         List<Pattern> patterns      = new ArrayList<Pattern>();
         List<String> mergedSentence = mergeTagsInSentences(nerTaggedSentence);

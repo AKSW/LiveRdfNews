@@ -3,32 +3,30 @@
  */
 package org.aksw.simba.rdflivenews.evaluation;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
-import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
-import org.aksw.simba.rdflivenews.nlp.pos.StanfordNLPPartOfSpeechTagger;
+import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
-import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
-import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
-import org.aksw.simba.rdflivenews.pattern.search.impl.PartOfSpeechTagPatternSearcher;
-import org.apache.lucene.document.Document;
+import org.aksw.simba.rdflivenews.util.ReflectionManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.index.IndexReader;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.lucene.LuceneManager;
@@ -40,6 +38,9 @@ import com.github.gerbsen.lucene.LuceneManager;
  */
 public class DataGeneration {
 
+    private static int pairs = 0;
+    private static int ids = 0;
+    
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
 
         DataGeneration.generatePatterns();
@@ -47,98 +48,65 @@ public class DataGeneration {
     
     public static void generatePatterns() throws InvalidFileFormatException, IOException {
         
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
-        String indexDir = RdfLiveNews.CONFIG.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "index");
-        IndexReader reader = LuceneManager.openIndexReader(LuceneManager.openLuceneIndex(indexDir));
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
         
-        StanfordNLPPartOfSpeechTagger posTagger = new StanfordNLPPartOfSpeechTagger();
+        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
-        List<Pattern> goodPatterns = new ArrayList<Pattern>();
-        List<Pattern> badPatterns = new ArrayList<Pattern>();
+        Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
+        deduplication.runDeduplication(0, 37, 37);
         
-        for ( int i = 0; i < reader.maxDoc() && i < 1000000000 ; i++ ) {
-            
-            Document doc = reader.document(i);
-            String sentence = doc.get(Constants.LUCENE_FIELD_TEXT);
-            int luceneId = Integer.valueOf(doc.get(Constants.LUCENE_FIELD_ID));
-            PatternSearcher patternSearcher = new PartOfSpeechTagPatternSearcher();
-            
-            for (Pattern pattern : patternSearcher.extractPatterns(posTagger.getAnnotatedSentence(sentence), luceneId)){
-                
-                List<String> tokens = new ArrayList<String>(Arrays.asList(pattern.getNaturalLanguageRepresentation().toLowerCase().split(" ")));
-                
-                if ( tokens.size() > 0 && tokens.size() < 15 ) {
+        Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+        System.out.print("Starting pattern search in "+currentNonDuplicateSentenceIds.size()+" sentences ...  ");
+        PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
+        List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds), RdfLiveNews.CONFIG.getIntegerSetting("search", "number-of-threads"));
+        System.out.println("DONE");
 
-                    tokens.removeAll(Constants.STOP_WORDS);
-                    
-                    if ( !tokens.isEmpty() ) goodPatterns.add(pattern);
-                    else badPatterns.add(pattern);
-                }
-                else badPatterns.add(pattern);
+        // filter the patterns and merge the old and the new patterns
+        PatternFilter patternFilter = new DefaultPatternFilter();
+        patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
+        
+        List<String> lines = new ArrayList<String>();   
+        System.out.println("Found " + patternsOfIteration.size()+ " patterns");
+        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/patterns1percent5occ.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/test/patterns1percent5occ.pattern", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        
+        int count = 0;
+        
+        for ( Pattern pattern : patternsOfIteration ) {
+            if ( pattern.getTotalOccurrence() >= 5 ) {
+                
+                count += pattern.getTotalOccurrence();
+                writer1.write(pattern.getNaturalLanguageRepresentation()+ "___" + pattern.getNaturalLanguageRepresentationWithTags());
+                patternToString(pattern, lines);
             }
         }
+        System.out.println("pairs: " + pairs + " ids: " + ids);
+        System.out.println("Lines in file: "+ lines.size() + " totalOcc: " + count);
+        Collections.sort(lines);
         
-        PatternFilter filter = new DefaultPatternFilter();
-        goodPatterns = filter.filter(goodPatterns);
-        
-//        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/annotation/patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-//        for ( Pattern pattern : goodPatterns ) writer.write(patternToString(pattern));
-//        writer.close();
-        
-//        writer = new BufferedFileWriter("/Users/gerb/test/annotation/bad_patterns.txt", "UTF-8", WRITER_WRITE_MODE.APPEND);
-//        for ( Pattern pattern : badPatterns ) writer.write(patternToString(pattern));
-//        writer.close();
-        
-//        System.out.println("Good: " + goodPatterns.size());
-//        System.out.println("Bad: " + badPatterns.size());
-        
-//        for ( Pattern p: badPatterns) System.out.println(p.getNaturalLanguageRepresentation());
-//        System.out.println("\n\n##################################################################\n##################################################################\n\n");
-//        for ( Pattern p: goodPatterns) System.out.println(p.getNaturalLanguageRepresentation());
-        
-        
-        PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
-        List<Pattern> mergedPatterns = patternSearchManager.mergeNewFoundPatterns(goodPatterns);
-        Collections.sort(mergedPatterns, new PatternOccurrenceComparator());
-        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/patterns10k.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
-        for ( Pattern pattern : mergedPatterns ) {
-            writer.write(patternToString(pattern));
-        }
+        for ( String line : lines )writer.write(line);
         writer.close();
+        writer1.close();
     }
     
-    public static String patternToString(Pattern pattern) {
+    public static void patternToString(Pattern pattern, List<String> lines) {
         
-        List<Integer> ids = new ArrayList<Integer>(pattern.getFoundInSentencesIds());
-        int i = 0;
-        
-        for (String sentence : IndexManager.getInstance().getStringValueFromDocuments(ids, Constants.LUCENE_FIELD_TEXT) ) {
+        for ( EntityPair pair : pattern.getLearnedFromEntities() ) {
             
-            int currentId = ids.get(i++); 
+            pairs++;
             
-            if ( sentence.contains(pattern.getLearnedFromEntities().get(0).getFirstEntity().getLabel().replace(" \\", "")) && 
-                    sentence.contains(pattern.getLearnedFromEntities().get(0).getSecondEntity().getLabel().replace(" \\", "")) ) {
+            for ( Integer id : pair.getLuceneSentenceIds()) {
                 
-                return pattern.getLearnedFromEntities().get(0).getFirstEntity().getLabel() + "___" +
-                        pattern.getNaturalLanguageRepresentation() + "___" + 
-                        pattern.getLearnedFromEntities().get(0).getSecondEntity().getLabel() + "___" +
-                        currentId + "___" +
-                        sentence;
-            }
-            else {
+                ids++;
+
+                String randomSentenceWithEntities = IndexManager.getInstance().getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
                 
-//                if ( sentence.equals("Contact him at craasch@gannett.com, follow him at http:\\/\\/twitter.com\\/craasch or join in the conversation at http:\\/\\/www.facebook.com\\/raaschcolumn")) {
-//                    
-//                    System.out.println("Facebook/Twitter");
-//                    
-//                    return 
-//                }
-                
-                System.out.println(pattern.getLearnedFromEntities().get(0).getFirstEntity().getLabel() + " ___ " + pattern.getLearnedFromEntities().get(0).getSecondEntity().getLabel());
-                System.out.println(sentence);
+                lines.add(pair.getFirstEntity().getLabel() + "___" +
+                                pattern.getNaturalLanguageRepresentation() + "___" + 
+                                pair.getSecondEntity().getLabel() + "___" +
+                                id + "___" +
+                                randomSentenceWithEntities);
             }
         }
-        
-        throw new RuntimeException("Baaaaaammmmmm....");
     }
 }

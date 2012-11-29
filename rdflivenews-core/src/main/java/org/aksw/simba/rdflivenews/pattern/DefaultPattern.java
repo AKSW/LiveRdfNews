@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pair.Pair;
@@ -30,7 +32,8 @@ public class DefaultPattern implements Pattern {
     private Double score;
     private String favouriteTypeSecondEntity;
     private String favouriteTypeFirstEntity;
-    private Set<Integer> luceneSentenceIds;
+    private String exampleSentence;
+    private String clazz;
     
     /**
      * 
@@ -39,11 +42,11 @@ public class DefaultPattern implements Pattern {
     public DefaultPattern(String patternString) {
 
         this.entityPairs = new HashMap<Integer,EntityPair>();
-        this.luceneSentenceIds = new HashSet<Integer>();
         this.favouriteTypeFirstEntity = "";
         this.favouriteTypeSecondEntity = "";
         this.naturalLanguageRepresentation = patternString;
         this.totalOccurrence = 1;
+        this.exampleSentence = "";
         this.score = 0D;
     }
     
@@ -210,7 +213,9 @@ public class DefaultPattern implements Pattern {
      */
     public Set<Integer> getLuceneSentenceIds() {
 
-        return this.luceneSentenceIds;
+        Set<Integer> luceneSentencesIds = new TreeSet<Integer>();
+        for ( EntityPair pair : this.entityPairs.values() ) luceneSentencesIds.addAll(pair.getLuceneSentenceIds());
+        return luceneSentencesIds;
     }
     
     /**
@@ -218,7 +223,9 @@ public class DefaultPattern implements Pattern {
      */
     public int getTotalOccurrence() {
 
-        return this.entityPairs.size();
+        int occurrence = 0;
+        for ( EntityPair pair : this.entityPairs.values() ) occurrence += pair.getOccurrence();
+        return occurrence;
     }
 
     /**
@@ -242,6 +249,7 @@ public class DefaultPattern implements Pattern {
         StringBuilder builder = new StringBuilder();
         builder.append("Pattern: "+this.favouriteTypeFirstEntity+" "      +  this.naturalLanguageRepresentation + " " + this.favouriteTypeSecondEntity);
         builder.append("\nTagged-Pattern: arg1 "  + this.naturalLanguageRepresentationWithTags + " arg2");
+        builder.append("\nExample: " + this.exampleSentence);
         builder.append("\nOccurrence: "    + this.totalOccurrence);
         
         int i = 1;
@@ -296,5 +304,43 @@ public class DefaultPattern implements Pattern {
     public Double getScore() {
 
         return this.score;
+    }
+
+    /**
+     * @return the exampleSentence
+     */
+    public String getExampleSentence() {
+    
+        return exampleSentence;
+    }
+
+    /**
+     * @param exampleSentence the exampleSentence to set
+     */
+    public void setExampleSentence(String exampleSentence) {
+    
+        this.exampleSentence = exampleSentence;
+    }
+
+    @Override
+    public boolean isAboveThresholds() {
+
+        return this.getTotalOccurrence() >= RdfLiveNews.CONFIG.getIntegerSetting("scoring", "occurrenceThreshold");
+    }
+
+    /**
+     * @return the clazz
+     */
+    public String getClazz() {
+
+        return clazz;
+    }
+
+    /**
+     * @param clazz the clazz to set
+     */
+    public void setClazz(String clazz) {
+
+        this.clazz = clazz;
     }
 }

@@ -15,6 +15,7 @@ import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.apache.commons.lang3.text.WordUtils;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.math.Frequency;
@@ -54,8 +55,6 @@ public class DefaultClusterLabeling implements ClusterLabeler {
                 nlrTokens.removeAll(Constants.STOP_WORDS);
                 String nameSuggestion = StringUtils.join(nlrTokens, " ");
                 
-//                System.out.println(nlr +  " -> " + nameSuggestion);
-                
                 frequency.addValue(nameSuggestion);
             }
             
@@ -77,7 +76,7 @@ public class DefaultClusterLabeling implements ClusterLabeler {
             fileName += this.getClass().getSimpleName() + "-" + RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").substring(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").lastIndexOf(".") + 1) + "-";
             fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".clstr";
             
-            BufferedFileWriter writer = new BufferedFileWriter(fileName, "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+            BufferedFileWriter writer = new BufferedFileWriter(fileName, Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
             for ( Cluster<Pattern> cluster : clusters) {
              
                 writer.write(cluster.getName() + " ("+ cluster.getUri() +") ");
@@ -91,7 +90,6 @@ public class DefaultClusterLabeling implements ClusterLabeler {
                 
                 writer.write("\n");
             }
-            
             writer.close();
         }
     }

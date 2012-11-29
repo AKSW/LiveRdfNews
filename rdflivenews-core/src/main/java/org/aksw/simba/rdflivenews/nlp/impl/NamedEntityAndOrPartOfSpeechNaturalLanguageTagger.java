@@ -47,7 +47,7 @@ public class NamedEntityAndOrPartOfSpeechNaturalLanguageTagger implements Natura
         
         for ( Integer sentenceId : newFoundNonDuplicateIds ) {
 
-            Document oldDoc = IndexManager.getInstance().getDocumentById(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
+            Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
             String text     = oldDoc.get(Constants.LUCENE_FIELD_TEXT);
             
             Document newDoc = new Document();

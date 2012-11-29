@@ -5,6 +5,7 @@ package org.aksw.simba.rdflivenews.pattern.filter.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,10 +14,15 @@ import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.chainsaw.Main;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
 
 
 /**
@@ -43,19 +49,32 @@ public class DefaultPatternFilter implements PatternFilter {
             String nlr = pattern.getNaturalLanguageRepresentation().toLowerCase().trim();
             String tags = pattern.getNaturalLanguageRepresentationWithTags();
             
-            Set<String> naturalLanguageRepresentationChunks = new HashSet<String>(Arrays.asList(nlr.split(" ")));
-            naturalLanguageRepresentationChunks.removeAll(Constants.STOP_WORDS);
-            naturalLanguageRepresentationChunks.removeAll(FILTER_TOKENS);
+            Set<String> naturalLanguageRepresentationLowerCaseChunks = new HashSet<String>(Arrays.asList(nlr.split(" ")));
+            naturalLanguageRepresentationLowerCaseChunks.removeAll(Constants.STOP_WORDS);
+            naturalLanguageRepresentationLowerCaseChunks.removeAll(FILTER_TOKENS);
+            
+            Set<String> naturalLanguageRepresentationNormalCaseChunks = new HashSet<String>(Arrays.asList(pattern.getNaturalLanguageRepresentation().split(" ")));
+            naturalLanguageRepresentationNormalCaseChunks.removeAll(Constants.STOP_WORDS);
+            naturalLanguageRepresentationNormalCaseChunks.removeAll(FILTER_TOKENS);
             
             // remove this from the list of all patterns
-            if ( naturalLanguageRepresentationChunks.isEmpty() ) {
+            if ( naturalLanguageRepresentationLowerCaseChunks.isEmpty() ) {
                 
                 patternIterator.remove();
                 continue;
             }
             
+            // cleaned patterns which contain only uppercase letters like ", FL" are removed
+            boolean isAllUpperCase = true;
+            for ( String chunk : naturalLanguageRepresentationNormalCaseChunks) if ( !StringUtils.isAllUpperCase(chunk.trim()) ) isAllUpperCase = false;
+            if ( isAllUpperCase ) {
+
+                patternIterator.remove();
+                continue;
+            }
+            
             // patterns which start or end with "and" are usually crap
-            if ( nlr.startsWith("and ") || nlr.endsWith("and") || nlr.contains(":") || nlr.contains("#") || nlr.contains("http") || nlr.contains("|") || 
+            if ( nlr.startsWith("and ") || nlr.startsWith("&") || nlr.endsWith("and") || nlr.contains(":") || nlr.contains("#") || nlr.contains("http") || nlr.contains("|") || 
                  (nlr.contains("<") && nlr.contains(">") || nlr.contains("p.m.") || nlr.contains("a.m.") || nlr.contains("/") )   ) {
                 
                 patternIterator.remove();
@@ -80,7 +99,7 @@ public class DefaultPatternFilter implements PatternFilter {
                 patternIterator.remove();
                 continue;
             }
-            
+            // patterns with too much strange characters are deleted
             if ( nlr.length() - nlr.replaceAll("[^A-Za-z0-9 ,'`]", "").length() > 1 ) {
                 
                 patternIterator.remove();
@@ -98,5 +117,19 @@ public class DefaultPatternFilter implements PatternFilter {
         }
         
         return patternsOfIteration;
+    }
+    
+    public static void main(String[] args) throws InvalidFileFormatException, IOException {
+
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+        
+        List<Pattern> patterns = new ArrayList<>();
+        Pattern p = new DefaultPattern(", FL");
+        patterns.add(p);
+        
+        DefaultPatternFilter f = new DefaultPatternFilter();
+        f.filter(patterns);
+        
+        System.out.println(patterns);
     }
 }

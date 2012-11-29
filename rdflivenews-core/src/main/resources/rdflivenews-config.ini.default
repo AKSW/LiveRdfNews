@@ -1,6 +1,8 @@
 [search]
 ; the method how we look for patterns: NER or POS possible
 method = POS
+; patterns which have days as subject or object will be ignored
+ignoreDays = true
 ; the number of threads which should search for patterns
 number-of-threads = 3
 
@@ -25,6 +27,13 @@ occurrenceThreshold = 4
 threshold = 0.9
 window = 10
 
+[refiner]
+url = jdbc:mysql://139.18.2.235:5555/dbrecords
+username = liverdf 
+password = YOUR_PASSWORD
+; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
+typing = SUPER_CLASS
+
 [similarity]
 checkDomainAndRange = true
 writeFile = true
@@ -34,14 +43,10 @@ threshold = 0.5
 writeFile = true
 similarityThreshold = 0.5
 
-[refinement]
-; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
-typing = SUPER_CLASS
-
 [classes]
 deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication
 tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndOrPartOfSpeechNaturalLanguageTagger
-refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner
+refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.AprioriDisambiguationPatternRefiner
 scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer
 cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering
 similarity      = org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric

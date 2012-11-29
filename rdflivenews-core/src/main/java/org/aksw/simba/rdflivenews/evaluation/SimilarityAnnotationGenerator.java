@@ -21,6 +21,7 @@ import org.aksw.simba.rdflivenews.pattern.similarity.impl.TakelabSimilarityMetri
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric;
 import org.apache.commons.io.FileUtils;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.similarity.wordnet.SimilarityAssessor;
@@ -76,8 +77,8 @@ public class SimilarityAnnotationGenerator {
         SimilarityMetric sim = new QGramSimilarityMetric();
 //        SimilarityMetric sim = new WordnetSimilarityMetric();
 //        SimilarityMetric sim = new TakelabSimilarityMetric();
-        List<String> patterns = FileUtils.readLines(new File("/Users/gerb/test/10percent/10percent-#4-patterns-nlr.txt"));
-        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/10percent/sim-patterns-nlr-"+sim.getClass().getSimpleName()+"-"+threshold+".tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+        List<String> patterns = FileUtils.readLines(new File("/Users/gerb/test/patterns1percent5occ.pattern"));
+        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/pattern-sim.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         
         double max = 1; 
         List<Similarity> sims = new ArrayList<>();
@@ -85,23 +86,23 @@ public class SimilarityAnnotationGenerator {
         int i = 1;
         for ( String pattern1 : patterns ) {
             
-            String[] parts = pattern1.split("___");
+//            String[] parts = pattern1.split("___");
             
-            String nlr1 = parts[0];
-            String pos1 = parts[1];
+//            String nlr1 = parts[0];
+//            String pos1 = parts[1];
             
-            System.out.println(i++ + "/" + patterns.size());
+//            System.out.println(i++ + "/" + patterns.size());
             for ( String pattern2 : patterns ) {
                 
-                String[] parts2 = pattern2.split("___");
+//                String[] parts2 = pattern2.split("___");
                 
-                String nlr2 = parts2[0];
-                String pos2 = parts2[1];
+//                String nlr2 = parts2[0];
+//                String pos2 = parts2[1];
                 
                 if ( !pattern1.equals(pattern2) ) { 
 
-                    Pattern p1 = new DefaultPattern(nlr1, pos1);
-                    Pattern p2 = new DefaultPattern(nlr2, pos2);
+                    Pattern p1 = new DefaultPattern(pattern1, "");
+                    Pattern p2 = new DefaultPattern(pattern2, "");
                     
                     double similarity = sim.calculateSimilarity(p1,p2);
                     if ( similarity > max && similarity != Double.MAX_VALUE ) max = similarity;
@@ -121,7 +122,7 @@ public class SimilarityAnnotationGenerator {
 //            else {
                     value = simi.getSimilarity() / max;
 //            }
-            if ( value > 0.5 )          
+            if ( value > 0.3 )          
                 writer.write(String.format("%s\t%s\t%s", simi.getPattern1().getNaturalLanguageRepresentation(), simi.getPattern2().getNaturalLanguageRepresentation(), value));
         }
         

@@ -26,6 +26,7 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
 
     private Morphology lemmatizer = new Morphology();
     public int counter = 0;
+    private WordnetSimilarity similarity = WordnetSimilarity.LIN;
 
     /*
      * (non-Javadoc)
@@ -57,7 +58,7 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
                 if (Constants.STOP_WORDS.contains(tokenTwo.toLowerCase())) continue;
                 
                 double sim = Wordnet.getInstance().getWordnetSimilarity(
-                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), WordnetSimilarity.LIN);
+                        lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), this.similarity);
 
                 total += sim;
                 comparison++;
@@ -76,5 +77,15 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
 
         WordnetSimilarityMetric m = new WordnetSimilarityMetric();
         System.out.println(m.calculateSimilarity(pattern1, pattern2));
+    }
+
+    /**
+     * Default is LIN metric
+     * 
+     * @param sim
+     */
+    public void setWordnetSimilarity(WordnetSimilarity sim) {
+
+        this.similarity = sim;
     }
 }

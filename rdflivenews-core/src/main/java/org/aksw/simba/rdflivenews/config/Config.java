@@ -39,7 +39,7 @@ public class Config {
      * @return
      */
     public boolean getBooleanSetting(String section, String key) {
-        
+
         return Boolean.valueOf(defactoConfig.get(section, key));
     }
     

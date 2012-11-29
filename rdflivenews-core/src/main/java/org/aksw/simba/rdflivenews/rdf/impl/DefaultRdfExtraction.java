@@ -65,7 +65,7 @@ public class DefaultRdfExtraction implements RdfExtraction {
                             }
                             else {
                                 
-                                System.out.println("WRONG D/R: " + pattern.getNaturalLanguageRepresentationWithTags());
+//                                System.out.println("WRONG D/R: " + pattern.getNaturalLanguageRepresentationWithTags());
                             }
                         }
                         else {

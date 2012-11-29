@@ -73,9 +73,9 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
         for ( Integer sentenceId : this.sentenceIds ) {
             
             // get the sentence from the index and try to extract patterns from it
-            Document document = IndexManager.getInstance().getDocumentById(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
+            Document document = IndexManager.getInstance().getDocumentByQuery(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(sentenceId))));
             String taggedSentence = document.get(this.luceneFieldName);
-            this.foundPatterns.addAll(this.patternSearcher.extractPatterns(taggedSentence,sentenceId));
+            this.foundPatterns.addAll(this.patternSearcher.extractPatterns(document.get(Constants.LUCENE_FIELD_TEXT), taggedSentence,sentenceId));
             
             this.progress++;
         }
