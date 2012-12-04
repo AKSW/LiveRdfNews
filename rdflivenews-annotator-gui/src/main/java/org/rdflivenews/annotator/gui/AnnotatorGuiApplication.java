@@ -128,10 +128,10 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
             object.setSizeFull();
             object.setStyleName("right");
             
-            String sentenceLabel = "<span style=\"font-size:130%\">" + this.pattern.sentence.
+            String sentenceLabel = "<a href=\""+this.pattern.url+"\">"+ "<span style=\"font-size:130%\">" + this.pattern.sentence.
                     replace(this.pattern.entityOne, "<span style=\"font-weight:bold\">" + this.pattern.entityOne + "</span>").
                     replace(this.pattern.entityTwo, "<span style=\"font-weight:bold\">" + this.pattern.entityTwo + "</span>").
-                    replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>") + "</span>";
+                    replace(this.pattern.nlr, "<span style=\"color:red\">" + this.pattern.nlr + "</span>") + "</span></a>";
             
             sentence =  new Label(sentenceLabel);
             sentence.setContentMode(Label.CONTENT_XHTML);
@@ -254,15 +254,20 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
         File file = new File(config.get("general", "dataDirectory") + config.get("general", "patternFileName"));
         File newFile = new File(config.get("general", "dataDirectory") + config.get("general", "patternFileName").replace(".txt", "_todo.txt"));
         if (!newFile.exists()) FileUtils.copyFile(file, newFile);
-        
+        int i = 1;
 		for (String line : FileUtils.readLines(newFile, "UTF-8") ) {
 		    
+		    i++;
 		    try {
 		    
 		        String[] lineParts = line.split("___");
-		        Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]), lineParts[4]);
+		        Pattern defaultPattern = new Pattern(lineParts[0],lineParts[1],lineParts[2],Integer.valueOf(lineParts[3]), lineParts[4], lineParts[5]);
 		        patterns.add(defaultPattern);
 		    }
+		    catch (java.lang.ArrayIndexOutOfBoundsException nfe) {
+                
+                System.out.println(i + ": " + line);
+            }
 		    catch (java.lang.NumberFormatException nfe) {
 		        
 		        System.out.println(line);
@@ -283,7 +288,8 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
                 pattern.nlr + "___" + 
                 pattern.entityTwo + "___" +
                 pattern.luceneId + "___" +
-                pattern.sentence;
+                pattern.sentence + "___" +
+                pattern.url;
     }
     
     /**
@@ -300,18 +306,20 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     
     private static class Pattern {
         
-        public Pattern(String firstEntity, String nlr, String secondEntity, int luceneId, String sentence) {
+        public Pattern(String firstEntity, String nlr, String secondEntity, int luceneId, String sentence, String url) {
 
             this.entityOne = firstEntity;
             this.entityTwo = secondEntity;
             this.nlr = nlr;
             this.luceneId = luceneId;
             this.sentence = sentence;
+            this.url       = url;
         }
         String sentence;
         String entityOne;
         String entityTwo;
         String nlr;
+        String url;
         int luceneId;
     }
 
