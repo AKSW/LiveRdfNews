@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.rdf.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
@@ -11,6 +12,7 @@ import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
+import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 
 import com.github.gerbsen.rdf.JenaUtil;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -28,7 +30,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 public class DefaultRdfExtraction implements RdfExtraction {
 
     @Override
-    public void extractRdf(Set<Cluster<Pattern>> clusters) {
+    public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
 
         OntModel model = ModelFactory.createOntologyModel();
         
@@ -86,5 +88,7 @@ public class DefaultRdfExtraction implements RdfExtraction {
         fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".ttl";
         JenaUtil.writeModelToFile(fileName, "TURTLE", "http://rdflivenews.org", model);
         JenaUtil.writeModelToRemoteStore();
+        
+        return null;
     }
 }

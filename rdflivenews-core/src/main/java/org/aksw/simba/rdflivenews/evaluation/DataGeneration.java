@@ -19,6 +19,7 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
+import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
 import org.apache.commons.lang3.StringUtils;
@@ -65,6 +66,10 @@ public class DataGeneration {
         PatternFilter patternFilter = new DefaultPatternFilter();
         patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
         
+        // refines the domain and range of the patterns 
+        PatternRefiner patternRefiner = (PatternRefiner) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "refiner"));
+        patternRefiner.refinePatterns(patternsOfIteration);
+        
         List<String> lines = new ArrayList<String>();   
         System.out.println("Found " + patternsOfIteration.size()+ " patterns");
         BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/patterns1percent5occ.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
@@ -76,7 +81,7 @@ public class DataGeneration {
             if ( pattern.getTotalOccurrence() >= 5 ) {
                 
                 count += pattern.getTotalOccurrence();
-                writer1.write(pattern.getNaturalLanguageRepresentation()+ "___" + pattern.getNaturalLanguageRepresentationWithTags());
+                writer1.write(pattern.getNaturalLanguageRepresentation()+ "___" + pattern.getNaturalLanguageRepresentationWithTags() + "___" + pattern.getFavouriteTypeFirstEntity() + "___" + pattern.getFavouriteTypeSecondEntity());
                 patternToString(pattern, lines);
             }
         }
@@ -99,13 +104,15 @@ public class DataGeneration {
                 
                 ids++;
 
-                String randomSentenceWithEntities = IndexManager.getInstance().getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
+                String sentence = IndexManager.getInstance().getStringValueFromDocument(id, Constants.LUCENE_FIELD_TEXT);
+                String articleUrl = IndexManager.getInstance().getStringValueFromDocument(id, Constants.LUCENE_FIELD_URL);
                 
                 lines.add(pair.getFirstEntity().getLabel() + "___" +
                                 pattern.getNaturalLanguageRepresentation() + "___" + 
                                 pair.getSecondEntity().getLabel() + "___" +
                                 id + "___" +
-                                randomSentenceWithEntities);
+                                sentence + "___" +
+                                articleUrl);
             }
         }
     }

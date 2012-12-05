@@ -3,10 +3,12 @@
  */
 package org.aksw.simba.rdflivenews.rdf;
 
+import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 
 
 /**
@@ -15,5 +17,5 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
  */
 public interface RdfExtraction {
 
-    void extractRdf(Set<Cluster<Pattern>> cluster);
+    List<Triple> extractRdf(Set<Cluster<Pattern>> cluster);
 }

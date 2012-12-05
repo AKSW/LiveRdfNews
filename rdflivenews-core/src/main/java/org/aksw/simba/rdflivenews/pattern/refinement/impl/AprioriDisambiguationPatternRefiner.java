@@ -139,9 +139,12 @@ public class AprioriDisambiguationPatternRefiner implements PatternRefiner {
         long startAll = System.currentTimeMillis();
         for ( Pattern pattern : patterns ) {
             
-            long start = System.currentTimeMillis();
-            if ( pattern.isAboveThresholds() ) this.refinePattern(pattern);
-            System.out.println("Refining Pattern: " + pattern.getNaturalLanguageRepresentation() + " (Support: "+ pattern.getLearnedFromEntities().size()+") took " + (System.currentTimeMillis() - start) + "ms.");
+            if ( pattern.isAboveThresholds() ) {
+                
+                long start = System.currentTimeMillis();
+                this.refinePattern(pattern);
+                System.out.println("Refining Pattern: " + pattern.getNaturalLanguageRepresentation() + " (Support: "+ pattern.getTotalOccurrence()+") took " + (System.currentTimeMillis() - start) + "ms.");
+            }
         }
         System.out.println("Refining " + patterns.size() + " patterns took: " + TimeUtil.convertMilliSeconds(System.currentTimeMillis() - startAll) + ".");
         

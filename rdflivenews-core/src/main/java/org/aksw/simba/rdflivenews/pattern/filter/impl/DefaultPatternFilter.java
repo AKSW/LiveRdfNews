@@ -74,7 +74,7 @@ public class DefaultPatternFilter implements PatternFilter {
             }
             
             // patterns which start or end with "and" are usually crap
-            if ( nlr.startsWith("and ") || nlr.startsWith("&") || nlr.endsWith("and") || nlr.contains(":") || nlr.contains("#") || nlr.contains("http") || nlr.contains("|") || 
+            if ( nlr.startsWith("and ") || nlr.startsWith(";") || nlr.startsWith("&") || nlr.endsWith("and") || nlr.contains(":") || nlr.contains("#") || nlr.contains("http") || nlr.contains("|") || 
                  (nlr.contains("<") && nlr.contains(">") || nlr.contains("p.m.") || nlr.contains("a.m.") || nlr.contains("/") )   ) {
                 
                 patternIterator.remove();

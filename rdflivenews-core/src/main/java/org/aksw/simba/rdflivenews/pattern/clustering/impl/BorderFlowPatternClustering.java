@@ -25,6 +25,8 @@ import org.apache.commons.io.FileUtils;
  */
 public class BorderFlowPatternClustering implements PatternClustering {
 
+    private int delta = -1;
+    
     public Set<Cluster<Pattern>> clusterPatterns(Set<Similarity> similarities, Double similarityThreshold) {
 
         Map<Set<String>, Set<String>> results = new HashMap<Set<String>, Set<String>>();
@@ -65,7 +67,7 @@ public class BorderFlowPatternClustering implements PatternClustering {
             //call borderflow
             BorderFlowHard bf = new BorderFlowHard(name);
             bf.hardPartitioning = true;
-            Map<Set<String>, Set<String>> clusters = bf.cluster(-1, true, true, true);
+            Map<Set<String>, Set<String>> clusters = bf.cluster(this.delta, true, true, true);
 
             //write output to clusters
             Set<Cluster<Pattern>> patternClusters = new HashSet<Cluster<Pattern>>();
@@ -147,5 +149,13 @@ public class BorderFlowPatternClustering implements PatternClustering {
                 System.out.print("\n");
             }
         }
+    }
+
+    /**
+     * @param delta the delta to set
+     */
+    public void setDelta(int delta) {
+
+        this.delta = delta;
     }
 }

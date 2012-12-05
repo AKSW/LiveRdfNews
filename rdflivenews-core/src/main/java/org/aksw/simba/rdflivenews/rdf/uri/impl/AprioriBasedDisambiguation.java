@@ -56,7 +56,7 @@ public class AprioriBasedDisambiguation implements UriRetrieval {
 
         try {
             Statement stmt = con.createStatement();
-            String sql = "SELECT distinct uriname FROM words_uris WHERE words = \'" + label + "\'";
+            String sql = "SELECT distinct uriname FROM words_uris WHERE words = \'" + label.replace("'", "") + "\'";
             ResultSet rset = stmt.executeQuery(sql);
             while (rset.next()) {
                 resource = rset.getString("uriname");

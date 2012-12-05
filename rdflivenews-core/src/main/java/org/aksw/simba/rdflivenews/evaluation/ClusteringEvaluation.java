@@ -38,12 +38,13 @@ public class ClusteringEvaluation {
     private static Map<String,Float> maxSensitivityForPatternInCluster = new LinkedHashMap<String,Float>();
     private static Map<Integer,Float> maxPPVForPatternInCluster = new LinkedHashMap<>();
     private static ArrayList<String> patternKeys;
+    private static PatternClustering clustering = new BorderFlowPatternClustering();
     
     public static void main(String[] args) throws IOException {
         
         List<EvaluationResult> results = new ArrayList<>();
         
-        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, 0.3, */0.4/*, 0.5, 0.6, 0.7, 0.8, 0.9, 1D*/) ) {
+        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, */0.3, 0.4, 0.5/*, 0.6, 0.7, 0.8, 0.9, 1D*/) ) {
             
             for ( SimilarityMetric metric : Arrays.asList(/*new QGramSimilarityMetric(), new WordnetSimilarityMetric(), */ new QGramAndWordnetSimilarityMetric() )) {
 
@@ -51,51 +52,57 @@ public class ClusteringEvaluation {
                     
                     for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
                         
-                        StringBuffer config = new StringBuffer();
-                        config.append("\n\tClusteringSimilarityThreshold: ").append(threshold).append("\n");
-                        config.append("\tSimilarityMetric: ").append(metric.getClass().getSimpleName()).append("\n");
-                        config.append("\tWordnetSimilarity: ").append(sim).append("\n");
+                        EvaluationResult result = new EvaluationResult();
+                        result.addConfigOption("ClusteringSimilarityThreshold", threshold);
+                        result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
+                        result.addConfigOption("WordnetSimilarity", sim.toString());
+                        results.add(result);
                         ((WordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
                         
-                        startEval(results, config, metric, threshold);
+                        startEval(result, metric, threshold);
                     }
                 }
                 else if ( metric instanceof QGramAndWordnetSimilarityMetric ) {
                     
-//                    for ( double wordnetParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
-//                        for ( double qgramParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
+                    for ( double wordnetParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
+                        for ( double qgramParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
                         
-                            double wordnetParameter = 0.8;
-                            double qgramParameter = 0.6;
-                    
-                            StringBuffer config = new StringBuffer();
-                            config.append("\n\tClusteringSimilarityThreshold: ").append(threshold).append("\n");
-                            config.append("\tSimilarityMetric: ").append(metric.getClass().getSimpleName()).append("\n");
-                            config.append("\tWordnetParameter: ").append(wordnetParameter).append("\n");
-                            config.append("\tQGramParameter: ").append(qgramParameter).append("\n");
+                            EvaluationResult result = new EvaluationResult();
+                            result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
+                            result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
+                            result.addConfigOption("WordnetParameter", wordnetParameter);
+                            result.addConfigOption("QGramParameter", qgramParameter);
+                            results.add(result);
                             
                             ((QGramAndWordnetSimilarityMetric) metric).setWordnetParamter(wordnetParameter);
                             ((QGramAndWordnetSimilarityMetric) metric).setQgramParamter(qgramParameter);
                             
                             for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
                                 
-                                config.append("\tWordnetSimilarity: ").append(sim).append("\n");
+                                result.addConfigOption("WordnetSimilarity", sim.toString());
                                 ((QGramAndWordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
                                 
-                                startEval(results, config, metric, threshold);
+                                startEval(result, metric, threshold);
                             }
                             
 //                            startEval(results, config, metric, threshold);
-//                        }
-//                    }
+                        }
+                    }
                 }
                 else {
                     
-                    StringBuffer config = new StringBuffer();
-                    config.append("\n\tClusteringSimilarityThreshold: ").append(threshold).append("\n");
-                    config.append("\tSimilarityMetric: ").append(metric.getClass().getSimpleName()).append("\n");
-                    
-                    startEval(results, config, metric, threshold);
+                    for (Integer i : Arrays.asList(-1000, -100, -10, -1, 0, 1, 10, 100, 1000)) {
+                        
+                        EvaluationResult result = new EvaluationResult();
+                        result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
+                        result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
+                        result.addConfigOption("BorderFlowDelta", i);
+                        results.add(result);
+                        
+                        ((BorderFlowPatternClustering)clustering).setDelta(i);
+                        
+                        startEval(result, metric, threshold);
+                    }
                 }
             }
         }
@@ -104,7 +111,7 @@ public class ClusteringEvaluation {
         for ( EvaluationResult result : results ) System.out.println(result + "\n");
     }
 
-    private static void startEval(List<EvaluationResult> results, StringBuffer config, SimilarityMetric metric, Double threshold) throws IOException {
+    private static void startEval(EvaluationResult result, SimilarityMetric metric, Double threshold) throws IOException {
 
         // initialize class labels
         initializePatternClassLabels();
@@ -119,17 +126,18 @@ public class ClusteringEvaluation {
         setClassLabelForPatterns(clusters);
 
         // run the evaluation
-        runEvaluation(results, config, clusters);
+        runEvaluation(result, clusters);
     }
 
-    private static void runEvaluation(List<EvaluationResult> results, StringBuffer config, List<Cluster<Pattern>> clusters) {
+    private static void runEvaluation(EvaluationResult result, List<Cluster<Pattern>> clusters) {
         
         float sensitivity = calculateSensitivity(clusters);
         float positivePredictedValue = calculatePPV(clusters);
         double accuracy = Math.sqrt(sensitivity * positivePredictedValue);
         
-        EvaluationResult result = new EvaluationResult(config.toString(), sensitivity, positivePredictedValue, accuracy);
-        results.add(result);
+        result.setSensitivity(sensitivity);
+        result.setPositivePredictedValue(positivePredictedValue);
+        result.setAccuracy(accuracy);
         
         System.out.println(result + "\n");
     }
@@ -230,8 +238,12 @@ public class ClusteringEvaluation {
 
     private static Set<Cluster<Pattern>> createClusters(Set<Similarity> similarities, Double threshold) {
 
-        PatternClustering clustering = new BorderFlowPatternClustering();
-        return clustering.clusterPatterns(similarities, threshold);
+        Set<Cluster<Pattern>> clusters = new HashSet<Cluster<Pattern>>(); 
+        for ( Cluster<Pattern> cluster : clustering.clusterPatterns(similarities, threshold)) {
+            
+            if ( cluster.size() > 0 ) clusters.add(cluster);
+        }
+        return clusters;
     }
 
     private static Set<Similarity> createSimilarities(SimilarityMetric metric) throws IOException {
@@ -268,8 +280,6 @@ public class ClusteringEvaluation {
     private static void initializePatternClassLabels() {
 
         classToPattern.put("says", new HashSet<>(Arrays.asList(", '' said", ", '' says", "asked", "said", "said ,", "said in", "said of", "said on", "said that", "says", "says that", "announced", ", told", ", said", ", according to", "calls", "tells", "told", "called", "reported", "noted that")));
-        classToPattern.put("owner", new HashSet<>(Arrays.asList(", owner of", "owner")));
-        classToPattern.put("champion", new HashSet<>(Arrays.asList("champions", "champion")));
         classToPattern.put("spokesperson", new HashSet<>(Arrays.asList("spokeswoman", ", spokeswoman for", ", a spokesman for", "spokesman", ", a spokeswoman for", "spokesperson",", spokesman for")));
         classToPattern.put("director", new HashSet<>(Arrays.asList(", the director of", "director", ", director of", "executive director", ", executive director of"))); 
         classToPattern.put("player", new HashSet<>(Arrays.asList("quarterback", "receiver", "pitcher", "first baseman", "third baseman", "player"))); 
@@ -289,6 +299,8 @@ public class ClusteringEvaluation {
         classToPattern.put("graduatedFrom", new HashSet<>(Arrays.asList("graduated from"))); 
         classToPattern.put("wasTaken", new HashSet<>(Arrays.asList("took", "was taken to"))); 
         classToPattern.put("founder", new HashSet<>(Arrays.asList("co-founder", "founder"))); 
+        classToPattern.put("owner", new HashSet<>(Arrays.asList(", owner of", "owner")));
+        classToPattern.put("champion", new HashSet<>(Arrays.asList("champions", "champion")));
         classToPattern.put("aka", new HashSet<>(Arrays.asList(", known as", ", also known as"))); 
         classToPattern.put("manager", new HashSet<>(Arrays.asList("campaign manager", "manager"))); 
         classToPattern.put("writer", new HashSet<>(Arrays.asList("writer", "writers"))); 
