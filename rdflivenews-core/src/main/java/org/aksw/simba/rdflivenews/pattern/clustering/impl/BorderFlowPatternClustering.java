@@ -69,6 +69,7 @@ public class BorderFlowPatternClustering implements PatternClustering {
             bf.hardPartitioning = true;
             Map<Set<String>, Set<String>> clusters = bf.cluster(this.delta, true, true, true);
 
+            Set<Pattern> usedPatterns = new HashSet<Pattern>();
             //write output to clusters
             Set<Cluster<Pattern>> patternClusters = new HashSet<Cluster<Pattern>>();
             for (Set<String> seed : clusters.keySet()) {
@@ -76,10 +77,20 @@ public class BorderFlowPatternClustering implements PatternClustering {
                 Cluster<Pattern> patternCluster = new Cluster<>();
                 for (String patternId : c) {
                     patternCluster.add(patternIndex.get(Integer.parseInt(patternId)));
+                    usedPatterns.add(patternIndex.get(Integer.parseInt(patternId)));
                 }
                 patternClusters.add(patternCluster);
             }
-
+            
+            for(Pattern p: allPatterns)
+            {
+                if(!usedPatterns.contains(p))
+                {
+                    Cluster<Pattern> patternCluster = new Cluster<>();            
+                    patternCluster.add(p);
+                    patternClusters.add(patternCluster);
+                }
+            }
             return patternClusters;
         } catch (Exception e) {
             e.printStackTrace();
