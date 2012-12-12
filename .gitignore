@@ -15,3 +15,5 @@ rdflivenews-core/src/main/resources/patterns-nlr-0.7.tab
 rdflivenews-core/src/main/resources/patterns-nlr-QGramSimilarityMetric-0.5.tsv
 rdflivenews-core/src/main/resources/test-patterns-nlr-QGramSimilarityMetric-0.5.tsv
 rdflivenews-core/src/main/resources/test-patterns-nlr-WordnetSimilarityMetric-0.5.tsv
+rdflivenews-core/src/main/resources/rdflivenews-config.ini
+rdflivenews-crawler/src/main/resources/newscrawler-config.ini

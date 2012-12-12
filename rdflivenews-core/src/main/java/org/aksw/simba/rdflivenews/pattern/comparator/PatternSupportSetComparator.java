@@ -14,7 +14,7 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
  * the patterns number of occurrence. Patterns with highest occurrences
  * come first.
  */
-public class PatternOccurrenceComparator implements Comparator<Pattern> {
+public class PatternSupportSetComparator implements Comparator<Pattern> {
 
     @Override
     public int compare(Pattern o1, Pattern o2) {

@@ -5,7 +5,6 @@ package org.aksw.simba.rdflivenews.cluster.labeling;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -13,8 +12,11 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
+import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.apache.commons.lang3.text.WordUtils;
+import org.apache.log4j.chainsaw.Main;
 
 import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
@@ -28,7 +30,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
-public class DefaultClusterLabeling implements ClusterLabeler {
+public class WordnetClusterLabeling implements ClusterLabeler {
 
     @Override
     public void labelCluster(Set<Cluster<Pattern>> clusters) {
@@ -46,17 +48,17 @@ public class DefaultClusterLabeling implements ClusterLabeler {
             // we look at every cluster and remove trash and count the number of the cleaned pattern 
             for ( Pattern pattern : cluster ) {
                 
-                String nlr = pattern.getNaturalLanguageRepresentation();
-                
                 if ( domain.isEmpty() ) domain = pattern.getFavouriteTypeFirstEntity();
                 if ( range.isEmpty() ) range   = pattern.getFavouriteTypeSecondEntity();
-
-                // remove all the trash from the pattern
-                List<String> nlrTokens = new ArrayList<String>(Arrays.asList(nlr.toLowerCase().replaceAll("[^a-z]", "").split(" ")));
-                nlrTokens.removeAll(Constants.STOP_WORDS);
-                String nameSuggestion = StringUtils.join(nlrTokens, " ");
                 
-                frequency.addValue(nameSuggestion);
+                for (String partOfPattern1 : pattern.getNaturalLanguageRepresentationWithTags().replace("-", "").split(" ")) {
+
+                    String tokenOne = partOfPattern1.substring(0, partOfPattern1.lastIndexOf("_"));
+                    String tagOne = partOfPattern1.substring(partOfPattern1.lastIndexOf("_") + 1);
+                    
+//                    Wordnet.getInstance().getDatabase().getHypernyms(arg0);
+                    
+                }
             }
             
             // the name of the cluster will be the most common string of all patterns
@@ -92,6 +94,19 @@ public class DefaultClusterLabeling implements ClusterLabeler {
                 writer.write("\n");
             }
             writer.close();
+        }
+    }
+    
+    public static void main(String[] args) {
+
+        Pattern pattern = new DefaultPattern("director of",  "director_NN of_IN");
+        
+        for (String partOfPattern1 : pattern.getNaturalLanguageRepresentationWithTags().replace("-", "").split(" ")) {
+
+            String tokenOne = partOfPattern1.substring(0, partOfPattern1.lastIndexOf("_"));
+            String tagOne = partOfPattern1.substring(partOfPattern1.lastIndexOf("_") + 1);
+            
+            System.out.println(Wordnet.getInstance().getDatabase().findSynsetBySynset("house"));
         }
     }
 }

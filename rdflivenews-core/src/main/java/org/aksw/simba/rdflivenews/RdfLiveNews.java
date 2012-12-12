@@ -25,11 +25,13 @@ import org.aksw.simba.rdflivenews.pattern.clustering.impl.BorderFlowPatternClust
 import org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering;
 import org.aksw.simba.rdflivenews.pattern.clustering.merging.ClusterMerger;
 import org.aksw.simba.rdflivenews.pattern.clustering.merging.DefaultClusterMerger;
-import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternSupportSetComparator;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternTotalOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
 import org.aksw.simba.rdflivenews.pattern.mapping.DbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
+import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.scoring.PatternScorer;
@@ -39,9 +41,10 @@ import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThread
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.SimilarityGenerator;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.DefaultSimilarityGenerator;
+import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.SimilarityGeneratorManager;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
+import org.aksw.simba.rdflivenews.rdf.impl.SimpleRdfExtraction;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
 import org.apache.lucene.document.Document;
@@ -70,17 +73,8 @@ public class RdfLiveNews {
         RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
         RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
         
-        
-//        initializeDataDirectory();
-//        for ( String dataDir : Arrays.asList(/*"index/1percent", "index/10percent") ) {
-//            for ( Integer occ : Arrays.asList(1,2,3,4,5,6,7,8,9,10)) {
-                
-//                RdfLiveNews.CONFIG.setStringSetting("general", "index", dataDir);
-//                RdfLiveNews.CONFIG.setStringSetting("scoring", "occurrenceThreshold", occ + "");
-                
-                run();
-//            }
-//        }
+        initializeDataDirectory();
+        run();
     }
     
     private static void run() {
@@ -90,13 +84,15 @@ public class RdfLiveNews {
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
         List<Pattern> patterns                  = new ArrayList<Pattern>();
-//        Set<Integer> nonDuplicateSentenceIds    = new HashSet<Integer>(); probably not needed any more
         
         // we need this to be an instance variable because we need to save the similarities which we computed for each iteration
-        SimilarityGenerator similarityGenerator = new DefaultSimilarityGenerator(
-                (SimilarityMetric) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")));
+        SimilarityGeneratorManager similarityGenerator = new SimilarityGeneratorManager(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity"));
+        Set<Similarity> similarities = Collections.synchronizedSet(new HashSet<Similarity>());
+     
+        // we can only find patterns if we have NER or POS tags annotated
+        NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
         
-        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+        for ( ; ITERATION < 38/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
 //        for ( ; ITERATION < IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
             
             long iterationTime = System.currentTimeMillis();
@@ -106,17 +102,16 @@ public class RdfLiveNews {
             // ##################################################
             // ##################################################
             // 1. Deduplication
-            System.out.println("Starting deduplication!");
+//            System.out.println("Starting deduplication!");
             long start = System.currentTimeMillis();
             
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
-            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
+//            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
 //            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
-//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
-            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
-//            nonDuplicateSentenceIds.addAll(currentNonDuplicateSentenceIds);
+            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
+//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
             
-            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
+//            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
             // ##################################################
             // ##################################################
@@ -125,11 +120,8 @@ public class RdfLiveNews {
             
             System.out.println("Starting NER & POS tagging of " + currentNonDuplicateSentenceIds.size() + " non duplicate sentences!");
             start = System.currentTimeMillis();
-
-            // we can only find patterns if we have NER or POS tags annotated
-            NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
 //            if you have not yet tagged all sentences in the index you need to uncomment this
-            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+//            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
 
             System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -138,12 +130,12 @@ public class RdfLiveNews {
             // ##################################################
             // 2. Pattern Search and Filtering
             
-            System.out.println(String.format("Starting pattern search with %s non duplicate sentences and %s threads!", currentNonDuplicateSentenceIds.size(), RdfLiveNews.CONFIG.getStringSetting("search", "number-of-threads")));
+            System.out.println(String.format("Starting pattern search with %s non duplicate sentences and %s threads!", currentNonDuplicateSentenceIds.size(), Runtime.getRuntime().availableProcessors()));
             start = System.currentTimeMillis();
 
             // search the patterns only in the sentences of the current iteration
             PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
-            List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds), RdfLiveNews.CONFIG.getIntegerSetting("search", "number-of-threads"));
+            List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds));
 
             // filter the patterns and merge the old and the new patterns
             PatternFilter patternFilter = new DefaultPatternFilter();
@@ -155,31 +147,34 @@ public class RdfLiveNews {
             // ##################################################
             // ##################################################
             // ##################################################
-            // 3. Pattern Refinement
+            // 3. Pattern Scoring
+            
+//            System.out.println("Starting pattern scoring!");
+//            start = System.currentTimeMillis();
+//            
+//            // scores the pattern according to certain features
+//            PatternScorer patternScorer = new OccurrencePatternScorer();
+//            patternScorer.scorePatterns(patterns);
+            
+            Collections.sort(patterns, new PatternSupportSetComparator());
+            patternSearchManager.logPatterns(patterns);
+            List<Pattern> top1PercentPattern = patterns.size() > 100000 ? patterns.subList(0, 1000) : patterns.subList(0, patterns.size() / 100);
+            
+            System.out.println(String.format("Finished pattern scoring in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
+            
+            // ##################################################
+            // ##################################################
+            // ##################################################
+            // 4. Pattern Refinement
             
             System.out.println(String.format("Starting pattern refinement with %s strategy!", RdfLiveNews.CONFIG.getStringSetting("refiner", "typing")));
             start = System.currentTimeMillis();
             
-            // refines the domain and range of the patterns 
-            PatternRefiner patternRefiner = (PatternRefiner) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "refiner"));
-            patternRefiner.refinePatterns(patterns);
+            // refines the domain and range of the patterns
+            PatternRefinementManager refinementManager = new PatternRefinementManager();
+            refinementManager.startPatternRefinement(top1PercentPattern);
             
-            System.out.println(String.format("Finished pattern refinement in %s!", /*TimeUtil.convertMilliSeconds(*/System.currentTimeMillis() - start)/*)*/);
-            
-            // ##################################################
-            // ##################################################
-            // ##################################################
-            // 4. Pattern Scoring
-            
-            System.out.println("Starting pattern scoring!");
-            start = System.currentTimeMillis();
-            
-            // scores the pattern according to certain features
-            PatternScorer patternScorer = new OccurrencePatternScorer();
-            patternScorer.scorePatterns(patterns);
-            patternSearchManager.logPatterns(patterns);
-            
-            System.out.println(String.format("Finished pattern scoring in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
+            System.out.println(String.format("Finished pattern refinement in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
             // ##################################################
@@ -188,7 +183,7 @@ public class RdfLiveNews {
             System.out.println(String.format("Starting to generate similarities between patterns with %s!", RdfLiveNews.CONFIG.getStringSetting("classes", "similarity")));
             start = System.currentTimeMillis();
             
-            Set<Similarity> similarities = similarityGenerator.calculateSimilarities(patterns);
+            similarityGenerator.startSimilarityGeneratorThreads(top1PercentPattern, similarities);
             
             System.out.println(String.format("Finished generate similarities in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -233,7 +228,7 @@ public class RdfLiveNews {
             start = System.currentTimeMillis();
             
             // use the patterns to extract rdf from news text
-            RdfExtraction rdfExtractor = new DefaultRdfExtraction();
+            RdfExtraction rdfExtractor = new SimpleRdfExtraction();
             rdfExtractor.extractRdf(clusters);
             
             System.out.println(String.format("Wrote rdf data in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
@@ -271,7 +266,10 @@ public class RdfLiveNews {
         if ( !new File(RdfLiveNews.DATA_DIRECTORY + "test").exists()) 
             new File(RdfLiveNews.DATA_DIRECTORY + "test").mkdir();
         if ( !new File(RdfLiveNews.DATA_DIRECTORY + "index").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "index").mkdir();        
+            new File(RdfLiveNews.DATA_DIRECTORY + "index").mkdir();
+        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "evaluation").exists()) 
+            new File(RdfLiveNews.DATA_DIRECTORY + "evaluation").mkdir();
+            new File(RdfLiveNews.DATA_DIRECTORY + "rdf").mkdir();
     }
     
 private static void test() {
@@ -292,7 +290,7 @@ private static void test() {
                 
                 System.out.println(url);
                 
-                for ( String s : IndexManager.getInstance().getSentencesFromArticle(url)) {
+                for ( String s : IndexManager.getInstance().getAllSentencesFromArticle(url)) {
                     
                     System.out.println(s);
                 }

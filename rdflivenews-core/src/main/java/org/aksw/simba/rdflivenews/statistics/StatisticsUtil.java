@@ -104,7 +104,7 @@ public class StatisticsUtil {
 
     /**
      * creates a statisitcs of how many sentences per timeslice were found for crawling
-     * @param writer 
+     * @param normalTripleWriter 
      */
     private static void getNumberOfSentencesPerTimeSlice() {
         
@@ -118,7 +118,7 @@ public class StatisticsUtil {
     
     /**
      * creates a statisitcs of how many non duplicate sentences per timeslice were found for crawling
-     * @param writer 
+     * @param normalTripleWriter 
      */
     private static void getNumberOfNonDuplicateSentencesPerTimeSlice(List<Double> thresholds, List<Integer> windowSizes) {
         

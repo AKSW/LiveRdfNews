@@ -13,10 +13,10 @@ import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
  */
 public class QGramAndWordnetSimilarityMetric implements SimilarityMetric {
 
-    private WordnetSimilarity similarity = WordnetSimilarity.LIN;
+    private WordnetSimilarity similarity = WordnetSimilarity.PATH;
     
-    private double qgramParamter = 0D;
-    private double wordnetParamter = 0D;
+    private double qgramParamter = 0.21D;
+    private double wordnetParamter = 0.86D;
     
     SimilarityMetric qgram = new QGramSimilarityMetric();
     SimilarityMetric wordnet = new WordnetSimilarityMetric();
@@ -36,7 +36,7 @@ public class QGramAndWordnetSimilarityMetric implements SimilarityMetric {
     }
 
     /**
-     * Default is LIN metric
+     * Default is PATH metric
      * 
      * @param sim
      */
@@ -59,5 +59,13 @@ public class QGramAndWordnetSimilarityMetric implements SimilarityMetric {
     public void setWordnetParamter(double wordnetParamter) {
     
         this.wordnetParamter = wordnetParamter;
+    }
+    
+    /**
+     * @return the similarity
+     */
+    public WordnetSimilarity getSimilarityMetric() {
+    
+        return similarity;
     }
 }

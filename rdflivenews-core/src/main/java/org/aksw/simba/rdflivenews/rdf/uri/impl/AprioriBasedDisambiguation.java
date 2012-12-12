@@ -4,8 +4,10 @@
  */
 package org.aksw.simba.rdflivenews.rdf.uri.impl;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
 
 import com.github.gerbsen.encoding.Encoder;
 import com.github.gerbsen.encoding.Encoder.Encoding;
@@ -24,7 +30,7 @@ import com.github.gerbsen.encoding.Encoder.Encoding;
  */
 public class AprioriBasedDisambiguation implements UriRetrieval {
 
-    Connection con;
+    public Connection con;
     public static Logger logger = java.util.logging.Logger.getLogger(AprioriBasedDisambiguation.class.getName());
 
     /**
@@ -112,7 +118,7 @@ public class AprioriBasedDisambiguation implements UriRetrieval {
                 for (String u : uris) {
                     
                     score = getAprioriScore(u);
-                    if (score > max) {
+                    if (score >= max) {
                         max = score;
                         uri = u;
                     }
@@ -127,5 +133,20 @@ public class AprioriBasedDisambiguation implements UriRetrieval {
     public String getUri(String label) {
     
         throw new RuntimeException("This method is not supported for Apriori based disambiguation!");
+    }
+    
+    public static void main(String[] args) throws InvalidFileFormatException, IOException {
+
+        // load the config, we dont need to configure logging because the log4j config is on the classpath
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+        RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
+        
+        String url = RdfLiveNews.CONFIG.getStringSetting("refiner", "url");
+        String username = RdfLiveNews.CONFIG.getStringSetting("refiner", "username");
+        String password = RdfLiveNews.CONFIG.getStringSetting("refiner", "password");
+        
+        UriRetrieval uriRetrieval = new AprioriBasedDisambiguation(url, username, password);
+        System.out.println(uriRetrieval.getUris("", Arrays.asList("Pro Bowl")));
+        
     }
 }

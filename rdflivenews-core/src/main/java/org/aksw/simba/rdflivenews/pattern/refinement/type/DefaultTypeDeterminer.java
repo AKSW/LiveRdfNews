@@ -30,7 +30,7 @@ public class DefaultTypeDeterminer implements TypeDeterminer {
     /**
      * 
      */
-    protected OntModel ontologyModel = JenaUtil.loadModelFromFile(MavenUtil.loadFile("/dbpedia_3.8.owl").getAbsolutePath());
+    protected static final OntModel ontologyModel = JenaUtil.loadModelFromFile(MavenUtil.loadFile("/dbpedia_3.8.owl").getAbsolutePath());
     
     /**
      * avoid those super class

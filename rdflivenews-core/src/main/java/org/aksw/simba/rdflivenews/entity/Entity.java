@@ -15,6 +15,7 @@ public class Entity {
     private String label;
     private String uri;
     private String type = Constants.OWL_THING;
+    private String refinedLabel = "";
     
     /**
      * @param label
@@ -146,5 +147,15 @@ public class Entity {
             if (!uri.equals(other.uri))
                 return false;
         return true;
+    }
+
+    public void setRefinedLabel(String label) {
+
+        this.refinedLabel = label;
+    }
+    
+    public String getRefinedLabel() {
+
+        return this.refinedLabel;
     }
 }

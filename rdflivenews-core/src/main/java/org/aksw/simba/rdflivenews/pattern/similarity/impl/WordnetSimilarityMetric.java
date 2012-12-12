@@ -41,9 +41,9 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
         double total = 0;
         int comparison = 0;
 
-        String[] partsOfPattern2 = pattern2.getNaturalLanguageRepresentationWithTags().split(" ");
+        String[] partsOfPattern2 = pattern2.getNaturalLanguageRepresentationWithTags().replace("-", "").split(" ");
         
-        for (String partOfPattern1 : pattern1.getNaturalLanguageRepresentationWithTags().split(" ")) {
+        for (String partOfPattern1 : pattern1.getNaturalLanguageRepresentationWithTags().replace("-", "").split(" ")) {
 
             String tokenOne = partOfPattern1.substring(0, partOfPattern1.lastIndexOf("_"));
             String tagOne = partOfPattern1.substring(partOfPattern1.lastIndexOf("_") + 1);
@@ -87,5 +87,10 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
     public void setWordnetSimilarity(WordnetSimilarity sim) {
 
         this.similarity = sim;
+    }
+
+    public WordnetSimilarity getSimilarityMetric() {
+
+        return this.similarity;
     }
 }

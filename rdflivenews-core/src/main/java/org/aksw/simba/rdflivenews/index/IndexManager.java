@@ -85,7 +85,7 @@ public class IndexManager {
      */
     public void createIndex() {
         
-        // create the index writer configuration and create a new index writer
+        // create the index normalTripleWriter configuration and create a new index normalTripleWriter
         IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         indexWriterConfig.setRAMBufferSizeMB(1024);
         indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
@@ -99,7 +99,7 @@ public class IndexManager {
      */
     public void openIndexWriter() {
         
-        // create the index writer configuration and create a new index writer
+        // create the index normalTripleWriter configuration and create a new index normalTripleWriter
         IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         indexWriterConfig.setRAMBufferSizeMB(1024);
         indexWriterConfig.setOpenMode(OpenMode.APPEND);
@@ -394,6 +394,8 @@ public class IndexManager {
     }
     
     /**
+     * Returns 10000 documents at maximum!
+     * 
      * 
      * @param documentIds
      * @param field
@@ -405,8 +407,16 @@ public class IndexManager {
         
         try {
             
+            BooleanQuery query = new BooleanQuery();
+            for ( Integer id : documentIds) 
+                query.add(new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(id))), Occur.SHOULD);
+            
+            TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, false);
+            LuceneManager.query(INDEX, query, collector);
+            
             IndexReader reader = IndexReader.open(INDEX);
-            for ( Integer id : documentIds ) values.add(this.getStringValueFromDocument(reader, id, field));
+            for (ScoreDoc doc : collector.topDocs().scoreDocs ) 
+                values.add(LuceneManager.getDocumentByNumber(reader, doc.doc).get(field));
             reader.close();
         }
         catch (CorruptIndexException e) {
@@ -420,7 +430,7 @@ public class IndexManager {
         
         return values;
     }
-
+    
     /**
      * Returns all documents (top 1000000) with the given timeslice id
      * from the underlying index. 
@@ -571,7 +581,7 @@ public class IndexManager {
         Query duplicate = new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(Constants.NOT_DUPLICATE_SENTENCE)));
         
         IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(2_000_000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, false);
         LuceneManager.query(searcher, duplicate, collector);
         
         Set<Integer> nonDuplicateSentences = new HashSet<>();
@@ -591,14 +601,14 @@ public class IndexManager {
      * 
      * @return
      */
-    public Set<String> getSentencesFromArticle(String articleUrl) {
+    public Set<String> getAllSentencesFromArticle(String articleUrl) {
 
         Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
         
         IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
         TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
         LuceneManager.query(searcher, articles, collector);
-        System.out.println(articles);
+        
         Set<String> sentences = new HashSet<>();
         
         // add the primary key of each document to the list
@@ -611,9 +621,71 @@ public class IndexManager {
         
         return sentences;
     }
+    
+    /**
+     * 
+     * @return
+     */
+    public Set<String> getAllSentenceIdsFromArticle(String articleUrl) {
+
+        Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
+        
+        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
+        LuceneManager.query(searcher, articles, collector);
+        
+        Set<String> sentenceIds = new HashSet<>();
+        
+        // add the primary key of each document to the list
+        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
+            sentenceIds.add(
+                    LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE));
+        
+        LuceneManager.closeIndexReader(searcher.getIndexReader());
+        LuceneManager.closeIndexSearcher(searcher);
+        
+        return sentenceIds;
+    }
 
     public void closeIndexWriter() {
 
         LuceneManager.closeIndexWriter(this.writer);
+    }
+
+    public Set<String[]> getTextArticleDateAndArticleUrl(Set<Integer> documentIds) {
+
+        Set<String[]> values = new HashSet<String[]>();
+        
+        try {
+            
+            BooleanQuery query = new BooleanQuery();
+            for ( Integer id : documentIds) 
+                query.add(new TermQuery(new Term(Constants.LUCENE_FIELD_ID, NumericUtils.intToPrefixCoded(id))), Occur.SHOULD);
+            
+            TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, false);
+            LuceneManager.query(INDEX, query, collector);
+            
+            IndexReader reader = IndexReader.open(INDEX);
+            for (ScoreDoc doc : collector.topDocs().scoreDocs ) {
+                
+                Document document = LuceneManager.getDocumentByNumber(reader, doc.doc);
+                String[] extractions = new String[] {"","",""};
+                extractions[0] = document.get(Constants.LUCENE_FIELD_TEXT);
+                extractions[1] = document.get(Constants.LUCENE_FIELD_EXTRACTION_DATE);
+                extractions[2] = document.get(Constants.LUCENE_FIELD_URL);
+                
+                values.add(extractions);
+            }
+            reader.close();
+        }
+        catch (CorruptIndexException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return values;
     }
 }

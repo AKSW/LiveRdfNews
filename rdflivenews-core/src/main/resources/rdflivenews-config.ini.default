@@ -33,6 +33,8 @@ username = liverdf
 password = YOUR_PASSWORD
 ; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
 typing = SUPER_CLASS
+; possible ALL,PERSON,NONE
+refineLabel = ALL
 
 [similarity]
 checkDomainAndRange = true

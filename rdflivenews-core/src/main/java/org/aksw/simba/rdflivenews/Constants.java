@@ -117,8 +117,45 @@ public class Constants {
     public static final Set<String> WEEK_DAYS = 
             new HashSet<String>(Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"));
 
+    public static final String RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    
     /**
      * 
      */
-    public static final String OWL_THING = "http://www.w3.org/2002/07/owl#Thing";
+    public static final String RDFS_PREFIX  = "http://www.w3.org/2000/01/rdf-schema#";
+    
+    public static final String RDFS_LABEL = RDFS_PREFIX + "label";
+    
+    /**
+     * 
+     */
+    public static final String OWL_PREFIX   = "http://www.w3.org/2002/07/owl#";
+    
+    /**
+     * 
+     */
+    public static final String OWL_THING = OWL_PREFIX + "Thing";
+
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_SUBJECT = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "subject";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_RESOURCE_OBJECT = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "resourceObject";
+
+    public static final String RDF_LIVE_NEWS_EXTRACTION_PREFIX = "http://rdflivenews.aksw.org/extraction/";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_PROPERTY = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "property";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_FOUND_IN_SENTENCE = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "foundInSentence";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_DATATYPE_OBJECT = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "datatypeObject";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "hasSourceSentence";
+
+    public static final String RDF_LIVE_NEWS_EXTRACTION_SAY_PREFIX = "http://rdflivenews.aksw.org/extraction/say/";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE_URL = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "sourceUrl";
+
+    public static final String RDF_LIVE_NEWS_ONTOLOGY_EXTRACTION_DATE = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "extractionDate";
+
+    public static final Object RDF_LIVE_NEWS_ONTOLOGY_MENTIONS = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "mentions";
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
+import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
 
 import edu.stanford.nlp.util.StringUtils;
 
@@ -42,5 +43,4 @@ public class QGramSimilarityMetric implements SimilarityMetric {
         
         return this.metric.getSimilarity(firstPattern, secondPattern);
     }
-
 }

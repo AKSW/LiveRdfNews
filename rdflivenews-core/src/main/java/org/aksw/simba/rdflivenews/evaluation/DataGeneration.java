@@ -16,7 +16,7 @@ import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternTotalOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
@@ -59,7 +59,7 @@ public class DataGeneration {
         Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
         System.out.print("Starting pattern search in "+currentNonDuplicateSentenceIds.size()+" sentences ...  ");
         PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
-        List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds), RdfLiveNews.CONFIG.getIntegerSetting("search", "number-of-threads"));
+        List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds));
         System.out.println("DONE");
 
         // filter the patterns and merge the old and the new patterns

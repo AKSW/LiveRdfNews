@@ -17,11 +17,12 @@ import java.util.concurrent.Future;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.comparator.PatternOccurrenceComparator;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternTotalOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.util.ListUtil;
 import org.apache.log4j.Logger;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 
@@ -44,19 +45,19 @@ public class PatternSearchThreadManager {
      * @param numberOfTotalSearchThreads
      * @return
      */
-    public List<Pattern> startPatternSearchCallables(List<Integer> luceneDocumentIds, int numberOfTotalSearchThreads) {
+    public List<Pattern> startPatternSearchCallables(List<Integer> luceneDocumentIds) {
 
         List<Pattern> results = new ArrayList<Pattern>();
         
         try {
             
             // we create numberOfTotalSearchThreads threads, so we need to split the sentences 
-            List<List<Integer>> luceneDocumentsIdsSubLists = ListUtil.split(luceneDocumentIds, (luceneDocumentIds.size() / numberOfTotalSearchThreads) + 1);
+            List<List<Integer>> luceneDocumentsIdsSubLists = ListUtil.split(luceneDocumentIds, (luceneDocumentIds.size() / Runtime.getRuntime().availableProcessors()) + 1);
 
             // create a thread pool and service for n threads/callable
-            ExecutorService executorService = Executors.newFixedThreadPool(numberOfTotalSearchThreads);
-            logger.info("Created executorservice for pattern search with " + numberOfTotalSearchThreads + 
-                    " threads and a thread pool of size " + numberOfTotalSearchThreads + ".");
+            ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            logger.info("Created executorservice for pattern search with " + Runtime.getRuntime().availableProcessors() + 
+                    " threads and a thread pool of size " + Runtime.getRuntime().availableProcessors() + ".");
             
             List<Callable<List<Pattern>>> todo = new ArrayList<Callable<List<Pattern>>>();
             
@@ -70,7 +71,7 @@ public class PatternSearchThreadManager {
             
             // start the timer which prints every 30s the progress of the callables
             Timer timer = new Timer();
-            timer.schedule(new PatternSearchPrintProgressTask(todo), 0, 30000);
+            timer.schedule(new PatternSearchPrintProgressTask(todo), 0, 1000);
             
             // invoke all waits until all threads are finished
             List<Future<List<Pattern>>> answers = executorService.invokeAll(todo);
@@ -162,17 +163,15 @@ public class PatternSearchThreadManager {
         fileName += RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").substring(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity").lastIndexOf(".") + 1) + "-";
         fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold");
         
-        BufferedFileWriter shortWriter  = new BufferedFileWriter(fileName + "-short.tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
-        BufferedFileWriter longWriter   = new BufferedFileWriter(fileName + "-long.tsv", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
-        
-        Collections.sort(patterns, new PatternOccurrenceComparator());
+        BufferedFileWriter shortWriter  = new BufferedFileWriter(fileName + "-short.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter longWriter   = new BufferedFileWriter(fileName + "-long.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         
         for (Pattern p : patterns) {
             
 //            if ( p.getScore() > RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") ) {
 
                 longWriter.write(p.toString());
-                shortWriter.write(p.getNaturalLanguageRepresentation() + "\t" + p.getNaturalLanguageRepresentationWithTags());
+                shortWriter.write(p.getNaturalLanguageRepresentation() + "\t" +p.getLearnedFromEntities().size() + "\t" + p.getNaturalLanguageRepresentationWithTags());
 //            }
         }
         shortWriter.close();

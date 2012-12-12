@@ -10,6 +10,7 @@ import java.util.Map;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.math.Frequency;
@@ -50,7 +51,7 @@ public class Statistics {
             frequency.addValue(posTags.trim());
         }
         
-        BufferedFileWriter writer = new BufferedFileWriter(fileName + "-POS.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer = new BufferedFileWriter(fileName + "-POS.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         for ( Map.Entry<Comparable<?>, Long> entry : frequency.sortByValue()) {
             
             writer.write(entry.getKey() + "\t\t" + entry.getValue());

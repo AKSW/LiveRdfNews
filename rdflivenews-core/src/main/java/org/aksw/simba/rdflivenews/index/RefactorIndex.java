@@ -87,46 +87,26 @@ public class RefactorIndex {
     
     public static void generatePartialDataset(int percent) throws InvalidFileFormatException, IOException {
         
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+        // load the config, we dont need to configure logging because the log4j config is on the classpath
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+        RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
         IndexManager.getInstance();
         
         IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
         IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
-        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/test/1percent/index"));
+        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/test/100percent/index"));
         
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         Set<Integer> ids = IndexManager.getInstance().getNonDuplicateSentences();
         System.out.println("Number of non duplicate sentences: " + ids.size());
         
-        Frequency f = new Frequency();
-        
         List<Document> documents = new ArrayList<Document>();
-        
-//        Set<Integer> goodIds = new HashSet<>();
-        
-//        int count = 0;
-//        for ( int i = 0; i <= IndexManager.getInstance().getHighestTimeSliceId() ; i++ ) {
-//            
-//            Set<Integer> s = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(i);
-//            goodIds.addAll(s);
-//            int now = s.size();
-//            count += now;
-//            System.out.println(now);
-//        }
-//        System.out.println(goodIds.size() + " " +  ids.size());
-//        System.out.println();
-//        System.out.println("docids: " + goodIds);
-//        
-//        System.out.println(count);
-//        System.exit(0);
         
         int j = 1;
         for ( Integer id : ids ) {
 //            if ( i % percent == 0 ) {
 
                 Document oldDoc = IndexManager.getInstance().getDocumentById(searcher, id);
-                
-                f.addValue(oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE));
                 
                 String pos = oldDoc.get(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE);
                 String ner = oldDoc.get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE);
@@ -141,8 +121,6 @@ public class RefactorIndex {
                 newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, ner == null ? "" : ner, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
                 newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get(Constants.LUCENE_FIELD_URL), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
                 
-//                writer.addDocument(newDoc);
-
                 documents.add(newDoc);
                 
                 if ( documents.size() > 50000 ) {

@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
+import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
@@ -27,6 +29,11 @@ import org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetri
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
 import org.apache.commons.io.FileUtils;
+import org.ini4j.Ini;
+
+import com.github.gerbsen.encoding.Encoder.Encoding;
+import com.github.gerbsen.file.BufferedFileWriter;
+import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -35,24 +42,27 @@ import org.apache.commons.io.FileUtils;
 public class ClusteringEvaluation {
 
     private static Map<String,Set<String>> classToPattern = new LinkedHashMap<String,Set<String>>();
-    private static Map<String,Float> maxSensitivityForPatternInCluster = new LinkedHashMap<String,Float>();
-    private static Map<Integer,Float> maxPPVForPatternInCluster = new LinkedHashMap<>();
+    private static Map<String,Double> maxSensitivityForPatternInCluster = new LinkedHashMap<String,Double>();
+    private static Map<Integer,Double> maxPPVForPatternInCluster = new LinkedHashMap<>();
     private static ArrayList<String> patternKeys;
     private static PatternClustering clustering = new BorderFlowPatternClustering();
     
     public static void main(String[] args) throws IOException {
         
-        List<EvaluationResult> results = new ArrayList<>();
+        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+        RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
         
-        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, */0.3, 0.4, 0.5/*, 0.6, 0.7, 0.8, 0.9, 1D*/) ) {
+        List<ClusterEvaluationResult> results = new ArrayList<>();
+        
+        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, 0.3,*/ 0.4/*, 0.5, 0.6, 0.7, 0.8, 0.9, 1D*/) ) {
             
-            for ( SimilarityMetric metric : Arrays.asList(/*new QGramSimilarityMetric(), new WordnetSimilarityMetric(), */ new QGramAndWordnetSimilarityMetric() )) {
+            for ( SimilarityMetric metric : Arrays.asList(/*new QGramSimilarityMetric(), new WordnetSimilarityMetric(),*/ new QGramAndWordnetSimilarityMetric()/**/)) {
 
                 if ( metric instanceof WordnetSimilarityMetric ) {
                     
                     for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
                         
-                        EvaluationResult result = new EvaluationResult();
+                        ClusterEvaluationResult result = new ClusterEvaluationResult();
                         result.addConfigOption("ClusteringSimilarityThreshold", threshold);
                         result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
                         result.addConfigOption("WordnetSimilarity", sim.toString());
@@ -64,54 +74,64 @@ public class ClusteringEvaluation {
                 }
                 else if ( metric instanceof QGramAndWordnetSimilarityMetric ) {
                     
-                    for ( double wordnetParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
-                        for ( double qgramParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
-                        
-                            EvaluationResult result = new EvaluationResult();
-                            result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
-                            result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
-                            result.addConfigOption("WordnetParameter", wordnetParameter);
-                            result.addConfigOption("QGramParameter", qgramParameter);
-                            results.add(result);
+//                    for ( double wordnetParameter = 0.8 ; wordnetParameter <= 0.9 ; wordnetParameter += 0.01) {
+//                        for ( double qgramParameter = 0.2 ; qgramParameter <= 0.4 ; qgramParameter += 0.01) {
                             
-                            ((QGramAndWordnetSimilarityMetric) metric).setWordnetParamter(wordnetParameter);
-                            ((QGramAndWordnetSimilarityMetric) metric).setQgramParamter(qgramParameter);
+//                    for ( double wordnetParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
+//                        for ( double qgramParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
+                        
+//                            ((QGramAndWordnetSimilarityMetric) metric).setWordnetParamter(wordnetParameter);
+//                            ((QGramAndWordnetSimilarityMetric) metric).setQgramParamter(qgramParameter);
+                        
+                        for ( Boolean typeSimilarity : Arrays.asList(true, false) ) {
                             
                             for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
                                 
+                                ClusterEvaluationResult result = new ClusterEvaluationResult();
+                                result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
+                                result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
+                                result.addConfigOption("Force Type Similarity", typeSimilarity.toString());
+//                                result.addConfigOption("WordnetParameter", wordnetParameter);
+//                                result.addConfigOption("QGramParameter", qgramParameter);
+                                results.add(result);
+
+//                                if ( sim !=  Wordnet.WordnetSimilarity.PATH ) continue; 
+                                
+                                long start = System.currentTimeMillis();
+                                
                                 result.addConfigOption("WordnetSimilarity", sim.toString());
                                 ((QGramAndWordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
+                                RdfLiveNews.CONFIG.setStringSetting("similarity", "checkDomainAndRange", typeSimilarity.toString());
                                 
                                 startEval(result, metric, threshold);
+                                
+                                System.out.println("Time: " + (System.currentTimeMillis() - start));
                             }
-                            
-//                            startEval(results, config, metric, threshold);
                         }
-                    }
+//                        }
+//                    }
                 }
                 else {
                     
-                    for (Integer i : Arrays.asList(-1000, -100, -10, -1, 0, 1, 10, 100, 1000)) {
-                        
-                        EvaluationResult result = new EvaluationResult();
-                        result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
-                        result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
-                        result.addConfigOption("BorderFlowDelta", i);
-                        results.add(result);
-                        
-                        ((BorderFlowPatternClustering)clustering).setDelta(i);
-                        
-                        startEval(result, metric, threshold);
-                    }
+                    ClusterEvaluationResult result = new ClusterEvaluationResult();
+                    result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
+                    result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
+                    results.add(result);
+                    
+                    startEval(result, metric, threshold);
                 }
             }
         }
         Collections.sort(results);
+        for ( ClusterEvaluationResult result : results ) System.out.println(result + "\n");
         
-        for ( EvaluationResult result : results ) System.out.println(result + "\n");
+        Collections.sort(results);
+        BufferedFileWriter writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/clustering.evaluation", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        for (ClusterEvaluationResult sortedResult : results) writer.write(sortedResult.toString() + "\n");
+        writer.close();
     }
 
-    private static void startEval(EvaluationResult result, SimilarityMetric metric, Double threshold) throws IOException {
+    private static void startEval(ClusterEvaluationResult result, SimilarityMetric metric, Double threshold) throws IOException {
 
         // initialize class labels
         initializePatternClassLabels();
@@ -121,27 +141,114 @@ public class ClusteringEvaluation {
 
         // we need to do the clustering
         List<Cluster<Pattern>> clusters = new ArrayList<>(createClusters(similarities, threshold));
+        
+        logClusters(clusters, metric);
 
         // we need to set the class labels for each pattern
         setClassLabelForPatterns(clusters);
 
         // run the evaluation
-        runEvaluation(result, clusters);
+        runEvaluation(result, clusters, metric);
     }
 
-    private static void runEvaluation(EvaluationResult result, List<Cluster<Pattern>> clusters) {
+    private static void logClusters(List<Cluster<Pattern>> clusters, SimilarityMetric metric ) {
+
+        if ( RdfLiveNews.CONFIG.getBooleanSetting("clustering", "writeFile") ) {
+            
+            String fileName = RdfLiveNews.DATA_DIRECTORY + RdfLiveNews.CONFIG.getStringSetting("general", "clusters");
+            fileName = fileName.endsWith("/") ? fileName : fileName + System.getProperty("file.separator");
+            fileName += "iter-#" + RdfLiveNews.ITERATION + "-";
+            if ( metric instanceof WordnetSimilarityMetric ) fileName += ((WordnetSimilarityMetric)metric).getSimilarityMetric().toString() + "-";
+            if ( metric instanceof QGramAndWordnetSimilarityMetric  ) fileName += ((QGramAndWordnetSimilarityMetric)metric).getSimilarityMetric().toString() + "-";
+            fileName += metric.getClass().getSimpleName() + "-";
+            fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".clstr";
+            
+            BufferedFileWriter writer = new BufferedFileWriter(fileName, Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+            for ( Cluster<Pattern> cluster : clusters) {
+             
+                for ( Pattern pattern : cluster ) {
+
+                    writer.write("\t" + pattern.getNaturalLanguageRepresentation());
+                }
+                writer.write("\n");
+            }
+            writer.close();
+        }
+    }
+
+    private static void runEvaluation(ClusterEvaluationResult result, List<Cluster<Pattern>> clusters, SimilarityMetric metric) {
         
-        float sensitivity = calculateSensitivity(clusters);
-        float positivePredictedValue = calculatePPV(clusters);
+        double sensitivity = calculateSensitivity(clusters);
+        double positivePredictedValue = calculatePPV(clusters);
         double accuracy = Math.sqrt(sensitivity * positivePredictedValue);
+        double intraClusterSimilarity = calculateIntraClusterSimilarity(clusters, metric);
+        double interClusterSimilarity = calculateInterClusterSimilarity(clusters, metric);
         
         result.setSensitivity(sensitivity);
         result.setPositivePredictedValue(positivePredictedValue);
         result.setAccuracy(accuracy);
+        result.setIntraClusterSimilarity(intraClusterSimilarity);
+        result.setInterClusterSimilarity(interClusterSimilarity);
         
         System.out.println(result + "\n");
     }
     
+    private static double calculateInterClusterSimilarity(List<Cluster<Pattern>> clusters, SimilarityMetric metric) {
+
+        double totalInterClusterSim = 0F;
+        int clusterComparisons = 0;
+        for ( Cluster<Pattern> cluster1 : clusters ) {
+            for ( Cluster<Pattern> cluster2 : clusters) {
+                if ( cluster1 != cluster2 ) {
+         
+                    clusterComparisons++;
+                    
+                    double interClusterSim   = 0D;
+                    int comparisons     = 0;
+                    
+                    for ( Pattern p1 : cluster1 ) {
+                        for ( Pattern p2 : cluster2) {
+                                
+                            interClusterSim += metric.calculateSimilarity(p1, p2);
+                            comparisons++;
+                        }
+                    }
+                    totalInterClusterSim += interClusterSim / comparisons;
+                }
+            }
+        }
+        return totalInterClusterSim / clusterComparisons;
+    }
+
+    private static double calculateIntraClusterSimilarity(List<Cluster<Pattern>> clusters, SimilarityMetric metric) {
+
+        double totalSim = 0F;
+        for ( Cluster<Pattern> cluster : clusters ) {
+            totalSim += getClusterSimilarity(cluster, metric);
+        }
+        return (double) (totalSim / clusters.size());
+    }
+    
+    private static double getClusterSimilarity(Cluster<Pattern> cluster, SimilarityMetric metric) {
+        
+        if ( cluster.size() == 1 ) return 0D;
+        else {
+
+            double clusterSim   = 0D;
+            int comparisons     = 0;
+            for ( Pattern p1 : cluster ) {
+                for ( Pattern p2 : cluster) {
+                    if ( p1 != p2 ) {
+                        
+                        clusterSim += metric.calculateSimilarity(p1, p2);
+                        comparisons++;
+                    }
+                }
+            }
+            return clusterSim / comparisons;
+        }
+    }
+
     /**
      * The positive predictive value is the proportion of members of cluster j 
      * which belong to complex i, relative to the total number of members of 
@@ -150,14 +257,14 @@ public class ClusteringEvaluation {
      * @param clusters
      * @return
      */
-    private static float calculatePPV(List<Cluster<Pattern>> clusters) {
+    private static double calculatePPV(List<Cluster<Pattern>> clusters) {
 
-        float[][] ppvMatrix = new float[classToPattern.size()][clusters.size()];
+        double[][] ppvMatrix = new double[classToPattern.size()][clusters.size()];
 
         for (int clusterIndex = 0; clusterIndex < clusters.size(); clusterIndex++) {
 
             Cluster<Pattern> cluster = clusters.get(clusterIndex);
-            float ppvMax = 0f;
+            double ppvMax = 0;
             
             for (int mappingIndex = 0; mappingIndex < classToPattern.size(); mappingIndex++) {
 
@@ -165,14 +272,14 @@ public class ClusteringEvaluation {
                 for (Pattern pattern : cluster) 
                     if ( pattern.getClazz().equals(patternKeys.get(mappingIndex))) patternsInCluster++;
 
-                ppvMatrix[mappingIndex][clusterIndex] = (float) patternsInCluster / clusters.get(clusterIndex).size();
+                ppvMatrix[mappingIndex][clusterIndex] = (double) patternsInCluster / clusters.get(clusterIndex).size();
                 ppvMax = Math.max(ppvMax, ppvMatrix[mappingIndex][clusterIndex]);
             }
             maxPPVForPatternInCluster.put(clusterIndex, ppvMax);
         }
         
-        float numberOfPatternsForMappingI = 0;
-        float weightedNumberOfPatternsForMappingI = 0;
+        double numberOfPatternsForMappingI = 0;
+        double weightedNumberOfPatternsForMappingI = 0;
         
         for (int clusterIndex = 0; clusterIndex < clusters.size(); clusterIndex++) {
             
@@ -183,15 +290,15 @@ public class ClusteringEvaluation {
         return weightedNumberOfPatternsForMappingI / numberOfPatternsForMappingI;
     }
 
-    private static float calculateSensitivity(List<Cluster<Pattern>> clusters) {
+    private static double calculateSensitivity(List<Cluster<Pattern>> clusters) {
 
-        float[][] sensitivityMatrix = new float[classToPattern.size()][clusters.size()];
+        double[][] sensitivityMatrix = new double[classToPattern.size()][clusters.size()];
         
         // sensitivity is the fraction of patterns of mapping i which are found in cluster j
         for ( int mappingIndex = 0; mappingIndex < classToPattern.size(); mappingIndex++) {
 
             String clazz = patternKeys.get(mappingIndex);
-            float sensitivityMax = 0f;
+            double sensitivityMax = 0f;
             
             for ( int clusterIndex = 0; clusterIndex < clusters.size() ; clusterIndex++ ) {
                 
@@ -200,15 +307,15 @@ public class ClusteringEvaluation {
                 for ( Pattern pattern : clusters.get(clusterIndex) ) 
                     if ( pattern.getClazz().equals(clazz) ) patternsInCluster++;
                 
-                sensitivityMatrix[mappingIndex][clusterIndex] = (float)patternsInCluster / classToPattern.get(clazz).size();
+                sensitivityMatrix[mappingIndex][clusterIndex] = (double)patternsInCluster / classToPattern.get(clazz).size();
                 sensitivityMax = Math.max(sensitivityMax, sensitivityMatrix[mappingIndex][clusterIndex]);
             }
             
             maxSensitivityForPatternInCluster.put(clazz, sensitivityMax);
         }
         
-        float numberOfPatternsForMappingI = 0;
-        float weightedNumberOfPatternsForMappingI = 0;
+        double numberOfPatternsForMappingI = 0;
+        double weightedNumberOfPatternsForMappingI = 0;
         
         for ( String clazz : patternKeys) {
             
@@ -303,7 +410,7 @@ public class ClusteringEvaluation {
         classToPattern.put("champion", new HashSet<>(Arrays.asList("champions", "champion")));
         classToPattern.put("aka", new HashSet<>(Arrays.asList(", known as", ", also known as"))); 
         classToPattern.put("manager", new HashSet<>(Arrays.asList("campaign manager", "manager"))); 
-        classToPattern.put("writer", new HashSet<>(Arrays.asList("writer", "writers"))); 
+        classToPattern.put("normalTripleWriter", new HashSet<>(Arrays.asList("normalTripleWriter", "writers"))); 
         classToPattern.put("selected", new HashSet<>(Arrays.asList("named", "'s selection of")));
         classToPattern.put("win", new HashSet<>(Arrays.asList("beat", "defeated")));
         classToPattern.put(", general partner ,", new HashSet<>(Arrays.asList(", general partner ,")));

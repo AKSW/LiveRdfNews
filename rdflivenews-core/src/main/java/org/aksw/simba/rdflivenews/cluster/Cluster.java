@@ -21,6 +21,44 @@ public class Cluster<T> implements Iterable<T>, Set<T> {
     private String rdfsRange = "";
     private String rdfsDomain = "";
     
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((cluster == null) ? 0 : cluster.hashCode());
+        return result;
+    }
+
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Cluster other = (Cluster) obj;
+        if (cluster == null) {
+            if (other.cluster != null)
+                return false;
+        }
+        else
+            if (!cluster.equals(other.cluster))
+                return false;
+        return true;
+    }
+
+
     public Cluster(){
         
         this.cluster = new HashSet<T>();

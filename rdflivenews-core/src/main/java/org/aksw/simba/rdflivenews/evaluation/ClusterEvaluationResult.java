@@ -12,21 +12,23 @@ import java.util.Map;
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
-public class EvaluationResult implements Comparable<EvaluationResult> {
+public class ClusterEvaluationResult implements Comparable<ClusterEvaluationResult> {
 
     private Map<String,String> config = new LinkedHashMap<String,String>();
     private Double accuracy;
-    private float ppv;
-    private float sensitivity;
+    private double ppv;
+    private double sensitivity;
+    private double intraClusterSimilarity;
+    private double interClusterSimilarity;
     
-    public EvaluationResult(float sensitivity, float positivePredictedValue, Double accuracy) {
+    public ClusterEvaluationResult(double sensitivity, double positivePredictedValue, Double accuracy) {
         
         this.sensitivity = sensitivity;
         this.ppv = positivePredictedValue;
         this.accuracy = accuracy;
     }
     
-    public EvaluationResult() {
+    public ClusterEvaluationResult() {
 
         // TODO Auto-generated constructor stub
     }
@@ -51,11 +53,12 @@ public class EvaluationResult implements Comparable<EvaluationResult> {
         for ( Map.Entry<String, String> configEntry : config.entrySet()) 
             buffer.append("\t").append(configEntry.getKey()).append(":\t\t").append(configEntry.getValue()).append("\n");
         
-        return "Config: " + buffer.toString() + "\n\tAccuracy: " + accuracy + "\tPPV: " + ppv + "\tSensitivity: " + sensitivity;
+        return "Config: " + buffer.toString() + "\n\tSensitivity: " + sensitivity + "\tPPV: " + ppv + "\tAccuracy: " + accuracy +
+                "\n\t\tIntra-Clustersimilarity: " + intraClusterSimilarity + "\tInter-Clustersimilarity: " + interClusterSimilarity;
     }
 
     @Override
-    public int compareTo(EvaluationResult o) {
+    public int compareTo(ClusterEvaluationResult o) {
 
         return -this.accuracy.compareTo(o.accuracy);
     }
@@ -65,12 +68,12 @@ public class EvaluationResult implements Comparable<EvaluationResult> {
         this.config.put(key, String.valueOf(value));
     }
 
-    public void setSensitivity(float sensitivity) {
+    public void setSensitivity(double sensitivity) {
 
         this.sensitivity = sensitivity;
     }
 
-    public void setPositivePredictedValue(float positivePredictedValue) {
+    public void setPositivePredictedValue(double positivePredictedValue) {
 
         this.ppv = positivePredictedValue;
     }
@@ -78,5 +81,15 @@ public class EvaluationResult implements Comparable<EvaluationResult> {
     public void setAccuracy(double accuracy) {
 
         this.accuracy = accuracy;
+    }
+
+    public void setIntraClusterSimilarity(double intraClusterSimilarity) {
+
+        this.intraClusterSimilarity = intraClusterSimilarity;
+    }
+
+    public void setInterClusterSimilarity(double interClusterSimilarity) {
+
+        this.interClusterSimilarity = interClusterSimilarity;
     }
 }
