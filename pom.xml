@@ -29,7 +29,7 @@
 		</repository>
 		<repository>
 			<id>gerb_snapshots</id>
-			<url>https://github.com/gerbsen/maven-repo/tree/master/snapshots</url>
+			<url>https://raw.github.com/gerbsen/maven-repo/tree/master/snapshots</url>
 		</repository>
  		<repository> 
  			<id>maven.aksw.internal</id> 
