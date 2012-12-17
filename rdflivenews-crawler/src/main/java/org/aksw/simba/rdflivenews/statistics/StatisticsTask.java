@@ -5,16 +5,12 @@ package org.aksw.simba.rdflivenews.statistics;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.TimerTask;
 
 import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
-import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.aksw.simba.rdflivenews.concurrency.QueueManager;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 
@@ -57,11 +53,11 @@ public class StatisticsTask  extends TimerTask {
 
         try {
             
-            File statisticsFolder = new File(Config.RDF_LIVE_NEWS_DATA_DIRECTORY + RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "statistics"));
+            File statisticsFolder = new File(RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "data-directory") + RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "statistics"));
             if ( !statisticsFolder.exists() )
                 statisticsFolder.mkdir();
             
-            this.writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(statisticsFolder.getAbsolutePath() + "/stats.tsv", true), "UTF-8"));
+            this.writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(statisticsFolder.getAbsolutePath() + "/statistics.tsv", true), "UTF-8"));
             this.writer.write(stuffToWrite);
             this.writer.close();
         }

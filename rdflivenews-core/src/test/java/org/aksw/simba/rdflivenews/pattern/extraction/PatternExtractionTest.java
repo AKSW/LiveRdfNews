@@ -77,7 +77,7 @@ public class PatternExtractionTest extends TestCase {
         assertEquals(216, sentenceFromFirstIterationIds.size());
         
         PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
-        List<org.aksw.simba.rdflivenews.pattern.Pattern> patterns = patternSearchManager.startPatternSearchCallables(sentenceFromFirstIterationIds, 3);
+        List<org.aksw.simba.rdflivenews.pattern.Pattern> patterns = patternSearchManager.startPatternSearchCallables(sentenceFromFirstIterationIds);
         
         // the patterns are not merged so we should have 
         // extracted as much patterns as we do have sentences

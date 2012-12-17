@@ -14,7 +14,9 @@ import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.apache.lucene.search.IndexSearcher;
 
+import com.github.gerbsen.lucene.LuceneManager;
 import com.github.gerbsen.maven.MavenUtil;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -32,6 +34,7 @@ public class RssDirectoryReader {
     private List<String> rssFeeds           = null;
     private Logger logger                   = Logger.getLogger(getClass());
     private BlockingQueue<String> queue     = null;
+    private IndexSearcher searcher			= null;
 
     /**
      * Reads the list of urls from the rss-list.txt file
@@ -44,6 +47,7 @@ public class RssDirectoryReader {
             this.rssFeeds = FileUtils.readLines(MavenUtil.loadFile("/rss-list.txt"), "UTF-8");
             Collections.shuffle(this.rssFeeds);
             this.queue = queue;
+            this.searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
         }
         catch (IOException e) {
 
@@ -82,7 +86,7 @@ public class RssDirectoryReader {
 
                         // we only want to add the uri if the uri is not already
                         // in the queue or in the database
-                        if (!this.queue.contains(link) && IndexManager.getInstance().isNewArticle(link)) {
+                        if (!this.queue.contains(link) && IndexManager.getInstance().isNewArticle(searcher, link)) {
 
                             this.queue.put(link);
                             this.logger.info("Added new article URL: " + link);

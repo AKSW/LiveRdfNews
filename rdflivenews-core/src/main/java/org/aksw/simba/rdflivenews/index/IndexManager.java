@@ -128,6 +128,25 @@ public class IndexManager {
     
     /**
      * 
+     * @param url 
+     * @return
+     */
+    public synchronized boolean isNewArticle(IndexSearcher searcher, String url) {
+        
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
+        LuceneManager.query(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_URL, url)), collector);
+        ScoreDoc[] hits = collector.topDocs().scoreDocs;
+        
+        LuceneManager.closeIndexReader(searcher.getIndexReader());
+        LuceneManager.closeIndexSearcher(searcher);
+        
+        if ( hits != null && hits.length != 0 ) return false;
+        
+        return true;
+    }
+    
+    /**
+     * 
      * @param sentence
      */
     public synchronized void addSentence(Sentence sentence) {
@@ -442,7 +461,7 @@ public class IndexManager {
 
         Set<Integer> documentIds = new HashSet<Integer>();
         
-        TopScoreDocCollector collector = TopScoreDocCollector.create(1000000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1_000_000, false);
         LuceneManager.query(INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
         
         IndexReader reader = LuceneManager.openIndexReader(INDEX);
@@ -459,7 +478,7 @@ public class IndexManager {
 
         Set<String> articleUrls = new HashSet<String>();
         
-        TopScoreDocCollector collector = TopScoreDocCollector.create(1000000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1_000_000, false);
         LuceneManager.query(INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_TIME_SLICE, NumericUtils.intToPrefixCoded(timeSlice))), collector);
         
         IndexReader reader = LuceneManager.openIndexReader(INDEX);

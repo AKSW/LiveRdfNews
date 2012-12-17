@@ -51,7 +51,8 @@ public class RdfLiveNewsCrawler {
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
         
         // if we stop the crawler and want to resume it we need to start with a higher id
-        TIME_SLICE_ID = IndexManager.getInstance().getHighestTimeSliceId() + 1;
+        int id = IndexManager.getInstance().getHighestTimeSliceId();
+        TIME_SLICE_ID = id > 0 ? id + 1 : 0;
         
         // this is the starting point for the slice, this time + the slice length make a time slice
         long startTime = System.currentTimeMillis();
