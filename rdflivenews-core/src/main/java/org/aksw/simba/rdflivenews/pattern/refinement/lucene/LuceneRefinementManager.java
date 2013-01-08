@@ -3,26 +3,18 @@
  */
 package org.aksw.simba.rdflivenews.pattern.refinement.lucene;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.Version;
 
 import com.github.gerbsen.encoding.Encoder;
 import com.github.gerbsen.encoding.Encoder.Encoding;
@@ -34,7 +26,6 @@ import com.github.gerbsen.lucene.LuceneManager;
 public class LuceneRefinementManager {
 
     private Directory INDEX;
-    private QueryParser dbpediaLabelQueryParser = new QueryParser(Version.LUCENE_36, Constants.DBPEDIA_LUCENE_FIELD_LABEL, new StandardAnalyzer(Version.LUCENE_36));
     private IndexSearcher searcher;
     
     public static final String NO_URI_FOUND = "not found";
@@ -73,7 +64,7 @@ public class LuceneRefinementManager {
     public String getPossibleUri(String label) {
 
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, true);
-        Query query = LuceneManager.parse(this.dbpediaLabelQueryParser, QueryParser.escape(label));
+        Query query = new TermQuery(new Term(Constants.DBPEDIA_LUCENE_FIELD_LABEL, label));
         
         String uri = Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label.replace(" ", "_"), Encoding.UTF_8);
         

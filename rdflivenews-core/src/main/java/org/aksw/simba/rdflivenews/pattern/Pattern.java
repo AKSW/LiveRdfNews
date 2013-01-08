@@ -4,7 +4,6 @@
 package org.aksw.simba.rdflivenews.pattern;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.pair.EntityPair;

@@ -3,7 +3,6 @@
  */
 package org.aksw.simba.rdflivenews.pattern.refinement.jena;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,11 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.DETERMINER_TYPE;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.TypeDeterminer;
-import org.apache.log4j.chainsaw.Main;
 
 import com.github.gerbsen.maven.MavenUtil;
 import com.github.gerbsen.rdf.JenaUtil;
@@ -24,7 +21,6 @@ import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.util.FileManager;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>

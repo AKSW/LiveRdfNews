@@ -10,13 +10,10 @@ import java.util.List;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
-import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
 
-import edu.stanford.nlp.util.StringUtils;
-
-import uk.ac.shef.wit.simmetrics.SimpleExample;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.QGramsDistance;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**

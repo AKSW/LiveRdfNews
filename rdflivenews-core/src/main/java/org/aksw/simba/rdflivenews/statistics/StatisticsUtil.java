@@ -18,13 +18,11 @@ import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
-import org.apache.lucene.index.CorruptIndexException;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.maven.MavenUtil;
 
 import edu.stanford.nlp.util.StringUtils;
 

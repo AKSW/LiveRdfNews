@@ -17,17 +17,12 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric;
-import org.aksw.simba.rdflivenews.pattern.similarity.impl.TakelabSimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric;
 import org.apache.commons.io.FileUtils;
 
 import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.similarity.wordnet.SimilarityAssessor;
-
-import edu.cmu.lti.ws4j.util.MatrixCalculator;
-import edu.stanford.nlp.process.Morphology;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>

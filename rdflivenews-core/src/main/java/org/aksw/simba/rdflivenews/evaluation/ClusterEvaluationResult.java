@@ -3,7 +3,6 @@
  */
 package org.aksw.simba.rdflivenews.evaluation;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

@@ -6,7 +6,6 @@ package org.aksw.simba.rdflivenews.pattern.comparator;
 import java.util.Comparator;
 
 import org.aksw.simba.rdflivenews.pair.EntityPair;
-import org.aksw.simba.rdflivenews.pattern.Pattern;
 
 
 /**

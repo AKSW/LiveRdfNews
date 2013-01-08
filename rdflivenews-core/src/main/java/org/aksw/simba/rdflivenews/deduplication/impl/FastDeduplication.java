@@ -4,8 +4,11 @@
  */
 package org.aksw.simba.rdflivenews.deduplication.impl;
 
-import java.util.*;
-import org.aksw.simba.rdflivenews.Constants;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.WordTokenizer;
 import org.aksw.simba.rdflivenews.index.IndexManager;

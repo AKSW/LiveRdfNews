@@ -4,7 +4,6 @@
  */
 package org.aksw.simba.rdflivenews.deduplication;
 
-import java.util.List;
 import java.util.Set;
 
 /**

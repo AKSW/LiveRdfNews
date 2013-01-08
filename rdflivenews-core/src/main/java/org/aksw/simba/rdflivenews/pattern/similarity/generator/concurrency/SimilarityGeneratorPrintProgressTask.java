@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 
-import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchCallable;
-import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchPrintProgressTask;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.apache.log4j.Logger;
 

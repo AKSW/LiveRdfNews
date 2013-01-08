@@ -7,12 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.simba.rdflivenews.nlp.ner.NamedEntityTagNormalizer;
-import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
 import org.aksw.simba.rdflivenews.nlp.pos.StanfordNLPPartOfSpeechTagger;
 import org.aksw.simba.rdflivenews.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
-import org.aksw.simba.rdflivenews.pair.EntityPair;
-import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.search.impl.PartOfSpeechTagPatternSearcher;
 
 import de.jetwick.snacktory.HtmlFetcher;

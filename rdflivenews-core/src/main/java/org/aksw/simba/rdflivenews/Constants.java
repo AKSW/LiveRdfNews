@@ -80,6 +80,30 @@ public class Constants {
      */
     public static final String DBPEDIA_LUCENE_FIELD_PAGE_RANK = "pagerank";
     
+    /**
+     * this is the lucene field name of the dbpedia index for the surface form of a given resource
+     */
+    public static final String DBPEDIA_LUCENE_FIELD_SURFACE_FORM = "surfaceForms";
+    
+    /**
+     * this is the lucene field name of the dbpedia index for the disambiguationScore of a given resource
+     */
+    public static final String DBPEDIA_LUCENE_FIELD_DISAMBIGUATION_SCORE = "disambiguationScore";
+    
+    /* ################################################################ */
+    /* ################################################################ */
+    /* ################################################################ */
+    
+    /**
+     * 
+     */
+    public static final String BOA_LUCENE_FIELD_ENTITY = "entity";
+    
+    /**
+     * 
+     */
+    public static final String BOA_LUCENE_FIELD_URI = "uri";
+    
     /* ################################################################ */
     /* ################################################################ */
     /* ################################################################ */
@@ -158,4 +182,6 @@ public class Constants {
     public static final String RDF_LIVE_NEWS_ONTOLOGY_EXTRACTION_DATE = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "extractionDate";
 
     public static final Object RDF_LIVE_NEWS_ONTOLOGY_MENTIONS = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "mentions";
+
+	public static final String NON_GOOD_URL_FOUND = "no url with score above threshold found";
 }

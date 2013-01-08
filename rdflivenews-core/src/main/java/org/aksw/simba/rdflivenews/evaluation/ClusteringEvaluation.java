@@ -24,7 +24,6 @@ import org.aksw.simba.rdflivenews.pattern.clustering.impl.BorderFlowPatternClust
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramAndWordnetSimilarityMetric;
-import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;

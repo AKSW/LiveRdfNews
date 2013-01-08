@@ -4,13 +4,17 @@
  */
 package org.aksw.simba.rdflivenews.pattern.clustering.impl;
 
-import de.uni_leipzig.gk.cluster.BorderFlowHard;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
@@ -18,6 +22,8 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.apache.commons.io.FileUtils;
+
+import de.uni_leipzig.gk.cluster.BorderFlowHard;
 
 /**
  *

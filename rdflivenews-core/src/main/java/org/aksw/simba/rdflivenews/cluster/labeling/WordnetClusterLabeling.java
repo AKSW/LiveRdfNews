@@ -3,10 +3,6 @@
  */
 package org.aksw.simba.rdflivenews.cluster.labeling;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
@@ -16,14 +12,11 @@ import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.apache.commons.lang3.text.WordUtils;
-import org.apache.log4j.chainsaw.Main;
 
 import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.math.Frequency;
-
-import edu.stanford.nlp.util.StringUtils;
 
 
 /**

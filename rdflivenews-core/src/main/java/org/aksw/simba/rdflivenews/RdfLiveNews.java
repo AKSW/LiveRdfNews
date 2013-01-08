@@ -6,7 +6,6 @@ package org.aksw.simba.rdflivenews;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -16,34 +15,23 @@ import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.cluster.labeling.ClusterLabeler;
 import org.aksw.simba.rdflivenews.cluster.labeling.DefaultClusterLabeling;
 import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
 import org.aksw.simba.rdflivenews.pattern.clustering.impl.BorderFlowPatternClustering;
-import org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering;
 import org.aksw.simba.rdflivenews.pattern.clustering.merging.ClusterMerger;
 import org.aksw.simba.rdflivenews.pattern.clustering.merging.DefaultClusterMerger;
 import org.aksw.simba.rdflivenews.pattern.comparator.PatternSupportSetComparator;
-import org.aksw.simba.rdflivenews.pattern.comparator.PatternTotalOccurrenceComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
 import org.aksw.simba.rdflivenews.pattern.mapping.DbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
-import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
-import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
-import org.aksw.simba.rdflivenews.pattern.scoring.PatternScorer;
-import org.aksw.simba.rdflivenews.pattern.scoring.impl.OccurrencePatternScorer;
-import org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
-import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.SimilarityGenerator;
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.SimilarityGeneratorManager;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
-import org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.SimpleRdfExtraction;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
@@ -52,8 +40,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.lucene.LuceneManager;
 import com.github.gerbsen.time.TimeUtil;
 
@@ -66,22 +52,18 @@ public class RdfLiveNews {
     public static Config CONFIG;
     public static String DATA_DIRECTORY;
     public static int ITERATION = 0;
-
+    
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
         
-        // load the config, we dont need to configure logging because the log4j config is on the classpath
-        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
-        RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
-        
-        initializeDataDirectory();
+        init();
         run();
     }
     
     private static void run() {
 
-        System.out.print("Resetting documents to non duplicate ... ");
+//        System.out.print("Resetting documents to non duplicate ... ");
 //        we only need to do this, if the deduplication is running again
-        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
+//        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
         List<Pattern> patterns                  = new ArrayList<Pattern>();
         
@@ -92,7 +74,7 @@ public class RdfLiveNews {
         // we can only find patterns if we have NER or POS tags annotated
         NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
         
-        for ( ; ITERATION < 38/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
 //        for ( ; ITERATION < IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
             
             long iterationTime = System.currentTimeMillis();
@@ -108,8 +90,8 @@ public class RdfLiveNews {
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
 //            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
 //            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
-            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
-//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
+            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
             
 //            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
@@ -121,7 +103,8 @@ public class RdfLiveNews {
             System.out.println("Starting NER & POS tagging of " + currentNonDuplicateSentenceIds.size() + " non duplicate sentences!");
             start = System.currentTimeMillis();
 //            if you have not yet tagged all sentences in the index you need to uncomment this
-//            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+            System.exit(0);
 
             System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -157,7 +140,6 @@ public class RdfLiveNews {
 //            patternScorer.scorePatterns(patterns);
             
             Collections.sort(patterns, new PatternSupportSetComparator());
-            patternSearchManager.logPatterns(patterns);
             List<Pattern> top1PercentPattern = patterns.size() > 100000 ? patterns.subList(0, 1000) : patterns.subList(0, patterns.size() / 100);
             
             System.out.println(String.format("Finished pattern scoring in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
@@ -173,6 +155,7 @@ public class RdfLiveNews {
             // refines the domain and range of the patterns
             PatternRefinementManager refinementManager = new PatternRefinementManager();
             refinementManager.startPatternRefinement(top1PercentPattern);
+            patternSearchManager.logPatterns(patterns);
             
             System.out.println(String.format("Finished pattern refinement in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -227,6 +210,8 @@ public class RdfLiveNews {
             System.out.println("Starting to write out RDF!");
             start = System.currentTimeMillis();
             
+            System.exit(0);
+            
             // use the patterns to extract rdf from news text
             RdfExtraction rdfExtractor = new SimpleRdfExtraction();
             rdfExtractor.extractRdf(clusters);
@@ -251,25 +236,35 @@ public class RdfLiveNews {
         }
     }
 
-    private static void initializeDataDirectory() {
+    public static void init() {
 
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "clusters").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "clusters").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "patterns").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "patterns").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "rdf").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "rdf").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "similarity").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "similarity").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "statistics").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "statistics").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "test").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "test").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "index").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "index").mkdir();
-        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "evaluation").exists()) 
-            new File(RdfLiveNews.DATA_DIRECTORY + "evaluation").mkdir();
-            new File(RdfLiveNews.DATA_DIRECTORY + "rdf").mkdir();
+    	// load the config, we dont need to configure logging because the log4j config is on the classpath
+        try {
+        	
+			RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+			RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
+	    	
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "clusters").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "clusters").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "patterns").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "patterns").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "rdf").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "rdf").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "similarity").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "similarity").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "statistics").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "statistics").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "test").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "test").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "index").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "index").mkdir();
+	        if ( !new File(RdfLiveNews.DATA_DIRECTORY + "evaluation").exists()) 
+	            new File(RdfLiveNews.DATA_DIRECTORY + "evaluation").mkdir();
+	            new File(RdfLiveNews.DATA_DIRECTORY + "rdf").mkdir();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
 private static void test() {

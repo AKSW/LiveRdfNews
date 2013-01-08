@@ -9,12 +9,6 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
-import org.apache.log4j.chainsaw.Main;
-
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.similarity.wordnet.SimilarityAssessor;
-import com.github.gerbsen.similarity.wordnet.WordNotFoundException;
 
 import edu.stanford.nlp.process.Morphology;
 

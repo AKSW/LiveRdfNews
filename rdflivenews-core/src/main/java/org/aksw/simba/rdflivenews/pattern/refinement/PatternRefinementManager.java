@@ -5,19 +5,14 @@ package org.aksw.simba.rdflivenews.pattern.refinement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.refinement.concurrency.PatternRefinementCallable;
+import org.aksw.simba.rdflivenews.pattern.refinement.concurrency.AprioriAndContextDisambiguationPatternRefinementCallable;
 import org.aksw.simba.rdflivenews.pattern.refinement.concurrency.PatternRefinementPrintProgressTask;
-import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.concurrency.CachedSimilarityGeneratorCallable;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.concurrency.SimilarityGeneratorPrintProgressTask;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.SimilarityGeneratorManager;
 import org.apache.log4j.Logger;
 
 
@@ -39,10 +34,8 @@ public class PatternRefinementManager {
             
             // one thread for each luceneDocumentIds sublist
             for (int i = 0 ; i < patterns.size() ; i++) {
-                
-                Pattern pattern = patterns.get(i);
-                todo.add(new PatternRefinementCallable(pattern, "PatternRefinementCallable-" + i));
-                logger.info("Create refiner for pattern: " + pattern.getNaturalLanguageRepresentation());
+                todo.add(new AprioriAndContextDisambiguationPatternRefinementCallable(patterns.get(i), "PatternRefinementCallable-" + i));
+                logger.info("Create refiner for pattern: " + patterns.get(i).getNaturalLanguageRepresentation());
             }
             
             logger.info("Created executorservice for pattern refinement with " + todo.size() + 
@@ -50,7 +43,7 @@ public class PatternRefinementManager {
             
             // start the timer which prints every 30s the progress of the callables
             Timer timer = new Timer();
-            timer.schedule(new PatternRefinementPrintProgressTask(todo), 0, 10000);
+            timer.schedule(new PatternRefinementPrintProgressTask(todo), 0, 1500);
             
             // invoke all waits until all threads are finished
             executorService.invokeAll(todo);

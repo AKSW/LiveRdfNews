@@ -1,84 +1,85 @@
 /**
  * 
  */
-package org.aksw.simba.rdflivenews.pattern.refinement.impl;
+package org.aksw.simba.rdflivenews.pattern.refinement.concurrency;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.refinement.label.LabelRefiner;
 import org.aksw.simba.rdflivenews.pattern.refinement.label.impl.EntityLabelRefiner;
-import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneRefinementManager;
+import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneDbpediaManager;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.DETERMINER_TYPE;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.TypeDeterminer;
-import org.aksw.simba.rdflivenews.rdf.uri.UriRetrieval;
-import org.aksw.simba.rdflivenews.rdf.uri.impl.AprioriBasedDisambiguation;
-import org.aksw.simba.rdflivenews.rdf.uri.impl.DefaultUriRetrieval;
-import org.ini4j.Ini;
-import org.ini4j.InvalidFileFormatException;
+import org.aksw.simba.rdflivenews.rdf.uri.Disambiguation;
+import org.aksw.simba.rdflivenews.rdf.uri.impl.FeatureBasedDisambiguation;
 
 import com.github.gerbsen.math.Frequency;
-import com.github.gerbsen.time.TimeUtil;
 
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
-public class AprioriDisambiguationPatternRefiner implements PatternRefiner {
+public class AprioriAndContextDisambiguationPatternRefinementCallable implements Callable<Pattern> {
 
-    private LuceneRefinementManager luceneRefinementManager = null;
-    private UriRetrieval uriRetrieval                             = null;
-    private LabelRefiner labelRefiner                             = null;
-    private TypeDeterminer typer                                  = null;
-    private String url;
-    private String username;
-    private String password;
-    
-    public AprioriDisambiguationPatternRefiner() {
-        
-        this.url = RdfLiveNews.CONFIG.getStringSetting("refiner", "url");
-        this.username = RdfLiveNews.CONFIG.getStringSetting("refiner", "username");
-        this.password = RdfLiveNews.CONFIG.getStringSetting("refiner", "password");
+    private Pattern pattern;
+    private String name;
+    private Disambiguation uriRetrieval                       = null;
+    private LabelRefiner labelRefiner                       = null;
+    private TypeDeterminer typer                            = null;
+    private int progress = 0;
+	private LuceneDbpediaManager luceneDbpediaManager;
+
+    public AprioriAndContextDisambiguationPatternRefinementCallable(Pattern pattern, String name) {
+
+        this.pattern = pattern;
+        this.name = name;
     }
     
     private void init() {
-        
-        this.uriRetrieval = new AprioriBasedDisambiguation(url, username, password);
-        this.typer        = new DefaultTypeDeterminer();
-        this.labelRefiner = new EntityLabelRefiner();
-        this.luceneRefinementManager = new LuceneRefinementManager();
+    	
+        this.uriRetrieval 			= new FeatureBasedDisambiguation();
+        this.typer        			= new DefaultTypeDeterminer();
+        this.labelRefiner 			= new EntityLabelRefiner();
+        this.luceneDbpediaManager	= new LuceneDbpediaManager();
+    }
+    
+    /**
+     * saves some memory
+     */
+    private void destroy() {
+    	
+        this.uriRetrieval = null;
+        this.typer = null;
+        this.labelRefiner = null;
     }
 
-    /**
-     * 
-     * @param pattern
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
      */
-    public void refinePattern(Pattern pattern) {
-        
+    public Pattern call() {
+
         this.init();
         
         for ( EntityPair pair : pattern.getLearnedFromEntities() ) {
-            
+        	
             if ( pair.isNew() ) {
                 
                 // mark the pair as not new, so that we dont process it again in subsequent iterations
                 pair.setNew(false);
+                this.progress++;
                 
                 Integer sentenceId = pair.getLuceneSentenceIds().iterator().next();
+                
+                List<String> entities = IndexManager.getInstance().getEntitiesFromArticle(sentenceId);
                 
                 String labelOne = pair.getFirstEntity().getLabel();
                 String labelTwo = pair.getSecondEntity().getLabel();
@@ -89,26 +90,26 @@ public class AprioriDisambiguationPatternRefiner implements PatternRefiner {
                     labelOne = labelRefiner.refineLabel(labelOne, sentenceId);
                     labelTwo = labelRefiner.refineLabel(labelTwo, sentenceId);
                     
-                    if (!pair.getFirstEntity().getLabel().equals(labelOne) )  
-                        System.out.println("\tReplaced: " + pair.getFirstEntity().getLabel() + " with: " + labelOne);
-                    if (!pair.getSecondEntity().getLabel().equals(labelTwo) )
-                        System.out.println("\tReplaced: " + pair.getSecondEntity().getLabel() + " with: " + labelTwo);
+//                    if (!pair.getFirstEntity().getLabel().equals(labelOne) )  
+//                        System.out.println("\tReplaced: " + pair.getFirstEntity().getLabel() + " with: " + labelOne);
+//                    if (!pair.getSecondEntity().getLabel().equals(labelTwo) )
+//                        System.out.println("\tReplaced: " + pair.getSecondEntity().getLabel() + " with: " + labelTwo);
                     
                     pair.getFirstEntity().setRefinedLabel(labelOne);
                     pair.getSecondEntity().setRefinedLabel(labelTwo);
                 }
                 
-                // get both uris for both labels at the same time
-                Map<String, String> labelToUriMapping = this.uriRetrieval.getUris("", Arrays.asList(labelOne, labelTwo));
-                
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
-                pair.getFirstEntity().setUri(labelToUriMapping.get(labelOne));
+                pair.getFirstEntity().setUri(this.uriRetrieval.getUri(labelOne, labelTwo, entities));
+                
+//                if ( !labelOne.equals(pair.getFirstEntity().getLabel()))
+                	System.out.println(labelOne +"/"+pair.getFirstEntity().getLabel()+": " +pair.getFirstEntity().getUri());
                 
                 // we can only find types if we have a uri from dbpedia
                 if (   pair.getFirstEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX) 
                     || pair.getFirstEntity().getUri().startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) {
                     
-                    Set<String> types = luceneRefinementManager.getTypesOfResource(pair.getFirstEntity().getUri());
+                    Set<String> types = this.luceneDbpediaManager.getTypesOfResource(pair.getFirstEntity().getUri());
                     
                     if ( !types.isEmpty() )
                         pair.getFirstEntity().setType(
@@ -118,13 +119,17 @@ public class AprioriDisambiguationPatternRefiner implements PatternRefiner {
                 }
                 
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
-                pair.getSecondEntity().setUri(labelToUriMapping.get(labelTwo));
+                pair.getSecondEntity().setUri(this.uriRetrieval.getUri(labelTwo, labelOne, entities));
+                
+//                if ( !labelTwo.equals(pair.getSecondEntity().getLabel()))
+                	System.out.println(labelTwo +"/"+pair.getSecondEntity().getLabel()+": " +pair.getSecondEntity().getUri());
+                System.out.println("------------------------------------------");
                 
                 // we can only find types if we have a uri from dbpedia
                 if (    pair.getSecondEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX)
                    ||   pair.getSecondEntity().getUri().startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) {
                     
-                    Set<String> types = luceneRefinementManager.getTypesOfResource(pair.getSecondEntity().getUri());
+                    Set<String> types = this.luceneDbpediaManager.getTypesOfResource(pair.getSecondEntity().getUri());
                     
                     if ( !types.isEmpty() )
                         pair.getSecondEntity().setType(
@@ -135,8 +140,12 @@ public class AprioriDisambiguationPatternRefiner implements PatternRefiner {
             }
         }
         
+        destroy();
+        
         pattern.setFavouriteTypeFirstEntity(generateFavouriteType(pattern.getTypesFirstEntity()));
         pattern.setFavouriteTypeSecondEntity(generateFavouriteType(pattern.getTypesSecondEntity()));
+        
+        return this.pattern;
     }
     
     /**
@@ -160,50 +169,42 @@ public class AprioriDisambiguationPatternRefiner implements PatternRefiner {
         return type;
     }
     
-    /**
-     * Refines a pattern with the help of the refine(Pattern pattern) method
-     * 
-     * @param patterns
-     */
-    public void refinePatterns(List<Pattern> patterns) {
-        
-//        int count = 0;
-//        for ( Pattern pattern : patterns ) if ( pattern.isAboveThresholds() ) count++;
-        
-        System.out.println("Starting to refine " + patterns.size() + " patterns!");
-        
-        long startAll = System.currentTimeMillis();
-        for ( Pattern pattern : patterns ) {
-            
-//            if ( pattern.isAboveThresholds() ) {
-                
-                long start = System.currentTimeMillis();
-                this.refinePattern(pattern);
-                System.out.println("Refining Pattern: " + pattern.getNaturalLanguageRepresentation() + " (Support: "+ pattern.getTotalOccurrence()+") took " + (System.currentTimeMillis() - start) + "ms.");
-//            }
-        }
-        System.out.println("Refining " + patterns.size() + " patterns took: " + TimeUtil.convertMilliSeconds(System.currentTimeMillis() - startAll) + ".");
-        
-        luceneRefinementManager.close();
-    }
+    /* ########################################################### */
+    /* ################# Statistics and Monitoring ############### */
+    /* ########################################################### */
     
-    public static void main(String[] args) throws InvalidFileFormatException, IOException {
+    /**
+     * @return the number of sentences this threads needs to process
+     */
+    public int getNumberTotal() {
         
-        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
-        RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
-
-        List<String> entities = new ArrayList<String>(Arrays.asList("Homeland Security"));
-        
-        System.out.println(new AprioriBasedDisambiguation("jdbc:mysql://139.18.2.235:5555/dbrecords", "liverdf", "_L1v3Rdf_").getUris("", entities));
-        System.out.println(new DefaultUriRetrieval().getUris("", entities));
+//        int count = 0; 
+//        for (EntityPair pair : this.pattern.getLearnedFromEntities()) if ( pair.isNew() ) count++;
+        return this.pattern.getLearnedFromEntities().size();
     }
 
     /**
-     * 
-     * @return
+     * @return how many sentence have been processed already
      */
-    public void closeLuceneRefinementManager() {
+    public int getNumberDone() {
+        
+        return this.progress;
+    }
 
-        this.luceneRefinementManager.close();
+    /**
+     * @return the progress as a value between 0 and 1
+     */
+    public double getProgress() {
+        
+        double progress = (double) this.progress / getNumberTotal();
+        return Double.isNaN(progress) || Double.isInfinite(progress) ? 0 : progress;
+    }
+
+    /**
+     * @return the name of this pattern searcher
+     */
+    public String getName() {
+
+        return this.name;
     }
 }

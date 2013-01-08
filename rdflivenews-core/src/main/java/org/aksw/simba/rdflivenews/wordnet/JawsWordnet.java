@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.apache.log4j.chainsaw.Main;
 
 import edu.smu.tspell.wordnet.NounSynset;
 import edu.smu.tspell.wordnet.Synset;

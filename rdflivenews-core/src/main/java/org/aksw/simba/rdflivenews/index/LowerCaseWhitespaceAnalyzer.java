@@ -3,9 +3,10 @@ package org.aksw.simba.rdflivenews.index;
 import java.io.Reader;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.WhitespaceTokenizer;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.core.LowerCaseFilter;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.util.Version;
 
 /**
@@ -18,9 +19,18 @@ import org.apache.lucene.util.Version;
  */
 public final class LowerCaseWhitespaceAnalyzer extends Analyzer {
 
-    @Override
-    public TokenStream tokenStream(String string, Reader reader) {
+	private Version version;
+	
+	public LowerCaseWhitespaceAnalyzer(Version version) {
+		
+		this.version = version;
+	}
 
-        return new LowerCaseFilter(Version.LUCENE_36, new WhitespaceTokenizer(Version.LUCENE_36, reader)); 
-    }
+	@Override
+	protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
+		
+		Tokenizer source = new WhitespaceTokenizer(version, reader);
+	    TokenStream filter = new LowerCaseFilter(version, source);
+		return new TokenStreamComponents(source, filter);
+	}
 }

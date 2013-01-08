@@ -3,7 +3,6 @@
  */
 package org.aksw.simba.rdflivenews.evaluation;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -52,13 +51,13 @@ public class DisambiguationEvaluationResult implements Comparable<Disambiguation
         buffer.append("\tObject-Precision: " + this.objectPrecision).append("\n");                     
         buffer.append("\tSubject-Object-Precision: " + this.subjectAndObjectPrecision).append("\n\n");   
                                                                         
-        buffer.append("\tSubject-Recall: " + this.subjectRecall).append("\n");                         
-        buffer.append("\tObject-Recall: " + this.objectRecall).append("\n");                           
-        buffer.append("\tSubject-Object-Recall: " + this.subjectAndObjectRecall).append("\n\n");         
-                                                                        
-        buffer.append("\tSubject-F-Measure: " + this.getSubjectUriFMeasure()).append("\n");                 
-        buffer.append("\tObject-F-Measure: " + this.getObjectUriFMeasure()).append("\n");                   
-        buffer.append("\tSubject-Object-F-Measure: " + this.getSubjectAndObjectUriFMeasure()).append("\n");
+//        buffer.append("\tSubject-Recall: " + this.subjectRecall).append("\n");                         
+//        buffer.append("\tObject-Recall: " + this.objectRecall).append("\n");                           
+//        buffer.append("\tSubject-Object-Recall: " + this.subjectAndObjectRecall).append("\n\n");         
+//                                                                        
+//        buffer.append("\tSubject-F-Measure: " + this.getSubjectUriFMeasure()).append("\n");                 
+//        buffer.append("\tObject-F-Measure: " + this.getObjectUriFMeasure()).append("\n");                   
+//        buffer.append("\tSubject-Object-F-Measure: " + this.getSubjectAndObjectUriFMeasure()).append("\n");
         
         return buffer.toString(); 
     }
@@ -81,7 +80,7 @@ public class DisambiguationEvaluationResult implements Comparable<Disambiguation
     @Override
     public int compareTo(DisambiguationEvaluationResult o) {
 
-        return -this.getSubjectAndObjectUriFMeasure().compareTo(o.getSubjectAndObjectUriFMeasure());
+        return -this.getSubjectAndObjectPrecision().compareTo(o.getSubjectAndObjectPrecision());
     }
 
     public void addConfigOption(String key, double value) {

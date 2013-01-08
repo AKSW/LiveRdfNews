@@ -18,6 +18,8 @@ import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
+import org.apache.lucene.document.IntField;
+import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
@@ -193,7 +195,7 @@ public class DeduplicationTest extends TestCase {
         deduplication.runDeduplication(fromTimeSliceId, toTimeSliceId, window);
 
         TopScoreDocCollector collector = TopScoreDocCollector.create(100, false);
-        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(1))), collector);
+        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, 1, Store.YES).stringValue())), collector);
         assertEquals(1, collector.getTotalHits());
         assertEquals(5, IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(toTimeSliceId).size());
         
@@ -205,7 +207,7 @@ public class DeduplicationTest extends TestCase {
         deduplication.runDeduplication(fromTimeSliceId, toTimeSliceId, window);
         
         collector = TopScoreDocCollector.create(100, false);
-        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, NumericUtils.intToPrefixCoded(2))), collector);
+        LuceneManager.query(IndexManager.INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, 2, Store.YES).stringValue())), collector);
         assertEquals(6, collector.getTotalHits());
         assertEquals(2, IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(toTimeSliceId).size());
     }

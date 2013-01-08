@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
-import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.NGramTokenizer;
-import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.WordTokenizer;
 
 /**
  *

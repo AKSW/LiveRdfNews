@@ -5,7 +5,6 @@ package org.aksw.simba.rdflivenews.pattern.similarity.generator.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
@@ -16,7 +15,6 @@ import java.util.concurrent.Executors;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
-import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.concurrency.CachedSimilarityGeneratorCallable;
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.concurrency.SimilarityGeneratorPrintProgressTask;
 import org.apache.log4j.Logger;

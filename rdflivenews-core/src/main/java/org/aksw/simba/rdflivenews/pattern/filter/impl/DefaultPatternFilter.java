@@ -3,9 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.pattern.filter.impl;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,14 +12,9 @@ import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
-import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.chainsaw.Main;
-import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
 
@@ -121,15 +114,40 @@ public class DefaultPatternFilter implements PatternFilter {
     
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
 
-        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
-        
-        List<Pattern> patterns = new ArrayList<>();
-        Pattern p = new DefaultPattern(", FL");
-        patterns.add(p);
-        
-        DefaultPatternFilter f = new DefaultPatternFilter();
-        f.filter(patterns);
-        
-        System.out.println(patterns);
+    	String test = "This is a little test string which needs to be splitted at white spaces very often, because it's so long!";
+    	
+    	long start = System.currentTimeMillis();
+    	for ( int i = 0 ; i < 1000000 ; i++ ) {
+    		
+    		List<String> splits = Arrays.asList(test.split(" "));
+    	}
+    	System.out.println("String.split(\" \"): " + (System.currentTimeMillis() - start));
+    	
+    	start = System.currentTimeMillis();
+    	for ( int i = 0 ; i < 1000000 ; i++ ) {
+    		
+    		List<String> splits = Arrays.asList(StringUtils.split(test));
+    	}
+    	System.out.println("StringUtils.split(test): " + (System.currentTimeMillis() - start));
+    	
+    	start = System.currentTimeMillis();
+    	for ( int i = 0 ; i < 1000000 ; i++ ) {
+    		
+    		List<String> splits = edu.stanford.nlp.util.StringUtils.split(test);
+    	}
+    	System.out.println("String.split(\" \"): " + (System.currentTimeMillis() - start));
+    	
+    	
+    	
+//        RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
+//        
+//        List<Pattern> patterns = new ArrayList<>();
+//        Pattern p = new DefaultPattern(", FL");
+//        patterns.add(p);
+//        
+//        DefaultPatternFilter f = new DefaultPatternFilter();
+//        f.filter(patterns);
+//        
+//        System.out.println(patterns);
     }
 }

@@ -3,16 +3,13 @@
  */
 package org.aksw.simba.rdflivenews.pattern.refinement.type;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-
-import org.aksw.simba.rdflivenews.Constants;
+import java.util.Set;
 
 import com.github.gerbsen.map.MapUtil;
 import com.github.gerbsen.maven.MavenUtil;

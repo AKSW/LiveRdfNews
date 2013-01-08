@@ -16,11 +16,19 @@ public class ObjectPropertyTriple extends AbstractTriple {
     
     public ObjectPropertyTriple(String subjectLabel, String subjectUri, String patternLabel, String objectLabel, String objectUri, Set<Integer> id) {
 
+//    	try {
+    		
+    		this.subjectUri = subjectUri;//URLDecoder.decode(subjectUri, "UTF-8");
+    		this.objectUri = objectUri;//URLDecoder.decode(objectUri, "UTF-8");
+//		} 
+//    	catch (UnsupportedEncodingException e) {
+//			 TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+    	
         this.subjectLabel = subjectLabel;
-        this.subjectUri = subjectUri;
         this.patternLabel = patternLabel;
         this.objectLabel = objectLabel;
-        this.objectUri = objectUri;
         this.sentenceIds.addAll(id);
     }
 

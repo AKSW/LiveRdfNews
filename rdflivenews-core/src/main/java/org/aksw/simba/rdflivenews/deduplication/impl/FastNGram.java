@@ -12,7 +12,6 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.deduplication.index.Index;
 import org.aksw.simba.rdflivenews.deduplication.similarity.Similarity;
 import org.aksw.simba.rdflivenews.deduplication.tokenization.Tokenizer;
-import org.aksw.simba.rdflivenews.deduplication.tokenization.impl.WordTokenizer;
 
 /**
  *

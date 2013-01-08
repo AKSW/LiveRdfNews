@@ -5,14 +5,10 @@ package org.aksw.simba.rdflivenews.pattern.refinement.concurrency;
 
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.concurrency.CachedSimilarityGeneratorCallable;
-import org.aksw.simba.rdflivenews.pattern.similarity.generator.concurrency.SimilarityGeneratorPrintProgressTask;
 import org.apache.log4j.Logger;
 
 
@@ -32,7 +28,7 @@ public class PatternRefinementPrintProgressTask extends TimerTask {
         this.todo = todo;
         
         // we need this to calculate the total number of done searches for all callables
-        for (Callable<Pattern> callable : todo) totalNumber  += ((PatternRefinementCallable) callable).getNumberTotal();
+        for (Callable<Pattern> callable : todo) totalNumber  += ((AprioriAndContextDisambiguationPatternRefinementCallable) callable).getNumberTotal();
     }
 
     /* (non-Javadoc)
@@ -46,7 +42,7 @@ public class PatternRefinementPrintProgressTask extends TimerTask {
 
         for (Callable<Pattern> callable : this.todo) {
 
-            PatternRefinementCallable refinementCallable = (PatternRefinementCallable) callable;
+        	AprioriAndContextDisambiguationPatternRefinementCallable refinementCallable = (AprioriAndContextDisambiguationPatternRefinementCallable) callable;
 
             int progress = Integer.valueOf(format.format(refinementCallable.getProgress() * 100));
             totalProgress += refinementCallable.getNumberDone();

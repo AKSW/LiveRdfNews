@@ -4,7 +4,6 @@
 package org.aksw.simba.rdflivenews.pattern.clustering.impl;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.cluster.Cluster;

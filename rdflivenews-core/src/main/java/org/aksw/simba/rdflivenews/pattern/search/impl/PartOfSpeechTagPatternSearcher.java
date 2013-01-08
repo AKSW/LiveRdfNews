@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.rdflivenews.Constants;
-import org.aksw.simba.rdflivenews.Enums;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.pair.EntityPair;

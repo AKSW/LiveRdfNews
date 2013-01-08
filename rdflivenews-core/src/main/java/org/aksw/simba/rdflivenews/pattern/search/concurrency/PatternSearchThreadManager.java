@@ -4,7 +4,6 @@
 package org.aksw.simba.rdflivenews.pattern.search.concurrency;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +16,6 @@ import java.util.concurrent.Future;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.comparator.PatternTotalOccurrenceComparator;
-import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.util.ListUtil;
 import org.apache.log4j.Logger;
 
