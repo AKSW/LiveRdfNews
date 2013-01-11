@@ -69,6 +69,7 @@ public class LuceneDbpediaManager {
     public Set<String> getTypesOfResource(String uri){
        
         Set<String> types = new HashSet<String>();
+        if ( uri.equals(Constants.NON_GOOD_URL_FOUND)) return types;
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(100, false);
         LuceneManager.query(this.searcher, new TermQuery(new Term(Constants.DBPEDIA_LUCENE_FIELD_URI, uri)), collector);

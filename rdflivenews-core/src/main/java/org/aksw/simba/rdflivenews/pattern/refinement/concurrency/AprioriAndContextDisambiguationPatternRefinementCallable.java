@@ -32,7 +32,7 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
 
     private Pattern pattern;
     private String name;
-    private Disambiguation uriRetrieval                       = null;
+    private FeatureBasedDisambiguation uriRetrieval         = null;
     private LabelRefiner labelRefiner                       = null;
     private TypeDeterminer typer                            = null;
     private int progress = 0;
@@ -45,11 +45,11 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
     }
     
     private void init() {
-    	
-        this.uriRetrieval 			= new FeatureBasedDisambiguation();
+
+    	this.luceneDbpediaManager	= new LuceneDbpediaManager();
+        this.uriRetrieval 			= new FeatureBasedDisambiguation(this.luceneDbpediaManager);
         this.typer        			= new DefaultTypeDeterminer();
         this.labelRefiner 			= new EntityLabelRefiner();
-        this.luceneDbpediaManager	= new LuceneDbpediaManager();
     }
     
     /**
@@ -57,8 +57,10 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
      */
     private void destroy() {
     	
+    	this.uriRetrieval.boaManager.close();
         this.uriRetrieval = null;
         this.typer = null;
+        this.luceneDbpediaManager.close();
         this.labelRefiner = null;
     }
 
@@ -103,7 +105,7 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
                 pair.getFirstEntity().setUri(this.uriRetrieval.getUri(labelOne, labelTwo, entities));
                 
 //                if ( !labelOne.equals(pair.getFirstEntity().getLabel()))
-                	System.out.println(labelOne +"/"+pair.getFirstEntity().getLabel()+": " +pair.getFirstEntity().getUri());
+//                	System.out.println(labelOne +"/"+pair.getFirstEntity().getLabel()+": " +pair.getFirstEntity().getUri());
                 
                 // we can only find types if we have a uri from dbpedia
                 if (   pair.getFirstEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX) 
@@ -122,8 +124,8 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
                 pair.getSecondEntity().setUri(this.uriRetrieval.getUri(labelTwo, labelOne, entities));
                 
 //                if ( !labelTwo.equals(pair.getSecondEntity().getLabel()))
-                	System.out.println(labelTwo +"/"+pair.getSecondEntity().getLabel()+": " +pair.getSecondEntity().getUri());
-                System.out.println("------------------------------------------");
+//                	System.out.println(labelTwo +"/"+pair.getSecondEntity().getLabel()+": " +pair.getSecondEntity().getUri());
+//                System.out.println("------------------------------------------");
                 
                 // we can only find types if we have a uri from dbpedia
                 if (    pair.getSecondEntity().getUri().startsWith(Constants.DBPEDIA_RESOURCE_PREFIX)

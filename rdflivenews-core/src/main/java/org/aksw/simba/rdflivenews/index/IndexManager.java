@@ -19,8 +19,11 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -48,6 +51,8 @@ import com.github.gerbsen.lucene.LuceneManager;
 public class IndexManager {
     
     public static final int UNDEFINED_SENTENCE_ID = -1;
+    
+    FieldType stringType = null;
     
     /**
      * singleton
@@ -77,6 +82,8 @@ public class IndexManager {
 
         createIndex();
         this.currentId = getNumberOfDocuments();
+        this.stringType = new FieldType(StringField.TYPE_STORED);
+        stringType.setStoreTermVectors(false);
     }
 
     /**
@@ -85,7 +92,7 @@ public class IndexManager {
     public void createIndex() {
         
         // create the index normalTripleWriter configuration and create a new index normalTripleWriter
-        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_40, analyzer);
         indexWriterConfig.setRAMBufferSizeMB(1024);
         indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
         writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
@@ -99,7 +106,7 @@ public class IndexManager {
     public void openIndexWriter() {
         
         // create the index normalTripleWriter configuration and create a new index normalTripleWriter
-        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_40, analyzer);
         indexWriterConfig.setRAMBufferSizeMB(1024);
         indexWriterConfig.setOpenMode(OpenMode.APPEND);
         writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
@@ -201,7 +208,7 @@ public class IndexManager {
     private Document sentenceToDocument(Sentence sentence) {
         
         Document luceneDocument = new Document();
-        luceneDocument.add(new IntField(Constants.LUCENE_FIELD_ID, currentId++, Store.YES));
+        luceneDocument.add(new Field(Constants.LUCENE_FIELD_ID, String.valueOf(currentId++), stringType));
         luceneDocument.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, sentence.getExtractionDate().getTime(), Store.YES));
         luceneDocument.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, sentence.getTimeSliceID(), Store.YES));
         luceneDocument.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Store.YES));
@@ -235,14 +242,15 @@ public class IndexManager {
      */
     public void setDocumentDuplicateInTimeSlice(int documentId, int timeSlice) {
         
-        Query query     =  NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, documentId, documentId, true, true);
+        Query query = new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(documentId)));
+        
         IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
         Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, query);
             
         Integer oldDuplicateTimeSlice = Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE)));
         
         Document newDoc = new Document();
-        newDoc.add(new IntField(Constants.LUCENE_FIELD_ID, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID)), Store.YES));
+        newDoc.add(new Field(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID), stringType));
         newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), Store.YES));
         newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))), Store.YES));
         newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, oldDuplicateTimeSlice.equals(Constants.NOT_DUPLICATE_SENTENCE) ? timeSlice : oldDuplicateTimeSlice, Store.YES));
@@ -261,7 +269,6 @@ public class IndexManager {
          * TODO
          * #########################################################################################################
          */
-        
         this.openIndexWriter();
 //        LuceneManager.updateDocument(this.writer, query.getTerm(), newDoc); TODO TODO TODO
         LuceneManager.closeIndexReader(searcher.getIndexReader());
@@ -285,24 +292,11 @@ public class IndexManager {
         
         for ( Integer id : duplicateIds ) {
             
-            TermQuery query     = new TermQuery(new Term(Constants.LUCENE_FIELD_ID, new IntField(Constants.LUCENE_FIELD_ID, id, Store.YES).stringValue()));
-            Query query1 = NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, id, id, true, true);
+            Query idQuery = new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(id)));
+            Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, idQuery);
             
-            /* #########################################################################################################
-             * #########################################################################################################
-             * #########################################################################################################
-             * #########################################################################################################
-             * #########################################################################################################
-             * #########################################################################################################
-             * TODO
-             * #########################################################################################################
-             */
-            
-            
-            Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, query);
-                
             Document newDoc = new Document();
-            newDoc.add(new IntField(Constants.LUCENE_FIELD_ID, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID)), Store.YES));
+            newDoc.add(new Field(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID), stringType));
             newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), Store.YES));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))), Store.YES));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, timeSlice, Store.YES));
@@ -311,7 +305,7 @@ public class IndexManager {
             newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, oldDoc.get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get(Constants.LUCENE_FIELD_URL), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             
-            LuceneManager.updateDocument(writer, query.getTerm(), newDoc);
+            LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID)), newDoc); 
         }
         LuceneManager.closeIndexReader(searcher.getIndexReader());
         LuceneManager.closeIndexSearcher(searcher);
@@ -332,7 +326,7 @@ public class IndexManager {
         TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, true);
         LuceneManager.query(searcher, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, 0, 1000, true, true), collector);
 
-        System.out.println(" found " + collector.getTotalHits());
+        System.out.println("Found " + collector.getTotalHits() + " non duplicate sentences!");
         int i = 0;
         
         for ( ScoreDoc hit : collector.topDocs().scoreDocs ) {
@@ -344,25 +338,16 @@ public class IndexManager {
             if ( oldDoc != null ) {
                 
                 Document newDoc = new Document();
-                newDoc.add(new IntField(Constants.LUCENE_FIELD_ID, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID)), Store.YES));
+                newDoc.add(new Field(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID), stringType));
                 newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), Store.YES));
                 newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))), Store.YES));
                 newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Store.YES));
-                
                 newDoc.add(new Field(Constants.LUCENE_FIELD_TEXT, oldDoc.get(Constants.LUCENE_FIELD_TEXT), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
                 newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, oldDoc.get(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
                 newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, oldDoc.get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
                 newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get(Constants.LUCENE_FIELD_URL), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
                 
-                // #########################################################################################################
-                // #########################################################################################################
-                // #########################################################################################################
-                // #########################################################################################################
-                // #########################################################################################################
-                // #########################################################################################################
-                // TODOODOODODODO
-                
-                LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, new IntField(Constants.LUCENE_FIELD_ID, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID)), Store.YES).stringValue()), newDoc);
+                LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID)), newDoc);
             }
         }
         LuceneManager.closeIndexReader(searcher.getIndexReader());
@@ -414,7 +399,7 @@ public class IndexManager {
     public String getStringValueFromDocument(int documentId, String field) {
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
-        LuceneManager.query(INDEX, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, documentId, documentId, true, true), collector); 
+        LuceneManager.query(INDEX, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(documentId))), collector); 
         
         return LuceneManager.getDocumentByNumber(INDEX, collector.topDocs().scoreDocs[0].doc).get(field);
     }
@@ -459,7 +444,7 @@ public class IndexManager {
             
             BooleanQuery query = new BooleanQuery();
             for ( Integer id : documentIds) 
-                query.add(NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, id, id, true, true), Occur.SHOULD);
+                query.add(new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(id))), Occur.SHOULD);
             
             TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, false);
             LuceneManager.query(INDEX, query, collector);
@@ -492,7 +477,7 @@ public class IndexManager {
 
         Set<Integer> documentIds = new HashSet<Integer>();
         
-        TopScoreDocCollector collector = TopScoreDocCollector.create(1_000_000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(5_000_000, false);
         LuceneManager.query(INDEX, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_TIME_SLICE, timeSlice, timeSlice, true, true), collector);
         
         IndexReader reader = LuceneManager.openIndexReader(INDEX);
@@ -509,7 +494,7 @@ public class IndexManager {
 
         Set<String> articleUrls = new HashSet<String>();
         
-        TopScoreDocCollector collector = TopScoreDocCollector.create(1_000_000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(5_000_000, false);
         LuceneManager.query(INDEX, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_TIME_SLICE, timeSlice, timeSlice, true, true), collector);
         
         IndexReader reader = LuceneManager.openIndexReader(INDEX);
@@ -527,7 +512,7 @@ public class IndexManager {
         Map<Integer,String> idsToSentence = new HashMap<>();
         
         // get all sentences from the current time slice
-        TopScoreDocCollector collector = TopScoreDocCollector.create(2_000_000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(5_000_000, false);
         LuceneManager.query(INDEX, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_TIME_SLICE, timeSlice, timeSlice, true, true), collector); 
         		
         IndexReader reader = LuceneManager.openIndexReader(INDEX);
@@ -587,7 +572,7 @@ public class IndexManager {
     public Document getDocumentById(IndexSearcher searcher, Integer id) {
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
-        LuceneManager.query(searcher, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, id, id, true, true), collector);
+        LuceneManager.query(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(id))), collector);
         return LuceneManager.getDocumentByNumber(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
     }
     
@@ -606,7 +591,7 @@ public class IndexManager {
         query.add(new BooleanClause(duplicate, Occur.MUST));
         
         IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(2_000_000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(5_000_000, false);
         LuceneManager.query(searcher, query, collector);
         
         Set<Integer> nonDuplicateSentencesUntilIteration = new HashSet<>();
@@ -628,11 +613,11 @@ public class IndexManager {
      */
     public Set<Integer> getNonDuplicateSentences() {
 
-        Query duplicate = NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Constants.NOT_DUPLICATE_SENTENCE, true, true); 
-        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, false);
-        LuceneManager.query(searcher, duplicate, collector);
-        
+    	IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);    	
+    	TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, true);
+        LuceneManager.query(searcher, NumericRangeQuery.newIntRange(
+        		Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Constants.NOT_DUPLICATE_SENTENCE, true, true), collector);
+    	
         Set<Integer> nonDuplicateSentences = new HashSet<>();
         
         // add the primary key of each document to the list
@@ -655,7 +640,7 @@ public class IndexManager {
         Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
         
         IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
         LuceneManager.query(searcher, articles, collector);
         
         Set<String> sentences = new HashSet<>();
@@ -684,7 +669,7 @@ public class IndexManager {
             
             BooleanQuery query = new BooleanQuery();
             for ( Integer id : documentIds) 
-                query.add(NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, id, id, true, true), Occur.SHOULD);
+                query.add(new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(id))), Occur.SHOULD);
             
             TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, false);
             LuceneManager.query(INDEX, query, collector);

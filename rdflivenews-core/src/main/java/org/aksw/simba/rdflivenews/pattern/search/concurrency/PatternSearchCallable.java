@@ -15,8 +15,10 @@ import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.PartOfSpeechTagPatternSearcher;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.TermQuery;
 
 import com.github.gerbsen.lucene.LuceneManager;
 
@@ -70,7 +72,7 @@ public class PatternSearchCallable implements Callable<List<Pattern>> {
         for ( Integer sentenceId : this.sentenceIds ) {
             
             // get the sentence from the index and try to extract patterns from it
-            Document document = IndexManager.getInstance().getDocumentByQuery(searcher, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, sentenceId, sentenceId, true, true));
+            Document document = IndexManager.getInstance().getDocumentByQuery(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(sentenceId))));
             String taggedSentence = document.get(this.luceneFieldName);
             this.foundPatterns.addAll(this.patternSearcher.extractPatterns(document.get(Constants.LUCENE_FIELD_TEXT), taggedSentence,sentenceId));
             

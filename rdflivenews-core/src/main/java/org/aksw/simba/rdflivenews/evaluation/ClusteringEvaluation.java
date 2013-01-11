@@ -24,6 +24,7 @@ import org.aksw.simba.rdflivenews.pattern.clustering.impl.BorderFlowPatternClust
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramAndWordnetSimilarityMetric;
+import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
@@ -53,9 +54,9 @@ public class ClusteringEvaluation {
         
         List<ClusterEvaluationResult> results = new ArrayList<>();
         
-        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, 0.3,*/ 0.4/*, 0.5, 0.6, 0.7, 0.8, 0.9, 1D*/) ) {
+        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, */0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D) ) {
             
-            for ( SimilarityMetric metric : Arrays.asList(/*new QGramSimilarityMetric(), new WordnetSimilarityMetric(),*/ new QGramAndWordnetSimilarityMetric()/**/)) {
+            for ( SimilarityMetric metric : Arrays.asList(new QGramSimilarityMetric(), new WordnetSimilarityMetric(), new QGramAndWordnetSimilarityMetric())) {
 
                 if ( metric instanceof WordnetSimilarityMetric ) {
                     
@@ -73,42 +74,34 @@ public class ClusteringEvaluation {
                 }
                 else if ( metric instanceof QGramAndWordnetSimilarityMetric ) {
                     
-//                    for ( double wordnetParameter = 0.8 ; wordnetParameter <= 0.9 ; wordnetParameter += 0.01) {
-//                        for ( double qgramParameter = 0.2 ; qgramParameter <= 0.4 ; qgramParameter += 0.01) {
+                    for ( double wordnetParameter = 0.0 ; wordnetParameter <= 1D ; wordnetParameter += 0.1) {
+                        for ( double qgramParameter = 0.0 ; qgramParameter <= 1D ; qgramParameter += 0.1) {
                             
-//                    for ( double wordnetParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
-//                        for ( double qgramParameter : Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D)) {
-                        
-//                            ((QGramAndWordnetSimilarityMetric) metric).setWordnetParamter(wordnetParameter);
-//                            ((QGramAndWordnetSimilarityMetric) metric).setQgramParamter(qgramParameter);
-                        
-                        for ( Boolean typeSimilarity : Arrays.asList(true, false) ) {
-                            
-                            for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
-                                
-                                ClusterEvaluationResult result = new ClusterEvaluationResult();
-                                result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
-                                result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
-                                result.addConfigOption("Force Type Similarity", typeSimilarity.toString());
-//                                result.addConfigOption("WordnetParameter", wordnetParameter);
-//                                result.addConfigOption("QGramParameter", qgramParameter);
-                                results.add(result);
-
-//                                if ( sim !=  Wordnet.WordnetSimilarity.PATH ) continue; 
-                                
-                                long start = System.currentTimeMillis();
-                                
-                                result.addConfigOption("WordnetSimilarity", sim.toString());
-                                ((QGramAndWordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
-                                RdfLiveNews.CONFIG.setStringSetting("similarity", "checkDomainAndRange", typeSimilarity.toString());
-                                
-                                startEval(result, metric, threshold);
-                                
-                                System.out.println("Time: " + (System.currentTimeMillis() - start));
-                            }
+	                        for ( Boolean typeSimilarity : Arrays.asList(true, false) ) {
+	                            
+	                            for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
+	                                
+	                                ClusterEvaluationResult result = new ClusterEvaluationResult();
+	                                result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
+	                                result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
+	                                result.addConfigOption("Force Type Similarity", typeSimilarity.toString());
+	                                result.addConfigOption("WordnetParameter", wordnetParameter);
+	                                result.addConfigOption("QGramParameter", qgramParameter);
+	                                results.add(result);
+	
+	                                long start = System.currentTimeMillis();
+	                                
+	                                result.addConfigOption("WordnetSimilarity", sim.toString());
+	                                ((QGramAndWordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
+	                                RdfLiveNews.CONFIG.setStringSetting("similarity", "checkDomainAndRange", typeSimilarity.toString());
+	                                
+	                                startEval(result, metric, threshold);
+	                                
+	                                System.out.println("Time: " + (System.currentTimeMillis() - start));
+	                            }
+	                        }
                         }
-//                        }
-//                    }
+                    }
                 }
                 else {
                     
@@ -303,8 +296,9 @@ public class ClusteringEvaluation {
                 
                 int patternsInCluster = 0;
                 
-                for ( Pattern pattern : clusters.get(clusterIndex) ) 
-                    if ( pattern.getClazz().equals(clazz) ) patternsInCluster++;
+                for ( Pattern pattern : clusters.get(clusterIndex) ) {
+                	if ( pattern.getClazz().equals(clazz) ) patternsInCluster++;
+                }
                 
                 sensitivityMatrix[mappingIndex][clusterIndex] = (double)patternsInCluster / classToPattern.get(clazz).size();
                 sensitivityMax = Math.max(sensitivityMax, sensitivityMatrix[mappingIndex][clusterIndex]);
@@ -331,15 +325,11 @@ public class ClusteringEvaluation {
      */
     private static void setClassLabelForPatterns(List<Cluster<Pattern>> clusters) {
 
-        for ( Cluster<Pattern> cluster : clusters ) {
-            for ( Pattern p : cluster ) {
-                for ( Map.Entry<String, Set<String>> entry : classToPattern.entrySet()) {
-                    if ( entry.getValue().contains(p.getNaturalLanguageRepresentation()) ) {
+        for ( Cluster<Pattern> cluster : clusters ) 
+            for ( Pattern p : cluster ) 
+                for ( Map.Entry<String, Set<String>> entry : classToPattern.entrySet())
+                    if ( entry.getValue().contains(p.getNaturalLanguageRepresentation()) )
                         p.setClazz(entry.getKey());
-                    }
-                }
-            }
-        }
     }
 
     private static Set<Cluster<Pattern>> createClusters(Set<Similarity> similarities, Double threshold) {
@@ -354,7 +344,7 @@ public class ClusteringEvaluation {
 
     private static Set<Similarity> createSimilarities(SimilarityMetric metric) throws IOException {
 
-        List<String> lines = FileUtils.readLines(new File("/Users/gerb/test/patterns1percent5occ.pattern"));
+        List<String> lines = FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "/evaluation/patterns1percent5occ.pattern"));
 
         Set<Similarity> sims = new HashSet<>();
 
@@ -384,72 +374,25 @@ public class ClusteringEvaluation {
     }
 
     private static void initializePatternClassLabels() {
-
-        classToPattern.put("says", new HashSet<>(Arrays.asList(", '' said", ", '' says", "asked", "said", "said ,", "said in", "said of", "said on", "said that", "says", "says that", "announced", ", told", ", said", ", according to", "calls", "tells", "told", "called", "reported", "noted that")));
-        classToPattern.put("spokesperson", new HashSet<>(Arrays.asList("spokeswoman", ", spokeswoman for", ", a spokesman for", "spokesman", ", a spokeswoman for", "spokesperson",", spokesman for")));
-        classToPattern.put("director", new HashSet<>(Arrays.asList(", the director of", "director", ", director of", "executive director", ", executive director of"))); 
-        classToPattern.put("player", new HashSet<>(Arrays.asList("quarterback", "receiver", "pitcher", "first baseman", "third baseman", "player"))); 
-        classToPattern.put("chief", new HashSet<>(Arrays.asList("captain", ", head of", "chief executive", "chief"))); 
-        classToPattern.put("attorney", new HashSet<>(Arrays.asList("'s attorney ,", "attorney", "'s lawyer ,", "lawyer"))); 
-        classToPattern.put("president", new HashSet<>(Arrays.asList("president", ", the president of", ", president of"))); 
-        classToPattern.put("coach", new HashSet<>(Arrays.asList("head coach", "football coach", "coach"))); 
-        classToPattern.put("goto", new HashSet<>(Arrays.asList("returned to", "went to", "comes to"))); 
-        classToPattern.put("daughter", new HashSet<>(Arrays.asList("'s daughter ,", "; daughters", ", daughter"))); 
-        classToPattern.put("placeOf", new HashSet<>(Arrays.asList("suburb of", "town of", "city of"))); 
-        classToPattern.put("leader", new HashSet<>(Arrays.asList("leader", "led"))); 
-        classToPattern.put("basedIn", new HashSet<>(Arrays.asList("headquarters in", ", based in"))); 
-        classToPattern.put("memberOf", new HashSet<>(Arrays.asList("member", ", a member of"))); 
-        classToPattern.put("livesIn", new HashSet<>(Arrays.asList(", who lives in", "lives in"))); 
-        classToPattern.put("chairman", new HashSet<>(Arrays.asList(", chairman of", "chairman"))); 
-        classToPattern.put("candidate", new HashSet<>(Arrays.asList("presidential candidate", "candidate"))); 
-        classToPattern.put("graduatedFrom", new HashSet<>(Arrays.asList("graduated from"))); 
-        classToPattern.put("wasTaken", new HashSet<>(Arrays.asList("took", "was taken to"))); 
-        classToPattern.put("founder", new HashSet<>(Arrays.asList("co-founder", "founder"))); 
-        classToPattern.put("owner", new HashSet<>(Arrays.asList(", owner of", "owner")));
-        classToPattern.put("champion", new HashSet<>(Arrays.asList("champions", "champion")));
-        classToPattern.put("aka", new HashSet<>(Arrays.asList(", known as", ", also known as"))); 
-        classToPattern.put("manager", new HashSet<>(Arrays.asList("campaign manager", "manager"))); 
-        classToPattern.put("normalTripleWriter", new HashSet<>(Arrays.asList("normalTripleWriter", "writers"))); 
-        classToPattern.put("selected", new HashSet<>(Arrays.asList("named", "'s selection of")));
-        classToPattern.put("win", new HashSet<>(Arrays.asList("beat", "defeated")));
-        classToPattern.put(", general partner ,", new HashSet<>(Arrays.asList(", general partner ,")));
-        classToPattern.put(", hold for", new HashSet<>(Arrays.asList(", hold for")));
-        classToPattern.put(", including", new HashSet<>(Arrays.asList(", including")));
-        classToPattern.put(", part of", new HashSet<>(Arrays.asList(", part of")));
-        classToPattern.put("; brothers", new HashSet<>(Arrays.asList("; brothers")));
-        classToPattern.put("'s mother ,", new HashSet<>(Arrays.asList("'s mother ,")));
-        classToPattern.put("'s son ,", new HashSet<>(Arrays.asList("'s son ,")));
-        classToPattern.put("'s wife ,", new HashSet<>(Arrays.asList("'s wife ,")));
-        classToPattern.put("analyst", new HashSet<>(Arrays.asList("analyst")));
-        classToPattern.put("arrived in", new HashSet<>(Arrays.asList("arrived in")));
-        classToPattern.put("being in", new HashSet<>(Arrays.asList("being in")));
-        classToPattern.put("congressman", new HashSet<>(Arrays.asList("congressman")));
-        classToPattern.put("criticized", new HashSet<>(Arrays.asList("criticized")));
-        classToPattern.put("customers in", new HashSet<>(Arrays.asList("customers in")));
-        classToPattern.put("dated", new HashSet<>(Arrays.asList("dated")));
-        classToPattern.put("died in", new HashSet<>(Arrays.asList("died in")));
-        classToPattern.put("editor", new HashSet<>(Arrays.asList("editor")));
-        classToPattern.put("found", new HashSet<>(Arrays.asList("found")));
-        classToPattern.put("gave", new HashSet<>(Arrays.asList("gave")));
-        classToPattern.put("gold medalist", new HashSet<>(Arrays.asList("gold medalist")));
-        classToPattern.put("in downtown", new HashSet<>(Arrays.asList("in downtown")));
-        classToPattern.put("is a former", new HashSet<>(Arrays.asList("is a former")));
-        classToPattern.put("joined", new HashSet<>(Arrays.asList("joined")));
-        classToPattern.put("last year ,", new HashSet<>(Arrays.asList("last year ,")));
-        classToPattern.put("left", new HashSet<>(Arrays.asList("left")));
-        classToPattern.put("pitched", new HashSet<>(Arrays.asList("pitched")));
-        classToPattern.put("police", new HashSet<>(Arrays.asList("police")));
-        classToPattern.put("praised", new HashSet<>(Arrays.asList("praised")));
-        classToPattern.put("put", new HashSet<>(Arrays.asList("put")));
-        classToPattern.put("reporter", new HashSet<>(Arrays.asList("reporter")));
-        classToPattern.put("scored on", new HashSet<>(Arrays.asList("scored on")));
-        classToPattern.put("star", new HashSet<>(Arrays.asList("star")));
-        classToPattern.put("state", new HashSet<>(Arrays.asList("state")));
-        classToPattern.put("teammate", new HashSet<>(Arrays.asList("teammate")));
-        classToPattern.put("was born", new HashSet<>(Arrays.asList("was born")));
-        classToPattern.put("winner", new HashSet<>(Arrays.asList("winner")));
-        classToPattern.put("withdrew from", new HashSet<>(Arrays.asList("withdrew from")));
-        classToPattern.put("won", new HashSet<>(Arrays.asList("won")));
+    	
+    	try {
+    		
+    		Set<String> cluster = new HashSet<String>();
+			for ( String s : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "/evaluation/gs_clusters.txt"))){
+				
+				if ( !s.isEmpty() ) cluster.add(s);
+				else {
+					classToPattern.put(cluster.iterator().next(), cluster);
+					cluster = new HashSet<>();
+				}
+			}
+			// add the last one
+			classToPattern.put(cluster.iterator().next(), cluster);
+		}
+    	catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         patternKeys = new ArrayList<String>(classToPattern.keySet());
     }

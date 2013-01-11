@@ -46,14 +46,14 @@ public class EntityLabelRefiner implements LabelRefiner {
 	private NamedEntityTagPatternSearcher searcher = new NamedEntityTagPatternSearcher();
 	private Map<String,String> refinedLabelCache = new HashMap<>();
 	
-	public static String INDEX_DIRECTORY = "/Users/gerb/Development/workspaces/experimental/rdflivenews/100percent/index";
-    public static Directory INDEX;
-    private IndexWriter writer;
-    private final Analyzer analyzer = new LowerCaseWhitespaceAnalyzer(Version.LUCENE_40);
+//	public static String INDEX_DIRECTORY = "/Users/gerb/Development/workspaces/experimental/rdflivenews/100percent/index";
+//    public static Directory INDEX;
+//    private IndexWriter writer;
+//    private final Analyzer analyzer = new LowerCaseWhitespaceAnalyzer(Version.LUCENE_40);
 
     public EntityLabelRefiner() {
     	
-    	createIndex();
+//    	createIndex();
     }
     
     /* (non-Javadoc)
@@ -140,40 +140,40 @@ public class EntityLabelRefiner implements LabelRefiner {
         return entities;
     }
     
-    /**
-     * Opens and closes an index in the index directory
-     */
-    public void createIndex() {
-        
-        // create the index normalTripleWriter configuration and create a new index normalTripleWriter
-        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-        indexWriterConfig.setRAMBufferSizeMB(1024);
-        indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
-        writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
-        INDEX = writer.getDirectory();
-        LuceneManager.closeIndexWriter(this.writer);
-    }
+//    /**
+//     * Opens and closes an index in the index directory
+//     */
+//    public void createIndex() {
+//        
+//        // create the index normalTripleWriter configuration and create a new index normalTripleWriter
+//        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+//        indexWriterConfig.setRAMBufferSizeMB(1024);
+//        indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
+//        writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
+//        INDEX = writer.getDirectory();
+//        LuceneManager.closeIndexWriter(this.writer);
+//    }
     
-    public Set<String> getAllNerTaggedSentencesFromArticle(String articleUrl) {
-    	
-    	Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
-        
-        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
-        LuceneManager.query(searcher, articles, collector);
-        
-        Set<String> sentences = new HashSet<>();
-        
-        // add the primary key of each document to the list
-        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
-            sentences.add(
-                    LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE));
-        
-        LuceneManager.closeIndexReader(searcher.getIndexReader());
-        LuceneManager.closeIndexSearcher(searcher);
-        
-        return sentences;
-	}
+//    public Set<String> getAllNerTaggedSentencesFromArticle(String articleUrl) {
+//    	
+//    	Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
+//        
+//        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
+//        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
+//        LuceneManager.query(searcher, articles, collector);
+//        
+//        Set<String> sentences = new HashSet<>();
+//        
+//        // add the primary key of each document to the list
+//        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
+//            sentences.add(
+//                    LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE));
+//        
+//        LuceneManager.closeIndexReader(searcher.getIndexReader());
+//        LuceneManager.closeIndexSearcher(searcher);
+//        
+//        return sentences;
+//	}
     
     
     public static void main(String[] args) throws InvalidFileFormatException, IOException {

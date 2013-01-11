@@ -35,13 +35,17 @@ import com.github.gerbsen.encoding.Encoder.Encoding;
 public class FeatureBasedDisambiguation implements Disambiguation {
 
     public static Logger logger = java.util.logging.Logger.getLogger(FeatureBasedDisambiguation.class.getName());
-    private LuceneDbpediaManager dbpediaManager = new LuceneDbpediaManager();
-    private LuceneBoaManager boaManager = new LuceneBoaManager();
+    public LuceneDbpediaManager dbpediaManager;
+    public LuceneBoaManager boaManager = new LuceneBoaManager();
 	private Map<String,Map<String,Integer>> contextEntityCache = new HashMap<>();
 	private Map<String,List<String>> uriCandidatesCache = new HashMap<>();
 	private Map<String,Double> aprioriScoreCache = new HashMap<>();
 
-    /**
+    public FeatureBasedDisambiguation(LuceneDbpediaManager luceneDbpediaManager) {
+    	this.dbpediaManager = luceneDbpediaManager;
+	}
+
+	/**
      * Check for URIs that contain entry as substring
      *
      * @param label Label of entity
@@ -176,7 +180,7 @@ public class FeatureBasedDisambiguation implements Disambiguation {
 
         RdfLiveNews.init();
         
-        FeatureBasedDisambiguation uriRetrieval = new FeatureBasedDisambiguation();
+        FeatureBasedDisambiguation uriRetrieval = new FeatureBasedDisambiguation(new LuceneDbpediaManager());
 //        System.out.println(uriRetrieval.getUri("Paul Ryan", Arrays.asList("Mitt Romney")));
 //        System.out.println(uriRetrieval.getUri("Ryan", Arrays.asList("Mitt Romney")));
 //        System.out.println(uriRetrieval.getUri("D.C.", Arrays.asList("Family Research Council", "D.C.", "Cathy Lanier", "The Washington Examiner", "FBI")));

@@ -16,8 +16,10 @@ import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
+import org.aksw.simba.rdflivenews.pattern.comparator.PatternSupportSetComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
+import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
@@ -54,6 +56,7 @@ public class DataGeneration {
         
         Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
         System.out.print("Starting pattern search in "+currentNonDuplicateSentenceIds.size()+" sentences ...  ");
+        
         PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
         List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds));
         System.out.println("DONE");
@@ -62,24 +65,28 @@ public class DataGeneration {
         PatternFilter patternFilter = new DefaultPatternFilter();
         patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
         
-        // refines the domain and range of the patterns 
-        PatternRefiner patternRefiner = (PatternRefiner) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "refiner"));
-        patternRefiner.refinePatterns(patternsOfIteration);
+        // cut of most of the crap
+        Collections.sort(patternsOfIteration, new PatternSupportSetComparator());
+        List<Pattern> top1PercentPattern = patternsOfIteration.size() > 100000 ? patternsOfIteration.subList(0, 1000) : patternsOfIteration.subList(0, patternsOfIteration.size() / 100);
+        
+        // refines the domain and range of the patterns
+        PatternRefinementManager refinementManager = new PatternRefinementManager();
+        refinementManager.startPatternRefinement(top1PercentPattern);
         
         List<String> lines = new ArrayList<String>();   
-        System.out.println("Found " + patternsOfIteration.size()+ " patterns");
-        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/test/patterns1percent5occ.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
-        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/test/patterns1percent5occ.pattern", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        System.out.println("Found " + top1PercentPattern.size()+ " patterns");
+        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/patterns1percent5occ.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/tmp/patterns1percent5occ.pattern", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         
         int count = 0;
         
-        for ( Pattern pattern : patternsOfIteration ) {
-            if ( pattern.getTotalOccurrence() >= 5 ) {
+        for ( Pattern pattern : top1PercentPattern ) {
+//            if ( pattern.getTotalOccurrence() >= 5 ) {
                 
                 count += pattern.getTotalOccurrence();
                 writer1.write(pattern.getNaturalLanguageRepresentation()+ "___" + pattern.getNaturalLanguageRepresentationWithTags() + "___" + pattern.getFavouriteTypeFirstEntity() + "___" + pattern.getFavouriteTypeSecondEntity());
                 patternToString(pattern, lines);
-            }
+//            }
         }
         System.out.println("pairs: " + pairs + " ids: " + ids);
         System.out.println("Lines in file: "+ lines.size() + " totalOcc: " + count);

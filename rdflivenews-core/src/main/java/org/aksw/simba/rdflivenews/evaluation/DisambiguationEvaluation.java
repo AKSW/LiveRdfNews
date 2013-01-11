@@ -74,7 +74,7 @@ public class DisambiguationEvaluation {
         RdfLiveNews.init();
         
     	labelRefiner = new EntityLabelRefiner();
-    	disambiguation = new FeatureBasedDisambiguation();
+    	disambiguation = new FeatureBasedDisambiguation(new LuceneDbpediaManager());
         
         List<DisambiguationEvaluationResult> results = new ArrayList<>();
         
@@ -326,8 +326,8 @@ public class DisambiguationEvaluation {
 //    	writeArffHeader(writer);
 //    	writeArffLine(writer);
     	
-//    	System.out.println("Precision: " + precision);
-//    	System.out.println("Recall: " + recall);
+    	System.out.println("Precision: " + precision);
+    	System.out.println("Recall: " + recall);
     	
 //    	writer.write(round(fScore) + "\t" + round(precision) + "\t"+  round(recall) + "\t" + StringUtils.join(paramters, "\t"));
 //    	writer.flush();

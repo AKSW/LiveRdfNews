@@ -16,8 +16,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.TermQuery;
 
 import com.github.gerbsen.lucene.LuceneManager;
 
@@ -46,7 +48,7 @@ public class NamedEntityAndOrPartOfSpeechNaturalLanguageTagger implements Natura
         	
         	if ( i++ % 100 == 0 )System.out.println(i);
 
-            Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, sentenceId, sentenceId, true, true));
+            Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(sentenceId))));
             String text     = oldDoc.get(Constants.LUCENE_FIELD_TEXT);
             
             Document newDoc = new Document();

@@ -43,7 +43,7 @@ public class PatternRefinementManager {
             
             // start the timer which prints every 30s the progress of the callables
             Timer timer = new Timer();
-            timer.schedule(new PatternRefinementPrintProgressTask(todo), 0, 1500);
+            timer.schedule(new PatternRefinementPrintProgressTask(todo), 0, 5000);
             
             // invoke all waits until all threads are finished
             executorService.invokeAll(todo);
