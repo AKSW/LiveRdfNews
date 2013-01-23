@@ -10,8 +10,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.PhraseQuery;
@@ -32,7 +30,7 @@ public class SolrIndex {
 	private final String sortField = "pagerank";
 	private final int maxNrOfItems = 25;
 	
-	public static void main(String[] args) throws ParseException {
+	public static void main(String[] args) {
 
         SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/dbpedia_resources/");
 //        SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");

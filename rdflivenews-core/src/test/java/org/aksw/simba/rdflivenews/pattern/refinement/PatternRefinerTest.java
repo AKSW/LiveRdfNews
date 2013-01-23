@@ -23,7 +23,6 @@ import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
-import org.aksw.simba.rdflivenews.pattern.refinement.impl.DefaultPatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.refinement.jena.SubclassChecker;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.DETERMINER_TYPE;
@@ -73,7 +72,7 @@ public class PatternRefinerTest extends TestCase {
     public void testGetFavouriteType() 
             throws SecurityException, NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 
-        PatternRefiner refiner = new DefaultPatternRefiner();
+        PatternRefiner refiner = null;//new DefaultPatternRefiner();
         
         // test the mostly used common subclass
         Pattern pattern1 = new DefaultPattern();
