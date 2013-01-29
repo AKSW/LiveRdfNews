@@ -3,6 +3,9 @@
  */
 package org.aksw.simba.rdflivenews.pattern.similarity.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
@@ -15,12 +18,12 @@ public class QGramAndWordnetSimilarityMetric implements SimilarityMetric {
 
     private WordnetSimilarity similarity = WordnetSimilarity.PATH;
     
-    private double qgramParamter = 0.21D;
-    private double wordnetParamter = 0.86D;
+    public double qgramParamter = 0.21D;
+    public double wordnetParamter = 0.86D;
     
     SimilarityMetric qgram = new QGramSimilarityMetric();
     SimilarityMetric wordnet = new WordnetSimilarityMetric();
-
+    
     /*
      * (non-Javadoc)
      * 

@@ -7,8 +7,12 @@ import edu.cmu.lti.lexical_db.ILexicalDatabase;
 import edu.cmu.lti.lexical_db.NictWordNet;
 import edu.cmu.lti.ws4j.RelatednessCalculator;
 import edu.cmu.lti.ws4j.impl.JiangConrath;
+import edu.cmu.lti.ws4j.impl.LeacockChodorow;
+import edu.cmu.lti.ws4j.impl.Lesk;
 import edu.cmu.lti.ws4j.impl.Lin;
 import edu.cmu.lti.ws4j.impl.Path;
+import edu.cmu.lti.ws4j.impl.Resnik;
+import edu.cmu.lti.ws4j.impl.WuPalmer;
 import edu.cmu.lti.ws4j.util.WS4JConfiguration;
 
 
@@ -31,9 +35,9 @@ public class Wordnet {
         
 //        LEACOCK_CHODOROW (new LeacockChodorow(db)),
 //        LEST             (new Lesk(db)),
-//        WU_PALMER        (new WuPalmer(db)), 
-//        RESNIK           (new Resnik(db)), //  
-        JIANG_CONRATH    (new JiangConrath(db)), 
+        WU_PALMER        (new WuPalmer(db)), 
+//        RESNIK           (new Resnik(db)),  
+//        JIANG_CONRATH    (new JiangConrath(db)), 
         LIN              (new Lin(db)), 
         PATH             (new Path(db));
 

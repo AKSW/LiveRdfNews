@@ -15,6 +15,7 @@ import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.cluster.labeling.ClusterLabeler;
 import org.aksw.simba.rdflivenews.cluster.labeling.DefaultClusterLabeling;
 import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
@@ -52,6 +53,8 @@ public class RdfLiveNews {
     public static Config CONFIG;
     public static String DATA_DIRECTORY;
     public static int ITERATION = 0;
+    public static List<Pattern> patterns                  = new ArrayList<Pattern>();
+    public static Set<Cluster<Pattern>> clusters;
     
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
         
@@ -63,9 +66,9 @@ public class RdfLiveNews {
 
 //        System.out.print("Resetting documents to non duplicate ... ");
 //        we only need to do this, if the deduplication is running again
-//        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
+        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
-        List<Pattern> patterns                  = new ArrayList<Pattern>();
+        Statistics stats = new Statistics();
         
         // we need this to be an instance variable because we need to save the similarities which we computed for each iteration
         SimilarityGeneratorManager similarityGenerator = new SimilarityGeneratorManager(RdfLiveNews.CONFIG.getStringSetting("classes", "similarity"));
@@ -74,8 +77,8 @@ public class RdfLiveNews {
         // we can only find patterns if we have NER or POS tags annotated
         NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
         
-        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
-//        for ( ; ITERATION < IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
+//        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+        for ( ; ITERATION <= IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
             
             long iterationTime = System.currentTimeMillis();
             System.out.println("Starting Iteration #" + ITERATION + "!");
@@ -88,10 +91,13 @@ public class RdfLiveNews {
             long start = System.currentTimeMillis();
             
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
-//            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
-//            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
-//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
-            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
+            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
+            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
+//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
+            
             
 //            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
@@ -104,7 +110,8 @@ public class RdfLiveNews {
             start = System.currentTimeMillis();
 //            if you have not yet tagged all sentences in the index you need to uncomment this
             tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
-            System.exit(0);
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
 
             System.out.println(String.format("Finished NER & POS tagging of non duplicate sentences in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -119,11 +126,15 @@ public class RdfLiveNews {
             // search the patterns only in the sentences of the current iteration
             PatternSearchThreadManager patternSearchManager = new PatternSearchThreadManager();
             List<Pattern> patternsOfIteration = patternSearchManager.startPatternSearchCallables(new ArrayList<Integer>(currentNonDuplicateSentenceIds));
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
 
             // filter the patterns and merge the old and the new patterns
             PatternFilter patternFilter = new DefaultPatternFilter();
             patternsOfIteration         = patternFilter.filter(patternSearchManager.mergeNewFoundPatterns(patternsOfIteration));
             patterns                    = patternSearchManager.mergeNewFoundAndOldPattern(patterns, patternsOfIteration);
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
 
             System.out.println(String.format("Finished pattern search with %s patterns in current iteration and %s total patterns in %s!", patternsOfIteration.size(), patterns.size(),  TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -157,6 +168,8 @@ public class RdfLiveNews {
             refinementManager.startPatternRefinement(top1PercentPattern);
             patternSearchManager.logPatterns(patterns);
             
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
+            
             System.out.println(String.format("Finished pattern refinement in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
@@ -167,6 +180,8 @@ public class RdfLiveNews {
             start = System.currentTimeMillis();
             
             similarityGenerator.startSimilarityGeneratorThreads(top1PercentPattern, similarities);
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             
             System.out.println(String.format("Finished generate similarities in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -179,7 +194,9 @@ public class RdfLiveNews {
             
             // tries to group similar patterns into the same cluster
             PatternClustering patternClustering = new BorderFlowPatternClustering();
-            Set<Cluster<Pattern>> clusters = patternClustering.clusterPatterns(similarities, RdfLiveNews.CONFIG.getDoubleSetting("clustering", "similarityThreshold"));
+            clusters = patternClustering.clusterPatterns(similarities, RdfLiveNews.CONFIG.getDoubleSetting("clustering", "similarityThreshold"));
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             
             System.out.println(String.format("Finished clustering with %s clusters in %s!", clusters.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -194,6 +211,8 @@ public class RdfLiveNews {
             ClusterLabeler clusterLabeler = new DefaultClusterLabeling();
             clusterLabeler.labelCluster(clusters);
             
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
+            
             System.out.println(String.format("Finished labeling clusters in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
             // ##################################################
@@ -203,6 +222,8 @@ public class RdfLiveNews {
             ClusterMerger clusterMerger = new DefaultClusterMerger();
             clusterMerger.mergeCluster(clusters);
             
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
+            
             // ##################################################
             // ##################################################
             // ##################################################
@@ -210,11 +231,11 @@ public class RdfLiveNews {
             System.out.println("Starting to write out RDF!");
             start = System.currentTimeMillis();
             
-            System.exit(0);
-            
             // use the patterns to extract rdf from news text
             RdfExtraction rdfExtractor = new SimpleRdfExtraction();
             rdfExtractor.extractRdf(clusters);
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             
             System.out.println(String.format("Wrote rdf data in %s!", TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
             
@@ -222,14 +243,17 @@ public class RdfLiveNews {
             // ##################################################
             // ##################################################
             // 8. Mapping to DBpedia
+            start = System.currentTimeMillis();
+            
             DbpediaMapper mapper = new DefaultDbpediaMapper();
             mapper.map(clusters);
+            
+            Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             
             // ##################################################
             // ##################################################
             // ##################################################
             // 9. Create statistics like pos tag distribution
-            Statistics stats = new Statistics();
             stats.createStatistics(patterns);
             
             System.out.println("Finished iteration #" + ITERATION + " in " + TimeUtil.convertMilliSeconds(System.currentTimeMillis() - iterationTime) + ".");

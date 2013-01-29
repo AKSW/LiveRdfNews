@@ -35,7 +35,6 @@ public class BorderFlowPatternClustering implements PatternClustering {
     
     public Set<Cluster<Pattern>> clusterPatterns(Set<Similarity> similarities, Double similarityThreshold) {
 
-        Map<Set<String>, Set<String>> results = new HashMap<Set<String>, Set<String>>();
         Map<Integer, Pattern> patternIndex = new HashMap<>();
         Map<Pattern, Integer> reversePatternIndex = new HashMap<>();
         Set<Pattern> allPatterns = new HashSet<>();

@@ -21,6 +21,7 @@ import org.aksw.simba.rdflivenews.util.ReflectionManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 
@@ -45,8 +46,8 @@ public class StatisticsUtil {
      */
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
 
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
-        writer = new BufferedFileWriter("log/statistics.txt", "UTF-8", WRITER_WRITE_MODE.OVERRIDE);
+    	RdfLiveNews.init();
+        writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "statistics/deduplication.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         
         highestTimeSlice    = IndexManager.getInstance().getHighestTimeSliceId();
         statistics          = new LinkedHashMap<String,List<String>>();

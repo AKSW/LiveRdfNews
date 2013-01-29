@@ -3,6 +3,9 @@
  */
 package org.aksw.simba.rdflivenews.pattern.similarity.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
@@ -21,6 +24,8 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
     private Morphology lemmatizer = new Morphology();
     public int counter = 0;
     private WordnetSimilarity similarity = WordnetSimilarity.LIN;
+    
+    private static Map<String,Double> wordnetSimilarities = new HashMap<>();
 
     /*
      * (non-Javadoc)
@@ -31,9 +36,18 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
      */
     @Override
     public double calculateSimilarity(Pattern pattern1, Pattern pattern2) {
+    	
+    	String key = pattern1.getNaturalLanguageRepresentation() + pattern2.getNaturalLanguageRepresentation() + similarity;
+    	if ( !wordnetSimilarities.containsKey(key) ) wordnetSimilarities.put(key, getSimilarity(pattern1, pattern2));
+    	return wordnetSimilarities.get(key);
+    }
 
-        double total = 0;
+    private double getSimilarity(Pattern pattern1, Pattern pattern2) {
+    	
+    	double total = 0;
         int comparison = 0;
+        
+        double max = 0D;
 
         String[] partsOfPattern2 = pattern2.getNaturalLanguageRepresentationWithTags().replace("-", "").split(" ");
         
@@ -53,24 +67,31 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
                 
                 double sim = Wordnet.getInstance().getWordnetSimilarity(
                         lemmatizer.lemma(tokenOne, tagOne), lemmatizer.lemma(tokenTwo, tagTwo), this.similarity);
-
+                
+                max = Math.max(max, sim);
+                
                 total += sim;
                 comparison++;
             }
         }
-
+        
         return total == 0D ? 0D : total / comparison;
-    }
+//        return max;
+	}
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
 
-        Pattern pattern1 = new DefaultPattern("said on");
-        pattern1.setNaturalLanguageRepresentationWithTags("said_VBZ on_DT");
-        Pattern pattern2 = new DefaultPattern("said");
-        pattern2.setNaturalLanguageRepresentationWithTags("said_VBD");
+        Pattern pattern1 = new DefaultPattern("director");
+        pattern1.setNaturalLanguageRepresentationWithTags("director_NN");
+        Pattern pattern2 = new DefaultPattern("manager");
+        pattern2.setNaturalLanguageRepresentationWithTags("manager_NN");
 
         WordnetSimilarityMetric m = new WordnetSimilarityMetric();
-        System.out.println(m.calculateSimilarity(pattern1, pattern2));
+        
+        for ( WordnetSimilarity w : WordnetSimilarity.values()) {
+        	m.similarity=w;
+        	System.out.println(m.calculateSimilarity(pattern1, pattern2));
+        }
     }
 
     /**

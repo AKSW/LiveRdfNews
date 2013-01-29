@@ -17,6 +17,9 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.config.Config;
+import org.aksw.simba.rdflivenews.evaluation.comparator.InterClusterSimilarityComparator;
+import org.aksw.simba.rdflivenews.evaluation.comparator.InterIntraClusterSimilarityComparator;
+import org.aksw.simba.rdflivenews.evaluation.comparator.IntraClusterSimilarityComparator;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
@@ -53,11 +56,12 @@ public class ClusteringEvaluation {
         RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
         
         List<ClusterEvaluationResult> results = new ArrayList<>();
-        
-        for ( Double threshold : Arrays.asList(/*0D, 0.1, 0.2, */0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1D) ) {
-            
-            for ( SimilarityMetric metric : Arrays.asList(new QGramSimilarityMetric(), new WordnetSimilarityMetric(), new QGramAndWordnetSimilarityMetric())) {
+        int iter = 1;
 
+        for ( SimilarityMetric metric : Arrays.asList(new QGramAndWordnetSimilarityMetric(), new QGramSimilarityMetric(), new WordnetSimilarityMetric())) {
+        
+        	for ( Double threshold : Arrays.asList(1D, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1) ) {
+            
                 if ( metric instanceof WordnetSimilarityMetric ) {
                     
                     for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
@@ -73,31 +77,35 @@ public class ClusteringEvaluation {
                     }
                 }
                 else if ( metric instanceof QGramAndWordnetSimilarityMetric ) {
-                    
-                    for ( double wordnetParameter = 0.0 ; wordnetParameter <= 1D ; wordnetParameter += 0.1) {
-                        for ( double qgramParameter = 0.0 ; qgramParameter <= 1D ; qgramParameter += 0.1) {
+
+                	for ( Boolean typeSimilarity : Arrays.asList(true, false) ) {
+                		for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
+                	
+                			for ( double wordnetParameter = 0.0 ; wordnetParameter <= 1D ; wordnetParameter += 0.05) {
+                				for ( double qgramParameter = 0.0 ; qgramParameter <= 1D ; qgramParameter += 0.05) {
                             
-	                        for ( Boolean typeSimilarity : Arrays.asList(true, false) ) {
-	                            
-	                            for ( WordnetSimilarity sim : Wordnet.WordnetSimilarity.values()) {
-	                                
 	                                ClusterEvaluationResult result = new ClusterEvaluationResult();
 	                                result.addConfigOption("ClusteringSimilarityThreshold", threshold + "");
 	                                result.addConfigOption("SimilarityMetric", metric.getClass().getSimpleName());
 	                                result.addConfigOption("Force Type Similarity", typeSimilarity.toString());
 	                                result.addConfigOption("WordnetParameter", wordnetParameter);
 	                                result.addConfigOption("QGramParameter", qgramParameter);
+//	                                result.addConfigOption("WordnetParameter", 0);
+//	                                result.addConfigOption("QGramParameter", 0);
 	                                results.add(result);
 	
 	                                long start = System.currentTimeMillis();
 	                                
 	                                result.addConfigOption("WordnetSimilarity", sim.toString());
 	                                ((QGramAndWordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
+	                                ((QGramAndWordnetSimilarityMetric) metric).qgramParamter = qgramParameter;
+	                                ((QGramAndWordnetSimilarityMetric) metric).wordnetParamter = wordnetParameter;
+	                                ((QGramAndWordnetSimilarityMetric) metric).setWordnetSimilarity(sim);
 	                                RdfLiveNews.CONFIG.setStringSetting("similarity", "checkDomainAndRange", typeSimilarity.toString());
 	                                
 	                                startEval(result, metric, threshold);
 	                                
-	                                System.out.println("Time: " + (System.currentTimeMillis() - start));
+	                                System.out.println(iter++ + " Time: " + (System.currentTimeMillis() - start));
 	                            }
 	                        }
                         }
@@ -114,11 +122,26 @@ public class ClusteringEvaluation {
                 }
             }
         }
-        Collections.sort(results);
-        for ( ClusterEvaluationResult result : results ) System.out.println(result + "\n");
+//        Collections.sort(results);
+//        for ( ClusterEvaluationResult result : results ) System.out.println(result + "\n");
         
         Collections.sort(results);
         BufferedFileWriter writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/clustering.evaluation", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        for (ClusterEvaluationResult sortedResult : results) writer.write(sortedResult.toString() + "\n");
+        writer.close();
+        
+        Collections.sort(results, new IntraClusterSimilarityComparator());
+        writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/clustering.evaluation.intra", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        for (ClusterEvaluationResult sortedResult : results) writer.write(sortedResult.toString() + "\n");
+        writer.close();
+        
+        Collections.sort(results, new InterClusterSimilarityComparator());
+        writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/clustering.evaluation.inter", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        for (ClusterEvaluationResult sortedResult : results) writer.write(sortedResult.toString() + "\n");
+        writer.close();
+        
+        Collections.sort(results, new InterIntraClusterSimilarityComparator());
+        writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/clustering.evaluation.inter.intra", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         for (ClusterEvaluationResult sortedResult : results) writer.write(sortedResult.toString() + "\n");
         writer.close();
     }
@@ -153,6 +176,7 @@ public class ClusteringEvaluation {
             if ( metric instanceof WordnetSimilarityMetric ) fileName += ((WordnetSimilarityMetric)metric).getSimilarityMetric().toString() + "-";
             if ( metric instanceof QGramAndWordnetSimilarityMetric  ) fileName += ((QGramAndWordnetSimilarityMetric)metric).getSimilarityMetric().toString() + "-";
             fileName += metric.getClass().getSimpleName() + "-";
+            fileName += RdfLiveNews.CONFIG.getStringSetting("similarity", "checkDomainAndRange") + "-";
             fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold") + ".clstr";
             
             BufferedFileWriter writer = new BufferedFileWriter(fileName, Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
@@ -216,7 +240,9 @@ public class ClusteringEvaluation {
 
         double totalSim = 0F;
         for ( Cluster<Pattern> cluster : clusters ) {
-            totalSim += getClusterSimilarity(cluster, metric);
+        	
+        	double sim = getClusterSimilarity(cluster, metric);
+            totalSim += sim;
         }
         return (double) (totalSim / clusters.size());
     }
@@ -230,13 +256,15 @@ public class ClusteringEvaluation {
             int comparisons     = 0;
             for ( Pattern p1 : cluster ) {
                 for ( Pattern p2 : cluster) {
-                    if ( p1 != p2 ) {
+                    if ( !p1.getNaturalLanguageRepresentation().equals(p2.getNaturalLanguageRepresentation()) ) {
                         
-                        clusterSim += metric.calculateSimilarity(p1, p2);
+                    	double sim = metric.calculateSimilarity(p1, p2);
+                        clusterSim += sim;
                         comparisons++;
                     }
                 }
             }
+            
             return clusterSim / comparisons;
         }
     }

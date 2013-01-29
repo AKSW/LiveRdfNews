@@ -79,8 +79,9 @@ public class DisambiguationEvaluation {
         List<DisambiguationEvaluationResult> results = new ArrayList<>();
         
         loadGoldStandard();
-//        runEvaluation();
-        debugEvaluation();
+//        runEvaluationGridSearch();
+        runEvaluationHillClimbing();
+//        debugEvaluation();
 
         Collections.sort(results);
         BufferedFileWriter writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/disambiguation.evaluation", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
@@ -104,7 +105,7 @@ public class DisambiguationEvaluation {
 
 	private static void loadGoldStandard() throws IOException {
 
-        for (String line : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated.txt"))) {
+        for (String line : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated_gold.txt"))) {
             
             String[] lineParts = line.replace("______", "___ ___").split("___");
             if (lineParts[0].equals("NORMAL")) {
@@ -129,7 +130,7 @@ public class DisambiguationEvaluation {
         RdfLiveNews.CONFIG.setStringSetting("refiner", "refineLabel", "ALL");
         DisambiguationEvaluation.stepSize = 0.1;
 //        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/"+stepSize+"-ALL.arff", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
-        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/tmp/scores.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/tmp/scores_new.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         
 		for ( double contextGlobal = 0D; contextGlobal <= 1 ; contextGlobal += DisambiguationEvaluation.stepSize) 
 			for ( double contextLocal = 0D; contextLocal <= 1 ; contextLocal += DisambiguationEvaluation.stepSize)
@@ -139,9 +140,8 @@ public class DisambiguationEvaluation {
 	    					
 	    					List<Double> paramters = Arrays.asList(contextGlobal, contextLocal, apriori, stringsim, threshold);
 	    					
-//	    					long s = System.currentTimeMillis();
+	    					long s = System.currentTimeMillis();
 	    					double score = getCost(writer1, paramters);
-//	    					System.out.println(System.currentTimeMillis() - s);
 	    					
 	    					if ( score > globalMaxScore ) {
 	    	                	
@@ -161,14 +161,14 @@ public class DisambiguationEvaluation {
     	Double globalMaxScore = 0D;
         List<Double> globalMaxSolution = null;
     	
-        for ( Double stepSize : Arrays.asList(/*0.01, 0.02, */0.05/*, 0.1*/) ) { DisambiguationEvaluation.stepSize = stepSize;
-        	for ( String refinementType : Arrays.asList("PERSON"/*, "NONE", "ALL"*/)) { RdfLiveNews.CONFIG.setStringSetting("refiner", "refineLabel", refinementType);
-            	for ( int randomIteration = 0; randomIteration < 100 ; randomIteration++) {
+        for ( Double stepSize : Arrays.asList(0.01, 0.02, 0.05, 0.1) ) { DisambiguationEvaluation.stepSize = stepSize;
+//        	for ( String refinementType : Arrays.asList("PERSON"/*, "NONE", "ALL"*/)) { RdfLiveNews.CONFIG.setStringSetting("refiner", "refineLabel", refinementType);
+//            	for ( int randomIteration = 0; randomIteration < 1000 ; randomIteration++) {
 //            		for ( Boolean forceTyping : Arrays.asList(true, false)  ) {
     	
-    	    			BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/"+stepSize+"-"+refinementType+"-"+randomIteration+".arff", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+    	    			BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/"+stepSize+"-ALL.arff", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
     	    	
-    	            	List<Double> initialSolution = new ArrayList<>(MathUtil.getFixedSetOfFixedNumbers(4, Double.class, 0, 1));
+    	            	List<Double> initialSolution = new ArrayList<>(Arrays.asList(0.1,0.2,0.5,0.2,0.2));
     	            	List<Double> currentSolution = initialSolution;
     	            	
     	            	Double currentFScore = getCost(writer, initialSolution);
@@ -179,7 +179,7 @@ public class DisambiguationEvaluation {
     	                    Double highestFScore = currentFScore;
     	                    List<Double> highestSolution = currentSolution;
     	                    
-    	                    System.out.println(String.format("Hill-climbing f-Score at step %s in iter: %s: %s", step, randomIteration, highestFScore));
+    	                    System.out.println(String.format("Hill-climbing f-Score at step %s: %s", step, highestFScore));
     	                    List<List<Double>> neighbours = getNeighbours(currentSolution);
     	                    
     	                    for (List<Double> newSolution : neighbours ) {
@@ -210,8 +210,8 @@ public class DisambiguationEvaluation {
     	                writer.close();
     	            }
 //        		}
-        	}
-        }
+//        	}
+//        }
     	
     	System.out.println("Maximum f1: " + globalMaxScore);
     	System.out.println("With: " + globalMaxSolution);
@@ -284,6 +284,13 @@ public class DisambiguationEvaluation {
 				
 				subjectCounter++;
 				if ( sUri.equals(foundSUri) ) correctSubjects++;
+				else {
+					
+//					System.out.println("Gold: " + sUri + " - " + sLabel);
+//					System.out.println("Found: " + foundSUri + " - " + sRefinedLabel);
+//					System.out.println(IndexManager.getInstance().getStringValueFromDocument(sentenceId, Constants.LUCENE_FIELD_TEXT));
+//					System.out.println();
+				}
 			}
 			
     		if ( !foundOUri.equals(Constants.NON_GOOD_URL_FOUND) ) {
@@ -326,11 +333,11 @@ public class DisambiguationEvaluation {
 //    	writeArffHeader(writer);
 //    	writeArffLine(writer);
     	
-    	System.out.println("Precision: " + precision);
-    	System.out.println("Recall: " + recall);
+//    	System.out.println("Precision: " + precision);
+//    	System.out.println("Recall: " + recall);
     	
-//    	writer.write(round(fScore) + "\t" + round(precision) + "\t"+  round(recall) + "\t" + StringUtils.join(paramters, "\t"));
-//    	writer.flush();
+    	writer.write(round(fScore) + "\t" + round(precision) + "\t"+  round(recall) + "\t" + StringUtils.join(paramters, "\t"));
+    	writer.flush();
     	return fScore;
     }
     

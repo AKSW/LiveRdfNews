@@ -14,11 +14,11 @@ import java.util.Map;
 public class ClusterEvaluationResult implements Comparable<ClusterEvaluationResult> {
 
     private Map<String,String> config = new LinkedHashMap<String,String>();
-    private Double accuracy;
-    private double ppv;
-    private double sensitivity;
-    private double intraClusterSimilarity;
-    private double interClusterSimilarity;
+    public Double accuracy;
+    public double ppv;
+    public double sensitivity;
+    public double intraClusterSimilarity;
+    public double interClusterSimilarity;
     
     public ClusterEvaluationResult(double sensitivity, double positivePredictedValue, Double accuracy) {
         

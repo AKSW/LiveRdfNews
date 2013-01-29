@@ -43,7 +43,6 @@ public class RefactorIndex {
      */
     public static void main(String[] args) throws InvalidFileFormatException, IOException  {
 
-//        generateFixedSizeRandomSentencesDataset();
         generatePartialDataset(0);
     }
     
@@ -56,7 +55,7 @@ public class RefactorIndex {
         
         IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
         IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
-        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/tmp/10percent", Version.LUCENE_40));
+        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/tmp/1percent", Version.LUCENE_40));
         
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         Set<Integer> ids = IndexManager.getInstance().getNonDuplicateSentences();
@@ -76,7 +75,7 @@ public class RefactorIndex {
             String ner = oldDoc.get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE);
             
             Document newDoc = new Document();
-            newDoc.add(new Field(Constants.LUCENE_FIELD_ID, String.valueOf(j++), stringType));
+            newDoc.add(new Field(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID), stringType));
             newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), Store.YES));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))), Store.YES));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Store.YES));
@@ -101,50 +100,50 @@ public class RefactorIndex {
         reader.close();
     }
     
-public static void generateFixedSizeRandomSentencesDataset() throws InvalidFileFormatException, IOException {
-        
-        Set<Integer> randomLuceneDocumentIds = MathUtil.getFixedSetOfFixedNumbers(10000, Integer.class, 0, 11699327);
-        
-        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
-        IndexManager.getInstance();
-        
-        IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
-        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/tmp/10percent", Version.LUCENE_40));
-        
-        FieldType stringType = new FieldType(StringField.TYPE_STORED);
-        stringType.setStoreTermVectors(false);
-        
-        int i = 0, j = 0;
-        
-        System.out.println(randomLuceneDocumentIds.size());
-        
-        for ( Integer id : randomLuceneDocumentIds ) {
-        	
-        	// we would need to make a very long boolean query here to just use the index searcher methods
-        	// TODO make the query
-            
-            System.out.println("Sentence: " + i++);
-
-            Document oldDoc = LuceneManager.getDocumentByNumber(reader, id);
-            
-            String pos = oldDoc.get(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE);
-            String ner = oldDoc.get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE);
-            
-            Document newDoc = new Document();
-            newDoc.add(new Field(Constants.LUCENE_FIELD_ID, String.valueOf(j++), stringType));
-            newDoc.add(new IntField(Constants.LUCENE_FIELD_ID, j++, Store.YES));
-            newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), Store.YES));
-            newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))), Store.YES));
-            newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Store.YES));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_TEXT, oldDoc.get(Constants.LUCENE_FIELD_TEXT), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, pos == null ? "" : pos, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, ner == null ? "" : ner, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get(Constants.LUCENE_FIELD_URL), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
-            
-            writer.addDocument(newDoc);
-        }
-        
-        writer.close();
-        reader.close();
-    }
+//public static void generateFixedSizeRandomSentencesDataset() throws InvalidFileFormatException, IOException {
+//        
+//        Set<Integer> randomLuceneDocumentIds = MathUtil.getFixedSetOfFixedNumbers(10000, Integer.class, 0, 11699327);
+//        
+//        RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
+//        IndexManager.getInstance();
+//        
+//        IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
+//        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/tmp/1percent", Version.LUCENE_40));
+//        
+//        FieldType stringType = new FieldType(StringField.TYPE_STORED);
+//        stringType.setStoreTermVectors(false);
+//        
+//        int i = 0, j = 0;
+//        
+//        System.out.println(randomLuceneDocumentIds.size());
+//        
+//        for ( Integer id : randomLuceneDocumentIds ) {
+//        	
+//        	// we would need to make a very long boolean query here to just use the index searcher methods
+//        	// TODO make the query
+//            
+//            System.out.println("Sentence: " + i++);
+//
+//            Document oldDoc = LuceneManager.getDocumentByNumber(reader, id);
+//            
+//            String pos = oldDoc.get(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE);
+//            String ner = oldDoc.get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE);
+//            
+//            Document newDoc = new Document();
+//            newDoc.add(new Field(Constants.LUCENE_FIELD_ID, String.valueOf(j++), stringType));
+//            newDoc.add(new IntField(Constants.LUCENE_FIELD_ID, j++, Store.YES));
+//            newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), Store.YES));
+//            newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf((oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE))), Store.YES));
+//            newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Store.YES));
+//            newDoc.add(new Field(Constants.LUCENE_FIELD_TEXT, oldDoc.get(Constants.LUCENE_FIELD_TEXT), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+//            newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, pos == null ? "" : pos, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+//            newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, ner == null ? "" : ner, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+//            newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get(Constants.LUCENE_FIELD_URL), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+//            
+//            writer.addDocument(newDoc);
+//        }
+//        
+//        writer.close();
+//        reader.close();
+//    }
 }

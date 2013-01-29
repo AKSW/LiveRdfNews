@@ -3,10 +3,13 @@
  */
 package org.aksw.simba.rdflivenews.statistics;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 
 import com.github.gerbsen.encoding.Encoder.Encoding;
@@ -14,12 +17,21 @@ import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.math.Frequency;
 
+import edu.stanford.nlp.util.StringUtils;
+
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *
  */
 public class Statistics {
+	
+	public static Map<Integer, List<Long>> durationPerIteration = new HashMap<>();
+	
+	public Statistics(){
+		
+		for (int i = 0; i < 40; i++) durationPerIteration.put(i, new ArrayList<Long>());
+	}
 
     public void createStatistics(List<Pattern> patterns) {
 
@@ -30,10 +42,45 @@ public class Statistics {
         fileName += RdfLiveNews.CONFIG.getDoubleSetting("similarity", "threshold");
         
         this.printPartOfSpeechTagDistribution(fileName, patterns);
-        
+        this.printStepDurations(fileName);
+        this.printPatternNumber(fileName);
+        this.printClusterNumber(fileName);
     }
 
-    private void printPartOfSpeechTagDistribution(String fileName, List<Pattern> patterns) {
+    private void printClusterNumber(String fileName) {
+    	
+    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-CLUSTER_NUMBER.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
+        int clusterAboveThreshold = 0;
+    	for ( Cluster<Pattern> cluster : RdfLiveNews.clusters ){
+        	if ( cluster.size() >= 5 ) clusterAboveThreshold++;
+        }
+    	writer.write(RdfLiveNews.ITERATION + "\t" + RdfLiveNews.clusters.size() + "\t" + clusterAboveThreshold);
+        writer.close();
+	}
+
+	private void printPatternNumber(String fileName) {
+    	
+    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-PATTERN_NUMBER.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
+        int patternsAboveThreshold = 0;
+    	for ( Pattern p : RdfLiveNews.patterns ){
+        	if ( p.getTotalOccurrence() > 10 )patternsAboveThreshold++;
+        }
+    	writer.write(RdfLiveNews.ITERATION + "\t" + RdfLiveNews.patterns.size() + "\t" + patternsAboveThreshold);
+        writer.close();
+	}
+
+	private void printStepDurations(String fileName) {
+		
+    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-RUNTIME.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        for ( Map.Entry<Integer, List<Long>> entry : durationPerIteration.entrySet()) {
+            
+            writer.write(entry.getKey() + "\t" + StringUtils.join(entry.getValue(), "\t"));
+        }
+        
+        writer.close();      
+	}
+
+	private void printPartOfSpeechTagDistribution(String fileName, List<Pattern> patterns) {
 
         Frequency frequency = new Frequency();
         

@@ -573,6 +573,9 @@ public class IndexManager {
         
         TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
         LuceneManager.query(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(id))), collector);
+        
+        // TODO this needs to be like this if you have and old index
+//        LuceneManager.query(searcher, NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_ID, id, id, true, true), collector);
         return LuceneManager.getDocumentByNumber(searcher.getIndexReader(), collector.topDocs().scoreDocs[0].doc);
     }
     

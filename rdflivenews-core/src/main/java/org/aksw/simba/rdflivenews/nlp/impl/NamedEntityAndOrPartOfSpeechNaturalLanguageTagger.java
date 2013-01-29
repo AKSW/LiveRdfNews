@@ -46,13 +46,13 @@ public class NamedEntityAndOrPartOfSpeechNaturalLanguageTagger implements Natura
         int i = 0;
         for ( Integer sentenceId : newFoundNonDuplicateIds ) {
         	
-        	if ( i++ % 100 == 0 )System.out.println(i);
+//        	if ( i++ % 100 == 0 )System.out.println(i);
 
             Document oldDoc = IndexManager.getInstance().getDocumentByQuery(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_ID, String.valueOf(sentenceId))));
             String text     = oldDoc.get(Constants.LUCENE_FIELD_TEXT);
             
             Document newDoc = new Document();
-            newDoc.add(new IntField(Constants.LUCENE_FIELD_ID, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_ID)), IntField.TYPE_STORED));
+            newDoc.add(new Field(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
             newDoc.add(new LongField(Constants.LUCENE_FIELD_EXTRACTION_DATE, Long.valueOf(oldDoc.get(Constants.LUCENE_FIELD_EXTRACTION_DATE)), LongField.TYPE_STORED));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_TIME_SLICE)), IntField.TYPE_STORED));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Integer.valueOf(oldDoc.get(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE)), IntField.TYPE_STORED));
@@ -66,26 +66,17 @@ public class NamedEntityAndOrPartOfSpeechNaturalLanguageTagger implements Natura
 //            if ( posTagged != null && !posTagged.isEmpty() && nerTagged != null && !nerTagged.isEmpty() ) continue;
             
             // if we already have a ner or pos tagged sentence we dont need to tag it again
-            if ( posTagged == null || posTagged.isEmpty() )
+//            if ( posTagged == null || posTagged.isEmpty() )
                 newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, posTagger.getAnnotatedSentence(text), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            else 
-                newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, posTagged, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+//            else 
+//                newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, posTagged, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             
-            if ( nerTagged == null || nerTagged.isEmpty() ) 
+//            if ( nerTagged == null || nerTagged.isEmpty() ) 
                 newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, nerTagger.getAnnotatedSentence(text), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            else 
-                newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, nerTagged, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+//            else 
+//                newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, nerTagged, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             
-            try {
-            	
-				writer.tryDeleteDocument(searcher.getIndexReader(), sentenceId);
-				writer.addDocument(newDoc);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            
-//            LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, new IntField(Constants.LUCENE_FIELD_ID, sentenceId, Store.NO).stringValue()), newDoc);
+                LuceneManager.updateDocument(writer, new Term(Constants.LUCENE_FIELD_ID, oldDoc.get(Constants.LUCENE_FIELD_ID)), newDoc);
         }
         LuceneManager.closeIndexWriter(writer);
         LuceneManager.closeIndexSearcher(searcher);

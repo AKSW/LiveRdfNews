@@ -103,8 +103,13 @@ public class EntityLabelRefiner implements LabelRefiner {
         }
         match = match.replaceAll("`", "");
         match = match.replaceAll(" ' ", " ");
-        for ( String word : Arrays.asList("Chief", "What", "American", "Education Secretary", "Because", "Mr.", "Mrs.", "Capt.", "ex-", "Former", "Col.", "Army General", "Army Gen.", "Sen.", "Sgt.", "Lt.", "the ", "The ", "Dr.", "Rep.")) 
-        	match = match.replace(word, "");
+        for ( String word : Arrays.asList("When", "Chief", "What", "American", "Education Secretary", "Because", "Mr.", "Mrs.", "Capt.", "ex-", "Former", "Col.", "Army General", "Army Gen.", "Sen.", "Sgt.", "Lt.", "the ", "The ", "Dr.", "Rep.")) {
+        	
+        	if ( match.startsWith(word) || match.endsWith(word) ) {
+        		match = match.replace(word, "");
+        	}
+        }
+        	
 //         match.replace("'s", "s");
 
         DisambiguationEvaluation.DEBUG_WRITER.write(label + ": " + match);
