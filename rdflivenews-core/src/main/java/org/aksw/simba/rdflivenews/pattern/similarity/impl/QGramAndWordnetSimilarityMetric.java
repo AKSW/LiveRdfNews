@@ -18,8 +18,8 @@ public class QGramAndWordnetSimilarityMetric implements SimilarityMetric {
 
     private WordnetSimilarity similarity = WordnetSimilarity.PATH;
     
-    public double qgramParamter = 0.21D;
-    public double wordnetParamter = 0.86D;
+    public double qgramParamter = 0.75D;
+    public double wordnetParamter = 0.45D;
     
     SimilarityMetric qgram = new QGramSimilarityMetric();
     SimilarityMetric wordnet = new WordnetSimilarityMetric();

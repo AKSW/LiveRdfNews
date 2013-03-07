@@ -67,7 +67,6 @@ public class RdfLiveNews {
 //        System.out.print("Resetting documents to non duplicate ... ");
 //        we only need to do this, if the deduplication is running again
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
-        
         Statistics stats = new Statistics();
         
         // we need this to be an instance variable because we need to save the similarities which we computed for each iteration
@@ -97,9 +96,7 @@ public class RdfLiveNews {
 //            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
-            
-            
-//            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
+            System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
 
             // ##################################################
             // ##################################################
@@ -109,7 +106,7 @@ public class RdfLiveNews {
             System.out.println("Starting NER & POS tagging of " + currentNonDuplicateSentenceIds.size() + " non duplicate sentences!");
             start = System.currentTimeMillis();
 //            if you have not yet tagged all sentences in the index you need to uncomment this
-            tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+            if (ITERATION > 30) tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
 

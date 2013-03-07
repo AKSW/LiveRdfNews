@@ -55,7 +55,7 @@ public class RefactorIndex {
         
         IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
         IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
-        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/tmp/1percent", Version.LUCENE_40));
+        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/tmp/100percent", Version.LUCENE_40));
         
         IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         Set<Integer> ids = IndexManager.getInstance().getNonDuplicateSentences();

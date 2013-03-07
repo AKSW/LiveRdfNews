@@ -75,8 +75,8 @@ public class WordnetSimilarityMetric implements SimilarityMetric {
             }
         }
         
-        return total == 0D ? 0D : total / comparison;
-//        return max;
+//        return total == 0D ? 0D : total / comparison;
+        return max;
 	}
 
 	public static void main(String[] args) {

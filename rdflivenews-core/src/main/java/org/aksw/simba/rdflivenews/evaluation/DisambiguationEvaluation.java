@@ -17,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
@@ -80,8 +82,41 @@ public class DisambiguationEvaluation {
         
         loadGoldStandard();
 //        runEvaluationGridSearch();
-        runEvaluationHillClimbing();
-//        debugEvaluation();
+//        runEvaluationHillClimbing();
+        debugEvaluation();
+//        System.out.println("Score");
+//        for ( Entry<Comparable<?>, Long> e : ((FeatureBasedDisambiguation)disambiguation).score.sortByValue()){
+//        	
+//        	System.out.println(e.getKey() + ": " + e.getValue());
+//        }
+//        System.out.println(  );
+//        System.out.println(  );
+//        System.out.println("Apriori");
+//        for ( Entry<Comparable<?>, Long> e : ((FeatureBasedDisambiguation)disambiguation).apriori.sortByValue()){
+//        	
+//        	System.out.println(e.getKey() + ": " + e.getValue());
+//        }
+//        System.out.println(  );
+//        System.out.println(  );
+//        System.out.println("Local");
+//        for ( Entry<Comparable<?>, Long> e : ((FeatureBasedDisambiguation)disambiguation).local.sortByValue()){
+//        	
+//        	System.out.println(e.getKey() + ": " + e.getValue());
+//        }
+//        System.out.println(  );
+//        System.out.println(  );
+//        System.out.println("Global");
+//        for ( Entry<Comparable<?>, Long> e : ((FeatureBasedDisambiguation)disambiguation).global.sortByValue()){
+//        	
+//        	System.out.println(e.getKey() + ": " + e.getValue());
+//        }
+//        System.out.println(  );
+//        System.out.println(  );
+//        System.out.println("StringSim");
+//        for ( Entry<Comparable<?>, Long> e : ((FeatureBasedDisambiguation)disambiguation).stringsim.sortByValue()){
+//        	
+//        	System.out.println(e.getKey() + ": " + e.getValue());
+//        }
 
         Collections.sort(results);
         BufferedFileWriter writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/disambiguation.evaluation", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
@@ -99,7 +134,8 @@ public class DisambiguationEvaluation {
     	
     	BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/test.arff", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
 //    	runEvaluationGridSearch();
-    	System.out.println("F1: " + getCost(writer, Arrays.asList(0.1, 0.2,	0.5, 0.2, 0.2)));
+//    	System.out.println("F1: " + getCost(writer, Arrays.asList(0.1, 0.2,	0.5, 0.2, 0.2)));
+    	System.out.println("F1: " + getCost(writer, Arrays.asList(0.4497828394133033, 0.7768306002641023,	1D, 0.5968259229692493, 0.6106314582518256)));
     	DEBUG_WRITER.close();
 	}
 
@@ -130,15 +166,16 @@ public class DisambiguationEvaluation {
         RdfLiveNews.CONFIG.setStringSetting("refiner", "refineLabel", "ALL");
         DisambiguationEvaluation.stepSize = 0.1;
 //        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/"+stepSize+"-ALL.arff", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
-        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/tmp/scores_new.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/tmp/scores_new_test.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
         
 		for ( double contextGlobal = 0D; contextGlobal <= 1 ; contextGlobal += DisambiguationEvaluation.stepSize) 
 			for ( double contextLocal = 0D; contextLocal <= 1 ; contextLocal += DisambiguationEvaluation.stepSize)
 				for ( double apriori = 0D; apriori <= 1 ; apriori += DisambiguationEvaluation.stepSize)
 					for ( double stringsim = 0D; stringsim <= 1 ; stringsim += DisambiguationEvaluation.stepSize) 
-	    				for ( double threshold = 0D; threshold <= 1 ; threshold += DisambiguationEvaluation.stepSize) {
+	    				for ( double threshold = 0.15D; threshold <= 0.25 ; threshold += 0.01) {
 	    					
 	    					List<Double> paramters = Arrays.asList(contextGlobal, contextLocal, apriori, stringsim, threshold);
+//	    					List<Double> paramters = Arrays.asList(0.1,0.2,0.5,0.2, threshold);
 	    					
 	    					long s = System.currentTimeMillis();
 	    					double score = getCost(writer1, paramters);
@@ -161,14 +198,19 @@ public class DisambiguationEvaluation {
     	Double globalMaxScore = 0D;
         List<Double> globalMaxSolution = null;
     	
-        for ( Double stepSize : Arrays.asList(0.01, 0.02, 0.05, 0.1) ) { DisambiguationEvaluation.stepSize = stepSize;
+//        for ( Double stepSize : Arrays.asList(0.01, 0.02, 0.05, 0.1) ) { DisambiguationEvaluation.stepSize = stepSize;
 //        	for ( String refinementType : Arrays.asList("PERSON"/*, "NONE", "ALL"*/)) { RdfLiveNews.CONFIG.setStringSetting("refiner", "refineLabel", refinementType);
-//            	for ( int randomIteration = 0; randomIteration < 1000 ; randomIteration++) {
+            	for ( int randomIteration = 0; randomIteration < 50 ; randomIteration++) {
 //            		for ( Boolean forceTyping : Arrays.asList(true, false)  ) {
     	
-    	    			BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/"+stepSize+"-ALL.arff", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+    	    			BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/hill.tsv", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
     	    	
-    	            	List<Double> initialSolution = new ArrayList<>(Arrays.asList(0.1,0.2,0.5,0.2,0.2));
+    	    			Random random = new Random();
+    	    			List<Double> randomList = MathUtil.getFixedSetOfRandomNumbers(5, Double.class, 0, 1);
+//    	    			randomList.add(0.5);
+    	    			
+    	            	List<Double> initialSolution = new ArrayList<>(randomList);
+//    	            	List<Double> initialSolution = new ArrayList<>(Arrays.asList(0.1,0.2,0.5,0.2,0.2));
     	            	List<Double> currentSolution = initialSolution;
     	            	
     	            	Double currentFScore = getCost(writer, initialSolution);
@@ -199,6 +241,7 @@ public class DisambiguationEvaluation {
     	            			currentFScore = highestFScore;
     	                        step++;
     	                    }
+    	                    System.out.println("global-max: " + globalMaxScore + "\n\n");
     	                }
     	                
     	                if ( currentFScore > globalMaxScore ) {
@@ -225,21 +268,41 @@ public class DisambiguationEvaluation {
     	List<List<Double>> neighbours = new ArrayList<>();
     	
     	for (int i = 0; i < solution.size(); i++){
-
-    		List<Double> newNeighbour = new ArrayList<>(solution);
-            if ( newNeighbour.get(i) < upperBound ) {
-            	
-            	double newParamterValue = newNeighbour.get(i) + stepSize ;
-            	newNeighbour.set(i, newParamterValue < upperBound ? newParamterValue : 1);
-            	neighbours.add(newNeighbour);
-            }
-            newNeighbour = new ArrayList<>(solution);
-            if ( newNeighbour.get(i) > lowerBound ) {
-            	
-            	double newParamterValue = newNeighbour.get(i) - stepSize;
-            	newNeighbour.set(i, newParamterValue > lowerBound ? newParamterValue : 0);
-            	neighbours.add(newNeighbour);
-            }
+    		
+    		if ( i < 4 ) {
+    		
+    			List<Double> newNeighbour = new ArrayList<>(solution);
+                if ( newNeighbour.get(i) < upperBound ) {
+                	
+                	double newParamterValue = newNeighbour.get(i) + stepSize ;
+                	newNeighbour.set(i, newParamterValue < upperBound ? newParamterValue : 1);
+                	neighbours.add(newNeighbour);
+                }
+                newNeighbour = new ArrayList<>(solution);
+                if ( newNeighbour.get(i) > lowerBound ) {
+                	
+                	double newParamterValue = newNeighbour.get(i) - stepSize;
+                	newNeighbour.set(i, newParamterValue > lowerBound ? newParamterValue : 0);
+                	neighbours.add(newNeighbour);
+                }
+    		}
+    		else {
+    			
+    			List<Double> newNeighbour = new ArrayList<>(solution);
+                if ( newNeighbour.get(i) < upperBound ) {
+                	
+                	double newParamterValue = newNeighbour.get(i) + 0.1 ;
+                	newNeighbour.set(i, newParamterValue < upperBound ? newParamterValue : 1);
+                	neighbours.add(newNeighbour);
+                }
+                newNeighbour = new ArrayList<>(solution);
+                if ( newNeighbour.get(i) > lowerBound ) {
+                	
+                	double newParamterValue = newNeighbour.get(i) - 0.1;
+                	newNeighbour.set(i, newParamterValue > lowerBound ? newParamterValue : 0);
+                	neighbours.add(newNeighbour);
+                }    			
+    		}
     	}
     	return neighbours;
     }
@@ -262,12 +325,27 @@ public class DisambiguationEvaluation {
 		int correctSubjects = 0;
     	int correctObjects = 0;
     	
+    	int dbpediaUriButRlnFound = 0;
+    	int rnlUriButDbpediaFound = 0;
+    	int nonUriFound = 0;
+    	int missingRlnUri = 0;
+    	int missingDbpediaUri = 0;
+    	int rlnUris = 0;
+		int dbpediaUris = 0;
+    	
+//    	System.out.println(GOLD_STANDARD_TRIPLES.size());
+    	
     	for ( Map.Entry<String, ObjectPropertyTriple> goldStandardEntry : GOLD_STANDARD_TRIPLES.entrySet()) {
     		
     		ObjectPropertyTriple goldTriple   = goldStandardEntry.getValue();
     		
     		String sUri = goldTriple.getSubjectUri();
     		String oUri = goldTriple.getObject();
+    		
+    		if ( sUri.startsWith("http://dbpedia") ) dbpediaUris++;
+    		if ( oUri.startsWith("http://dbpedia") ) dbpediaUris++;
+    		if ( sUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) rlnUris++;
+    		if ( oUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) rlnUris++;
     		
     		Integer sentenceId = goldTriple.getSentenceId().iterator().next();
     		if ( !entitiesCache.containsKey(sentenceId) ) entitiesCache.put(sentenceId, IndexManager.getInstance().getEntitiesFromArticle(sentenceId));
@@ -282,6 +360,17 @@ public class DisambiguationEvaluation {
     		
 			if ( !foundSUri.equals(Constants.NON_GOOD_URL_FOUND) ) {
 				
+				if ( foundSUri.startsWith("http://dbpedia") && sUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) {
+					
+					rnlUriButDbpediaFound++;
+//					System.out.println("" + foundSUri + "\t\t" + sUri);
+				}
+				if ( foundSUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) && sUri.startsWith("http://dbpedia") ) {
+					
+//					System.out.println("" + foundSUri + "\t\t" + sUri);
+					dbpediaUriButRlnFound++;
+				}
+				
 				subjectCounter++;
 				if ( sUri.equals(foundSUri) ) correctSubjects++;
 				else {
@@ -292,8 +381,26 @@ public class DisambiguationEvaluation {
 //					System.out.println();
 				}
 			}
+			else {
+				
+				nonUriFound++;
+				if ( sUri.startsWith("http://dbpedia") ) missingDbpediaUri++;
+				if ( sUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) missingRlnUri++;
+			}
 			
     		if ( !foundOUri.equals(Constants.NON_GOOD_URL_FOUND) ) {
+    			
+    			if ( foundOUri.startsWith("http://dbpedia") && oUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) {
+    				
+//    				System.out.println("" + foundOUri + "\t\t" + oUri);
+    				rnlUriButDbpediaFound++;
+    			}
+				if ( foundOUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) && oUri.startsWith("http://dbpedia") ) {
+					
+					dbpediaUriButRlnFound++;
+//					System.out.println("" + foundOUri + "\t\t" + oUri);
+				}
+				
     			
     			objectCounter++;
     			if (oUri.equals(foundOUri)) correctObjects++;
@@ -310,7 +417,21 @@ public class DisambiguationEvaluation {
 //					}
 				}
     		}
+    		else {
+    			
+    			nonUriFound++;
+    			if ( sUri.startsWith("http://dbpedia") ) missingDbpediaUri++;
+				if ( sUri.startsWith(Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX) ) missingRlnUri++;
+    		}
     	}
+    	
+    	System.out.println("nonUriFound: " +nonUriFound);
+    	System.out.println("rnlUriButDbpediaFound: " + rnlUriButDbpediaFound);
+    	System.out.println("dbpediaUriButRlnFound: " + dbpediaUriButRlnFound);
+    	System.out.println("missingDbpediaUri: " + missingDbpediaUri);
+    	System.out.println("missingRlnUri: " + missingRlnUri);
+    	System.out.println("rlnUris: " + rlnUris);
+    	System.out.println("dbpediaUris: " + dbpediaUris);
     	
     	// how many of the uri's we have found are correct
     	precision	= (double) (correctSubjects + correctObjects) / (subjectCounter + objectCounter);
@@ -333,12 +454,13 @@ public class DisambiguationEvaluation {
 //    	writeArffHeader(writer);
 //    	writeArffLine(writer);
     	
-//    	System.out.println("Precision: " + precision);
-//    	System.out.println("Recall: " + recall);
+    	System.out.println("Precision: " + precision);
+    	System.out.println("Recall: " + recall);
     	
     	writer.write(round(fScore) + "\t" + round(precision) + "\t"+  round(recall) + "\t" + StringUtils.join(paramters, "\t"));
     	writer.flush();
     	return fScore;
+//    	return precision;
     }
     
     private static void writeArffLine(BufferedFileWriter writer) {

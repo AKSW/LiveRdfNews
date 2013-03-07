@@ -5,6 +5,7 @@
 package org.aksw.simba.rdflivenews.rdf.uri.impl;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import uk.ac.shef.wit.simmetrics.similaritymetrics.QGramsDistance;
 
 import com.github.gerbsen.encoding.Encoder;
 import com.github.gerbsen.encoding.Encoder.Encoding;
+import com.github.gerbsen.math.Frequency;
 
 /**
  *
@@ -40,6 +42,14 @@ public class FeatureBasedDisambiguation implements Disambiguation {
 	private Map<String,Map<String,Integer>> contextEntityCache = new HashMap<>();
 	private Map<String,List<String>> uriCandidatesCache = new HashMap<>();
 	private Map<String,Double> aprioriScoreCache = new HashMap<>();
+	
+	public Frequency score = new Frequency();
+	public Frequency apriori = new Frequency();
+	public Frequency local = new Frequency();
+	public Frequency global = new Frequency();
+	public Frequency stringsim = new Frequency();
+	
+	 DecimalFormat df = new DecimalFormat("#.###");
 
     public FeatureBasedDisambiguation(LuceneDbpediaManager luceneDbpediaManager) {
     	this.dbpediaManager = luceneDbpediaManager;
@@ -101,14 +111,25 @@ public class FeatureBasedDisambiguation implements Disambiguation {
             
             for ( Map.Entry<String, List<Double>> scoreEntry : urlsToScores.entrySet() ) {
             	
-            	double contextGlobal = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextGlobal") * (scoreEntry.getValue().get(0) / contextGlobalMax));
+            	Double contextGlobal = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextGlobal") * (scoreEntry.getValue().get(0) / contextGlobalMax));
             	Double contextLocal = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextLocal") * (scoreEntry.getValue().get(1) / contextLocalMax));
-            	double apriori = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "apriori") * (scoreEntry.getValue().get(2) / aprioriMax));
-            	double stringsim = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "stringsim") * (scoreEntry.getValue().get(3)));
+            	Double apriori = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "apriori") * (scoreEntry.getValue().get(2) / aprioriMax));
+            	Double stringsim = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "stringsim") * (scoreEntry.getValue().get(3)));
             	
 //            	System.out.println("Global: " + contextGlobal + " Local:"+ contextLocal +" Apriori:" + apriori + " Stringsim:" + stringsim);
             	
-            	score = (apriori + contextGlobal + stringsim + (contextLocal.isNaN() ? 0 : contextLocal)) / 4;
+            	contextGlobal = contextGlobal.isNaN() || contextGlobal.isInfinite() ? 0 : contextGlobal;
+            	apriori = apriori.isNaN() || apriori.isInfinite() ? 0 : apriori;
+            	stringsim = stringsim.isNaN() || stringsim.isInfinite() ? 0 : stringsim;
+            	contextLocal = contextLocal.isNaN() || contextLocal.isInfinite() ? 0 : contextLocal;
+            	
+            	score = (apriori + contextGlobal + stringsim + contextLocal) / 4;
+            	
+            	this.apriori.addValue(df.format(apriori));
+            	this.local.addValue(df.format(contextLocal));
+            	this.global.addValue(df.format(contextGlobal));
+            	this.stringsim.addValue(df.format(stringsim));
+            	this.score.addValue(df.format(score));
             	
 //            	if ( score > 1 ) System.out.println(
 //            			RdfLiveNews.CONFIG.getDoubleSetting("refiner", "apriori") + "*" + apriori +  "\t" +
@@ -136,8 +157,10 @@ public class FeatureBasedDisambiguation implements Disambiguation {
     	for ( String surfaceForm : this.dbpediaManager.getSurfaceFormsForUri(uri)) {
     		
     		double sim = metric.getSimilarity(label, surfaceForm);
+//    		System.out.println(label + " " + surfaceForm + " " +sim);
     		max = Math.max(max, sim);
     	}
+//    	System.out.println(max);
 		return max;
 	}
 

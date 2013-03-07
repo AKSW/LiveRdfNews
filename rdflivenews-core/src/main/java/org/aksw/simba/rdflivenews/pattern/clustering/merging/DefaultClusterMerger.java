@@ -28,14 +28,19 @@ public class DefaultClusterMerger implements ClusterMerger {
     @Override
     public void mergeCluster(Set<Cluster<Pattern>> clusters) {
         boolean merged = true;
-        while(merged) {
+//        while(merged) {
             merged = false;
             Set<Cluster<Pattern>> mergedCluster = new HashSet<Cluster<Pattern>>();
             
             for ( Iterator<Cluster<Pattern>> iter1 = new HashSet<Cluster<Pattern>>(clusters).iterator(); iter1.hasNext();) {
                 Cluster<Pattern> clusterOne = iter1.next();
+                
+//                if ( clusterOne.size() <= 1 ) continue;
+                
                 for ( Iterator<Cluster<Pattern>> iter2 = new HashSet<Cluster<Pattern>>(clusters).iterator(); iter2.hasNext();) {
                     Cluster<Pattern> clusterTwo = iter2.next();
+                    
+//                    if ( clusterTwo.size() <= 1 ) continue;
                     
 //                    System.out.println("Comparing: " + clusterOne.getName() + " & " + clusterTwo.getName());
                     
@@ -54,10 +59,10 @@ public class DefaultClusterMerger implements ClusterMerger {
                            mergedCluster.add(clusterOne);
                            clusters.remove(clusterOne);
                            clusters.remove(clusterTwo);
-                           System.out.println("Merging " + clusterOne.getName() + " and " + clusterTwo.getName() + 
-                                   "\nResult:\n" + clusterOne);
+//                           System.out.println("Merging " + clusterOne.getName() + " and " + clusterTwo.getName() + 
+//                                   "\nResult:\n" + clusterOne);
                            for ( Pattern p : clusterOne ) {
-                               System.out.println(p.getNaturalLanguageRepresentation());
+//                               System.out.println(p.getNaturalLanguageRepresentation());
                            }
                            
                         } else {
@@ -68,7 +73,7 @@ public class DefaultClusterMerger implements ClusterMerger {
                 }
             }
             clusters.addAll(mergedCluster);
-        }
+//        }
         
         if ( RdfLiveNews.CONFIG.getBooleanSetting("clustering", "writeFile") ) {
             

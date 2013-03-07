@@ -49,10 +49,10 @@ public class Statistics {
 
     private void printClusterNumber(String fileName) {
     	
-    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-CLUSTER_NUMBER.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
+    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-CLUSTER_NUMBER1.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
         int clusterAboveThreshold = 0;
     	for ( Cluster<Pattern> cluster : RdfLiveNews.clusters ){
-        	if ( cluster.size() >= 5 ) clusterAboveThreshold++;
+        	if ( cluster.size() > 1 ) clusterAboveThreshold++;
         }
     	writer.write(RdfLiveNews.ITERATION + "\t" + RdfLiveNews.clusters.size() + "\t" + clusterAboveThreshold);
         writer.close();
@@ -60,10 +60,10 @@ public class Statistics {
 
 	private void printPatternNumber(String fileName) {
     	
-    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-PATTERN_NUMBER.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
+    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-PATTERN_NUMBER1.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
         int patternsAboveThreshold = 0;
     	for ( Pattern p : RdfLiveNews.patterns ){
-        	if ( p.getTotalOccurrence() > 10 )patternsAboveThreshold++;
+        	if ( p.getTotalOccurrence() > 1 )patternsAboveThreshold++;
         }
     	writer.write(RdfLiveNews.ITERATION + "\t" + RdfLiveNews.patterns.size() + "\t" + patternsAboveThreshold);
         writer.close();
@@ -71,7 +71,7 @@ public class Statistics {
 
 	private void printStepDurations(String fileName) {
 		
-    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-RUNTIME.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+    	BufferedFileWriter writer = new BufferedFileWriter(fileName + "-RUNTIME1.txt", Encoding.UTF_8, WRITER_WRITE_MODE.APPEND);
         for ( Map.Entry<Integer, List<Long>> entry : durationPerIteration.entrySet()) {
             
             writer.write(entry.getKey() + "\t" + StringUtils.join(entry.getValue(), "\t"));
