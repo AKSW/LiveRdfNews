@@ -63,7 +63,7 @@ public class RefactorIndex {
         
         IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
         IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
-        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/wiki/100percent", Version.LUCENE_40));
+        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/home/gerber/wiki/100percent", Version.LUCENE_40));
         
         StanfordNLPNamedEntityRecognition nerTagger = new StanfordNLPNamedEntityRecognition();
         StanfordNLPPartOfSpeechTagger posTagger = new StanfordNLPPartOfSpeechTagger();
