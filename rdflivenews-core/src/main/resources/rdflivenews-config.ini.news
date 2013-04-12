@@ -1,0 +1,61 @@
+[search]
+; the method how we look for patterns: NER or POS possible
+method = POS
+; patterns which have days as subject or object will be ignored
+ignoreDays = true
+
+[general]
+; this directory should not be inside the code repo
+data-directory = /Users/gerb/Development/workspaces/experimental/rdflivenews/1percent
+; website sentence crawl index
+index = index
+; we need this test directory only for the junit tests
+test = test
+; store the similarity scores in this directory
+similarity = similarity
+; store the clusters
+clusters = clusters 
+; this is an index where the dbpedia types and labels are index TODO create documentation on how to generate it 
+dbpedia = /Users/gerb/Development/workspaces/experimental/solr_4/dbpedia_resources_38_score_accent/index
+
+; this is an index where the boa named entity context is stored 
+boa = /Users/gerb/Development/workspaces/experimental/boa/en_wiki_20120601/index/corpus
+
+[deduplication]
+threshold = 1
+window = 5
+
+[scoring]
+occurrenceThreshold = 10
+
+[refiner]
+; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
+typing = SUPER_CLASS
+; possible ALL,PERSON,NONE
+refineLabel = ALL
+useAprioriAndContext = true
+apriori = 0.5
+contextGlobal = 0.1
+contextLocal = 0.2
+stringsim = 0.2
+urlScoreThreshold = 0.2
+
+[similarity]
+checkDomainAndRange = false
+writeFile = true
+threshold = 0.5
+
+[clustering]
+writeFile = true
+similarityThreshold = 0.3
+
+[classes]
+deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication
+tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndOrPartOfSpeechNaturalLanguageTagger
+refiner         = org.aksw.simba.rdflivenews.pattern.refinement.impl.AprioriDisambiguationPatternRefiner
+scorer          = org.aksw.simba.rdflivenews.pattern.scoring.impl.WekaPatternScorer
+cluster         = org.aksw.simba.rdflivenews.pattern.clustering.impl.DefaultPatternClustering
+similarity      = org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramAndWordnetSimilarityMetric
+extraction      = org.aksw.simba.rdflivenews.rdf.impl.DefaultRdfExtraction
+mapping         = org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper
+uriretrieval    = org.aksw.simba.rdflivenews.rdf.uri.impl.DefaultUriRetrieval

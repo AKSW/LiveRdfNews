@@ -76,8 +76,8 @@ public class RdfLiveNews {
         // we can only find patterns if we have NER or POS tags annotated
         NaturalLanguageTagger tagger = (NaturalLanguageTagger) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "tagging"));
         
-//        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
-        for ( ; ITERATION <= IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
+        for ( ; ITERATION < 1/* TODO change this back, it takes to long for testing IndexManager.getInstance().getHighestTimeSliceId()*/ ; ITERATION++ ) {
+//        for ( ; ITERATION <= IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
             
             long iterationTime = System.currentTimeMillis();
             System.out.println("Starting Iteration #" + ITERATION + "!");
@@ -90,10 +90,10 @@ public class RdfLiveNews {
             long start = System.currentTimeMillis();
             
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
-            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
-            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
-            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
-//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+//            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
+//            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
+//            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
+            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
