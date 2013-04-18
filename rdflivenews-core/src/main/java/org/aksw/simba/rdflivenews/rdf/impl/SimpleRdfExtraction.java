@@ -21,10 +21,18 @@ import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.DatatypePropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
+import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.parser.NxParser;
+
+import virtuoso.jena.driver.VirtGraph;
 
 import com.github.gerbsen.encoding.Encoder.Encoding;
+import com.github.gerbsen.file.BufferedFileReader;
 import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
+import com.github.gerbsen.rdf.JenaUtil;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -342,5 +350,25 @@ public class SimpleRdfExtraction implements RdfExtraction {
 					+ ":");
 
 		normalTripleWriter.write(rdf);
+	}
+
+	@Override
+	public void uploadRdf() {
+		
+		String graph	= RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
+		String server	= RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
+		String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
+		String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "type");
+		
+		VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
+		
+		OntModel model = JenaUtil.loadModelFromFile(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl");
+		StmtIterator iter = model.listStatements();
+		
+		while ( iter.hasNext() ) {
+			
+			com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
+			remoteGraph.add(t);
+		}
 	}
 }

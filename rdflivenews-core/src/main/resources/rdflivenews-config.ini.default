@@ -52,6 +52,12 @@ threshold = 0.5
 writeFile = true
 similarityThreshold = 0.5
 
+[sparql]
+uploadServer	= jdbc:virtuoso://[2001:638:902:2010:0:168:35:138]:1111
+username		= dba
+password		= dba 
+type			= wikipedia
+
 [classes]
 deduplication   = org.aksw.simba.rdflivenews.deduplication.impl.FastDeduplication
 tagging         = org.aksw.simba.rdflivenews.nlp.impl.NamedEntityAndOrPartOfSpeechNaturalLanguageTagger

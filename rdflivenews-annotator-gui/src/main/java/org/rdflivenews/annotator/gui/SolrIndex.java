@@ -1,6 +1,7 @@
 package org.rdflivenews.annotator.gui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
+
 public class SolrIndex {
 
 	private HttpSolrServer server;
@@ -32,14 +34,14 @@ public class SolrIndex {
 	
 	public static void main(String[] args) {
 
-        SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/dbpedia_resources/");
+        SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/en_dbpedia_resources/");
 //        SolrIndex index = new SolrIndex("http://dbpedia.aksw.org:8080/solr/dbpedia_resources");
 //        System.out.println(index.search("Mississippi").size());
 //        System.out.println(index.search("Leip").size());
 //        System.out.println(index.search("Brad Pitt").size());
         
-        System.out.println("Query for: 'Jeff Bezos'");
-        for ( SolrItem item : index.search("Jeff Bezos")) {
+        System.out.println("Query for: 'Peyton Manning'");
+        for ( SolrItem item : index.search("Peyton Manning")) {
             
             System.out.println(item.getUri());
         }
@@ -70,43 +72,41 @@ public class SolrIndex {
 	}
 	
 	public Collection<SolrItem> search(String searchTerm){
-		List<SolrItem> result = new ArrayList<SolrIndex.SolrItem>();
-//		
-//		PhraseQuery query = new PhraseQuery();
-//		
-//		List<String> searchQuery = new ArrayList<String>();
-//		for ( String term : searchTerm.split(" ") ) {
-//		    
-//		    query.add(new Term(searchField, term));
-//		}
-//		BooleanQuery bq = new BooleanQuery();
-//		bq.add(query, BooleanClause.Occur.MUST);
-//		
-////		SolrQuery q = new SolrQuery(StringUtils.join(searchQuery, " AND "));
-////		SolrQuery q = new SolrQuery(query.toString());
-//		SolrQuery q = new SolrQuery(searchField+":("+searchTerm+")");
-//		
-//		System.out.println(query.toString());
-//		System.out.println(q.toString());
-//		
-//		if ( searchTerm.contains(" ") ) 
-//		    q = new SolrQuery(searchField + ":(" + searchTerm  + ")");
-//		else
-//		    q = new SolrQuery(searchField + ":\"" + searchTerm  + "\"");
-		 
-//		q.setRows(maxNrOfItems);
-//		q.setSortField(sortField, ORDER.desc);
-//		System.out.println(q);
-	    
-	    AprioriBasedDisambiguation abd = new AprioriBasedDisambiguation("jdbc:mysql://139.18.2.235:5555/dbrecords", "liverdf","_L1v3Rdf_");
-	    for (String uri : abd.getUriCandidates(searchTerm) ) {
-	        
-	        result.add(new SolrItem(uri, searchTerm, uri, ""));
-	    }
 		
-		Collections.sort(result);
+		List<SolrItem> resources = new ArrayList<SolrItem>();
 		
-		return result;
+		SolrQuery query = new SolrQuery();
+		query.setQuery("surfaceForms:\""+ searchTerm +"\"");
+		query.addSortField("disambiguationScore", ORDER.desc);
+		query.addField("uri");
+		query.addField("label");
+		query.addField("comment");
+		query.addField("imageUrl");
+		query.setRows(100);
+		
+		try {
+
+			for ( SolrDocument doc : server.query(query).getResults()) {
+				
+				String uri = (String) doc.getFieldValue("uri");
+				String label = (String) doc.getFieldValue("label");
+				String comment = (String) doc.getFieldValue("comment");
+				String imageURL = (String) doc.getFieldValue("imageUrl");
+				
+				System.out.println(doc);
+				
+				SolrItem res = new SolrItem(uri, label, comment, imageURL);
+				
+				System.out.println(res.getUri());
+				resources.add(res);
+			}
+		}
+		catch (SolrServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return resources;
 	}
 	
 	public static class SolrItem implements Comparable<SolrItem> {

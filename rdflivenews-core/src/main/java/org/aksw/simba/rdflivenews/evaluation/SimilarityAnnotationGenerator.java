@@ -18,6 +18,7 @@ import org.aksw.simba.rdflivenews.pattern.clustering.PatternClustering;
 import org.aksw.simba.rdflivenews.pattern.clustering.impl.BorderFlowPatternClustering;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
+import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramAndWordnetSimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric;
 import org.apache.commons.io.FileUtils;
 
@@ -31,7 +32,7 @@ public class SimilarityAnnotationGenerator {
     public static void main(String[] args) throws IOException {
 
     	PatternClustering clustering = new BorderFlowPatternClustering();
-    	for ( Cluster<Pattern> cluster : clustering.clusterPatterns(createSimilarities(new QGramSimilarityMetric()),	 0.3) ){
+    	for ( Cluster<Pattern> cluster : clustering.clusterPatterns(createSimilarities(new QGramAndWordnetSimilarityMetric()),	 0.3) ){
     		
     		for ( Pattern p : cluster) System.out.println(p.getNaturalLanguageRepresentation());
     		System.out.println();
@@ -41,7 +42,7 @@ public class SimilarityAnnotationGenerator {
     
     private static Set<Similarity> createSimilarities(SimilarityMetric metric) throws IOException {
 
-        List<String> lines = FileUtils.readLines(new File("/Users/gerb/tmp/patterns1percent5occ.pattern"));
+        List<String> lines = FileUtils.readLines(new File("/Users/gerb/Desktop/patterns1percent5occ.pattern"));
 
         Set<Similarity> sims = new HashSet<>();
 

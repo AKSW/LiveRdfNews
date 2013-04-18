@@ -6,6 +6,7 @@ package org.aksw.simba.rdflivenews.evaluation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -49,10 +50,10 @@ public class DataGeneration {
         
         RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
         
-        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
+//        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         
-        Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
-        deduplication.runDeduplication(0, 37, 37);
+//        Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
+//        deduplication.runDeduplication(0, 37, 37);
         
         Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
         System.out.print("Starting pattern search in "+currentNonDuplicateSentenceIds.size()+" sentences ...  ");
@@ -75,24 +76,43 @@ public class DataGeneration {
         
         List<String> lines = new ArrayList<String>();   
         System.out.println("Found " + top1PercentPattern.size()+ " patterns");
-        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/tmp/patterns1percent5occ.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
-        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/tmp/patterns1percent5occ.pattern", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer = new BufferedFileWriter("/Users/gerb/Desktop/patterns1percent5occ.txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer1 = new BufferedFileWriter("/Users/gerb/Desktop/patterns1percent5occ.pattern", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        BufferedFileWriter writer2 = new BufferedFileWriter("/Users/gerb/Desktop/pattern_counts.pattern", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+        
+        for ( Pattern pattern : top1PercentPattern ) {
+        	
+        	writer2.write(pattern.getTotalOccurrence() + "\t"+ pattern.getNaturalLanguageRepresentation());
+        }
+        writer2.close();
         
         int count = 0;
+        Collections.shuffle(top1PercentPattern);
+        top1PercentPattern = top1PercentPattern.subList(0, 150);
         
         for ( Pattern pattern : top1PercentPattern ) {
 //            if ( pattern.getTotalOccurrence() >= 5 ) {
                 
                 count += pattern.getTotalOccurrence();
-                writer1.write(pattern.getNaturalLanguageRepresentation()+ "___" + pattern.getNaturalLanguageRepresentationWithTags() + "___" + pattern.getFavouriteTypeFirstEntity() + "___" + pattern.getFavouriteTypeSecondEntity());
                 patternToString(pattern, lines);
 //            }
         }
         System.out.println("pairs: " + pairs + " ids: " + ids);
         System.out.println("Lines in file: "+ lines.size() + " totalOcc: " + count);
-        Collections.sort(lines);
+        Collections.shuffle(lines);
+        lines = lines.subList(0, 1000);
         
-        for ( String line : lines )writer.write(line);
+        Set<String> posTags = new HashSet<String>();
+        
+        for ( String line : lines ) {
+        	
+        	for (Pattern pattern : top1PercentPattern) if ( pattern.getNaturalLanguageRepresentation().equals(line.split("___")[1] )) {
+        		posTags.add(pattern.getNaturalLanguageRepresentation()+ "___" + pattern.getNaturalLanguageRepresentationWithTags());
+        	}
+        	writer.write(line);
+        }
+        writer.close();
+        for ( String patternAndPos : posTags ) writer1.write(patternAndPos);
         writer.close();
         writer1.close();
     }

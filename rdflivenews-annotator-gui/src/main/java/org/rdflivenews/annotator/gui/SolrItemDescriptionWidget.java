@@ -13,7 +13,7 @@ public class SolrItemDescriptionWidget extends VerticalLayout{
 		setWidth("370px");
 		setHeight("60px");
 		
-		String description = "<div><b>" + item.getLabel() + "</b></div>";
+		String description = "<div><b>" + item.getLabel() + "</b>  ("+item.getUri().replace("http://dbpedia.org/resource/", "dbr:")+")</div>";
 		if(item.getImageURL() != null){
 			description += "<div style='float: right; height: 40px; width: 60px'>" +
 	    	 		"<div style='height: 100%;'><img style='height: 100%;' src=\"" + item.getImageURL() + "\"/></div>" +

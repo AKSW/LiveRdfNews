@@ -18,4 +18,6 @@ import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 public interface RdfExtraction {
 
     List<Triple> extractRdf(Set<Cluster<Pattern>> cluster);
+
+	public void uploadRdf();
 }

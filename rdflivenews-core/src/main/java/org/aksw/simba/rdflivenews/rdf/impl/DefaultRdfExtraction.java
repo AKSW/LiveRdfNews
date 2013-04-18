@@ -90,4 +90,10 @@ public class DefaultRdfExtraction implements RdfExtraction {
         
         return null;
     }
+
+	@Override
+	public void uploadRdf() {
+		// TODO Auto-generated method stub
+		throw new RuntimeException("Not implemented!");
+	}
 }

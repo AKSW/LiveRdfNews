@@ -231,6 +231,7 @@ public class RdfLiveNews {
             // use the patterns to extract rdf from news text
             RdfExtraction rdfExtractor = new SimpleRdfExtraction();
             rdfExtractor.extractRdf(clusters);
+            rdfExtractor.uploadRdf();
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             

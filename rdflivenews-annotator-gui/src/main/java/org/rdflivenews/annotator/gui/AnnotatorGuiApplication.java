@@ -68,7 +68,6 @@ public class AnnotatorGuiApplication extends com.vaadin.Application implements C
     Pattern pattern;
     
     private SolrIndex index = new SolrIndex(config.get("general", "luceneIndex"));
-//    private SolrIndex index = new SolrIndex("http://[2001:638:902:2010:0:168:35:138]:8080/solr/#/dbpedia_resources/");
     
     private VerticalLayout mainLayout = new VerticalLayout();
 
