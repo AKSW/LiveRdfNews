@@ -102,7 +102,7 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
                 }
                 
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
-                pair.getFirstEntity().setUri(this.uriRetrieval.getUri(labelOne, labelTwo, entities));
+                pair.getFirstEntity().setUri(this.uriRetrieval.getUri(pair.getFirstEntity().getLabel(), labelOne, labelTwo, entities, true));
                 
 //                if ( !labelOne.equals(pair.getFirstEntity().getLabel()))
 //                	System.out.println(labelOne +"/"+pair.getFirstEntity().getLabel()+": " +pair.getFirstEntity().getUri());
@@ -121,7 +121,7 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
                 }
                 
                 // find a suitable uri for the given subject and get the deepest (in ontology hierachy) types of this uri
-                pair.getSecondEntity().setUri(this.uriRetrieval.getUri(labelTwo, labelOne, entities));
+                pair.getSecondEntity().setUri(this.uriRetrieval.getUri(pair.getSecondEntity().getLabel(), labelTwo, labelOne, entities, true));
                 
 //                if ( !labelTwo.equals(pair.getSecondEntity().getLabel()))
 //                	System.out.println(labelTwo +"/"+pair.getSecondEntity().getLabel()+": " +pair.getSecondEntity().getUri());

@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.DefaultPattern;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
@@ -42,23 +43,35 @@ public class SimilarityAnnotationGenerator {
     
     private static Set<Similarity> createSimilarities(SimilarityMetric metric) throws IOException {
 
-        List<String> lines = FileUtils.readLines(new File("/Users/gerb/Desktop/patterns1percent5occ.pattern"));
+    	Set<String> nlrs = new HashSet<String>();
+    	for (String line : FileUtils.readLines(new File("/Users/gerb/Development/workspaces/experimental/rdflivenews/wikipedia/1percent/goldstandard/patterns_annotated_gold.txt"))) {
+    		
+//    		if ( line.startsWith("SAY") )continue;
+    		
+    		String[] lineParts = line.split("___");
+    		nlrs.add(lineParts[3]);
+    	}
+    	
+        List<String> lines = FileUtils.readLines(new File("/Users/gerb/tmp/Desktop/patterns1percent5occ.pattern"));
+//        List<String> lines = FileUtils.readLines(new File("/Users/gerb/Development/workspaces/experimental/rdflivenews/news/1percent/evaluation/patterns1percent5occ.pattern"));
 
         Set<Similarity> sims = new HashSet<>();
 
         for (String line1 : lines) {
-
+        	
             String[] parts = line1.split("___");
 
             String nlr1 = parts[0];
             String pos1 = parts[1];
-
+            
             for (String line2 : lines) {
 
                 String[] parts2 = line2.split("___");
 
                 String nlr2 = parts2[0];
                 String pos2 = parts2[1];
+                
+                if ( !nlrs.contains(nlr1) && !nlrs.contains(nlr2) ) continue;
 
                 Pattern p1 = new DefaultPattern(nlr1, pos1);
                 Pattern p2 = new DefaultPattern(nlr2, pos2);

@@ -3,7 +3,12 @@
  */
 package org.aksw.simba.rdflivenews.pattern.refinement.label.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +24,10 @@ import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.LowerCaseWhitespaceAnalyzer;
 import org.aksw.simba.rdflivenews.pattern.refinement.label.LabelRefiner;
 import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -30,6 +38,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
@@ -46,15 +55,42 @@ public class EntityLabelRefiner implements LabelRefiner {
 	private NamedEntityTagPatternSearcher searcher = new NamedEntityTagPatternSearcher();
 	private Map<String,String> refinedLabelCache = new HashMap<>();
 	
-//	public static String INDEX_DIRECTORY = "/Users/gerb/Development/workspaces/experimental/rdflivenews/100percent/index";
-//    public static Directory INDEX;
-//    private IndexWriter writer;
-//    private final Analyzer analyzer = new LowerCaseWhitespaceAnalyzer(Version.LUCENE_40);
+	public static String INDEX_DIRECTORY = RdfLiveNews.CONFIG.getStringSetting("refiner", "evalIndex");
+    public static Directory INDEX;
+    private IndexWriter writer;
+    private final Analyzer analyzer = new LowerCaseWhitespaceAnalyzer(Version.LUCENE_40);
+    
+    private IndexReader reader;
+	private IndexSearcher fullIndexSearcher;
+	
+	private static final String LABEL_CACHE_FILE = RdfLiveNews.DATA_DIRECTORY + "evaluation/labels.ser";
 
     public EntityLabelRefiner() {
     	
-//    	createIndex();
+    	try {
+			this.fullIndexSearcher = LuceneManager.openIndexSearcher(FSDirectory.open(new File(INDEX_DIRECTORY)));
+			
+			if ( new File(LABEL_CACHE_FILE).exists() )
+				this.refinedLabelCache = (Map<String, String>) SerializationUtils.deserialize(new FileInputStream(new File(LABEL_CACHE_FILE)));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
+    
+    public void serializeCache() {
+    	
+    	try {
+    		
+//    		if ( !new File(URI_CACHE_DIR).exists() )
+    			SerializationUtils.serialize((Serializable) this.refinedLabelCache, new FileOutputStream(new File(LABEL_CACHE_FILE)));
+		}
+    	catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
     
     /* (non-Javadoc)
      * @see org.aksw.simba.rdflivenews.pattern.refinement.label.LabelRefiner#refineLabel(java.lang.String, java.lang.Integer)
@@ -67,14 +103,20 @@ public class EntityLabelRefiner implements LabelRefiner {
 
     		// grab the article url for the current sentence and get all other sentences ner tagged
             String url = IndexManager.getInstance().getStringValueFromDocument(sentenceId, Constants.LUCENE_FIELD_URL);
-            Set<String> nerTaggedSentences = IndexManager.getInstance().getAllNerTaggedSentencesFromArticle(url);
-//            Set<String> nerTaggedSentences = getAllNerTaggedSentencesFromArticle(url);
+//            Set<String> nerTaggedSentences = IndexManager.getInstance().getAllNerTaggedSentencesFromArticle(url);
+            
+//            System.out.println(nerTaggedSentences.size() + " " +  url);
+            Set<String> nerTaggedSentences = getAllNerTaggedSentencesFromArticle(url);
             if ( nerTaggedSentences.isEmpty() ) System.err.println("We did not find any NER tagged sentences for this article: " + url);
             
             Map<String,String> entities = new HashMap<>();
             for ( String taggedSentence : nerTaggedSentences) entities.putAll(getEntities(searcher.mergeTagsInSentences(taggedSentence)));
             this.refinedLabelCache.put(key, this.findLongestMatch(label, entities));
     	}
+    	
+//    	if ( label.equals(this.refinedLabelCache.get(key)) ) System.out.println("NOTHING COULD BE REFINED");
+//    	else System.out.println("NEW LABEL: " + this.refinedLabelCache.get(key) + " OLD: " + label); 
+    	
     	return this.refinedLabelCache.get(key);
     }
     
@@ -96,14 +138,19 @@ public class EntityLabelRefiner implements LabelRefiner {
         for ( Map.Entry<String, String> entity : entities.entrySet() ) {
         	if ( entity.getKey().contains(label) && !entity.getKey().contains("Mr.") && !entity.getKey().contains("Mrs.") ) {
         		if ( entity.getKey().startsWith(label) || entity.getKey().endsWith(label)) {
-        			if ( entity.getKey().contains(" ") || !entity.getKey().contains("-"))
-        				match = entity.getKey();
+        			if ( entity.getKey().contains(" ") || !entity.getKey().contains("-")) {
+        				if ( entity.getKey().length() > match.length() ) {
+
+//        					System.out.println(entity.getKey() + " -- " + entity.getValue());
+            				match = entity.getKey();
+        				}
+        			}
         		}
         	}
         }
         match = match.replaceAll("`", "");
         match = match.replaceAll(" ' ", " ");
-        for ( String word : Arrays.asList("When", "Chief", "What", "American", "Education Secretary", "Because", "Mr.", "Mrs.", "Capt.", "ex-", "Former", "Col.", "Army General", "Army Gen.", "Sen.", "Sgt.", "Lt.", "the ", "The ", "Dr.", "Rep.")) {
+        for ( String word : Arrays.asList("Brigadier General", "General Sir", "When", "Chief", "What", "American", "Education Secretary", "Because", "Mr.", "Mrs.", "Capt.", "ex-", "Former", "Col.", "Army General", "Army Gen.", "Sen.", "Sgt.", "Lt.", "the ", "The ", "Dr.", "Rep.")) {
         	
         	if ( match.startsWith(word) || match.endsWith(word) ) {
         		match = match.replace(word, "");
@@ -145,40 +192,38 @@ public class EntityLabelRefiner implements LabelRefiner {
         return entities;
     }
     
-//    /**
-//     * Opens and closes an index in the index directory
-//     */
-//    public void createIndex() {
-//        
-//        // create the index normalTripleWriter configuration and create a new index normalTripleWriter
-//        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-//        indexWriterConfig.setRAMBufferSizeMB(1024);
-//        indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
-//        writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
-//        INDEX = writer.getDirectory();
-//        LuceneManager.closeIndexWriter(this.writer);
-//    }
+    /**
+     * Opens and closes an index in the index directory
+     */
+    public void createIndex() {
+        
+        // create the index normalTripleWriter configuration and create a new index normalTripleWriter
+        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        indexWriterConfig.setRAMBufferSizeMB(1024);
+        indexWriterConfig.setOpenMode(LuceneManager.isIndexExisting(INDEX_DIRECTORY) ? OpenMode.APPEND : OpenMode.CREATE);
+        writer = LuceneManager.openIndexWriter(INDEX_DIRECTORY, indexWriterConfig);
+        INDEX = writer.getDirectory();
+        LuceneManager.closeIndexWriter(this.writer);
+    }
     
-//    public Set<String> getAllNerTaggedSentencesFromArticle(String articleUrl) {
-//    	
-//    	Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
-//        
-//        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
-//        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
-//        LuceneManager.query(searcher, articles, collector);
-//        
-//        Set<String> sentences = new HashSet<>();
-//        
-//        // add the primary key of each document to the list
-//        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
-//            sentences.add(
-//                    LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE));
-//        
-//        LuceneManager.closeIndexReader(searcher.getIndexReader());
-//        LuceneManager.closeIndexSearcher(searcher);
-//        
-//        return sentences;
-//	}
+    public Set<String> getAllNerTaggedSentencesFromArticle(String articleUrl) {
+    	
+    	Query articles = new TermQuery(new Term(Constants.LUCENE_FIELD_URL, articleUrl));
+        
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1000, false);
+        LuceneManager.query(this.fullIndexSearcher, articles, collector);
+        
+        Set<String> sentences = new HashSet<>();
+        
+        // add the primary key of each document to the list
+        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
+            sentences.add(LuceneManager.getDocumentByNumber(fullIndexSearcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE));
+        
+//        LuceneManager.closeIndexReader(fullIndexSearcher.getIndexReader());
+//        LuceneManager.closeIndexSearcher(fullIndexSearcher);
+        
+        return sentences;
+	}
     
     
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
@@ -188,8 +233,10 @@ public class EntityLabelRefiner implements LabelRefiner {
         
 //        Hernandez pitched Seattle Mariners 49016
         EntityLabelRefiner refiner = new EntityLabelRefiner();
-        for ( String s : IndexManager.getInstance().getAllNerTaggedSentencesFromArticle("http://wvgazette.com/rssFeeds/201208150133")) {
+        for ( String s : refiner.getAllNerTaggedSentencesFromArticle("http://en.wikipedia.org/wiki/Girolamo_Rainaldi")) {
         	System.out.println(s);
         }
+        
+        refiner.refineLabel("Rainaldi", 14141801);
     }
 }

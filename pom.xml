@@ -31,10 +31,10 @@
 			<id>gerb_snapshots</id>
 			<url>https://raw.github.com/gerbsen/maven-repo/master/snapshots/</url>
 		</repository>
- 		<repository> 
- 			<id>maven.aksw.internal</id> 
- 			<url>http://maven.aksw.org/archiva/repository/internal</url> 
- 		</repository> 
+		<repository>
+			<id>maven.aksw.internal</id>
+			<url>http://maven.aksw.org/archiva/repository/internal</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -68,12 +68,12 @@
 			<artifactId>border-flow</artifactId>
 			<version>0.4</version>
 		</dependency>
-                <dependency> 
-                	<groupId>gnu.getopt</groupId>
+		<dependency>
+			<groupId>gnu.getopt</groupId>
 			<artifactId>java-getopt</artifactId>
 			<version>1.0.13</version>
 		</dependency>
-                <dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>3.8.1</version>
@@ -87,9 +87,13 @@
 		<dependency>
 			<groupId>com.github.gerbsen</groupId>
 			<artifactId>utk</artifactId>
-            <version>1.0.5</version>
+			<version>1.0.5</version>
 		</dependency>
-                
+		<dependency>
+			<groupId>com.openlink.virtuoso</groupId>
+			<artifactId>virt_jena</artifactId>
+			<version>6.1.6</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -110,16 +114,16 @@
 				<!-- </plugin> -->
 			</plugins>
 		</pluginManagement>
-	 <plugins>
-	  <plugin>
-	   <groupId>org.apache.maven.plugins</groupId>
-	   <artifactId>maven-compiler-plugin</artifactId>
-	   <version>2.3.2</version>
-	   <configuration>
-	    <source>1.7</source>
-	    <target>1.7</target>
-	   </configuration>
-	  </plugin>
-	 </plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>

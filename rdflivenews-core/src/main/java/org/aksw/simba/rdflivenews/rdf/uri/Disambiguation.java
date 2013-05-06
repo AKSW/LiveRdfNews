@@ -12,6 +12,6 @@ import java.util.List;
  */
 public interface Disambiguation {
 
-    public String getUri(String label, String secondEntity, List<String> contextEntities);
+	public String getUri(String label, String refinedDabel, String secondEntity, List<String> contextEntities, boolean isSubject);
     public String getUri(String label, String secondEntity);
 }

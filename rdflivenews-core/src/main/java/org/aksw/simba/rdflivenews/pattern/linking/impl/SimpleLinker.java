@@ -39,5 +39,4 @@ public class SimpleLinker implements Linker {
         }
         return result;
     }
-    
 }

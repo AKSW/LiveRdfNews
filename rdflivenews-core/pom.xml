@@ -24,14 +24,18 @@
             </plugin>
         </plugins>
     </build>
-
-<<<<<<< Updated upstream
     <dependencies>
         <dependency>
             <groupId>de.jetwick</groupId>
             <artifactId>snacktory</artifactId>
             <version>1.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+	<groupId>xalan</groupId>
+	<artifactId>serializer</artifactId>
+	<version>2.7.1</version>
+</dependency>
+            
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

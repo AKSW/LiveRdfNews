@@ -59,35 +59,40 @@ public class RefactorIndex {
         // load the config, we dont need to configure logging because the log4j config is on the classpath
         RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
         RdfLiveNews.DATA_DIRECTORY = Config.RDF_LIVE_NEWS_DATA_DIRECTORY;
+        System.out.println(RdfLiveNews.DATA_DIRECTORY);
         IndexManager.getInstance();
         
         IndexReader reader = LuceneManager.openIndexReader(IndexManager.INDEX);
         IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
-        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/home/gerber/wiki/100percent", Version.LUCENE_40));
+        IndexWriter writer = LuceneManager.openIndexWriterAppend(LuceneManager.createIndexIfNotExists("/Users/gerb/wiki/100percent", Version.LUCENE_40));
         
-        StanfordNLPNamedEntityRecognition nerTagger = new StanfordNLPNamedEntityRecognition();
-        StanfordNLPPartOfSpeechTagger posTagger = new StanfordNLPPartOfSpeechTagger();
+//        StanfordNLPNamedEntityRecognition nerTagger = new StanfordNLPNamedEntityRecognition();
+//        StanfordNLPPartOfSpeechTagger posTagger = new StanfordNLPPartOfSpeechTagger();
         
 //        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
-        Set<Integer> ids = getSentencesFromWikipediaIndex();
-        System.out.println("Number of non duplicate sentences: " + ids.size());
+//        Set<Integer> ids = getSentencesFromWikipediaIndex();
+//        System.out.println("Number of non duplicate sentences: " + ids.size());
         
         FieldType stringType = new FieldType(StringField.TYPE_STORED);
         stringType.setStoreTermVectors(false);
         
         List<Document> documents = new ArrayList<Document>();
         
-        int j = 1;
-        for ( Integer id : ids ) {
-        	
+//        int j = 1;
+//        for ( Integer id : ids ) {
+        System.out.println(reader.maxDoc());
+        System.out.println(reader.numDocs());
+        for (int j = 0 ; j < reader.maxDoc() ; j++) {
+
 //        	if ( j++ % 10 != 0 ) continue;
 
 //            Document oldDoc = IndexManager.getInstance().getDocumentById(searcher, id);
-            Document oldDoc = LuceneManager.getDocumentByNumber(searcher.getIndexReader(), id);
+            Document oldDoc = reader.document(j);//LuceneManager.getDocumentByNumber(searcher.getIndexReader(), id);
             
-//            String pos = oldDoc.get(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE);
+            String pos = oldDoc.get("pos");
             String ner = oldDoc.get("ner");
-            if ( ner == null ) System.out.println("NER NULL for " +  j);
+            if ( ner == null ) System.out.println("NER NULL for " +  oldDoc.get("sentence"));
+            if ( pos == null ) System.out.println("POS NULL for " +  oldDoc.get("sentence"));
             
             Document newDoc = new Document();
             newDoc.add(new Field(Constants.LUCENE_FIELD_ID, j + "", stringType));
@@ -95,9 +100,11 @@ public class RefactorIndex {
             newDoc.add(new IntField(Constants.LUCENE_FIELD_TIME_SLICE, 0, Store.YES));
             newDoc.add(new IntField(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Store.YES));
             newDoc.add(new Field(Constants.LUCENE_FIELD_TEXT, oldDoc.get("sentence"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, posTagger.getAnnotatedSentences(oldDoc.get("sentence")), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
-            newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, ner == null ? nerTagger.getAnnotatedSentences(oldDoc.get("sentence")) : ner, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+            newDoc.add(new Field(Constants.LUCENE_FIELD_POS_TAGGED_SENTENCE, oldDoc.get("pos"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
+            newDoc.add(new Field(Constants.LUCENE_FIELD_NER_TAGGED_SENTENCE, oldDoc.get("ner"), Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.NO));
             newDoc.add(new Field(Constants.LUCENE_FIELD_URL, oldDoc.get("uri"), Field.Store.YES, Field.Index.NOT_ANALYZED, Field.TermVector.NO));
+            
+//            System.out.println(oldDoc.get("uri"));
             
             documents.add(newDoc);
             

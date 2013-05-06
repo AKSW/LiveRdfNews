@@ -706,8 +706,9 @@ public class IndexManager {
     	NamedEntityTagPatternSearcher searcher = new NamedEntityTagPatternSearcher();
     	String url = IndexManager.getInstance().getStringValueFromDocument(sentenceId, Constants.LUCENE_FIELD_URL);
         List<String> entities = new ArrayList<String>();
-        for ( String taggedSentence : IndexManager.getInstance().getAllNerTaggedSentencesFromArticle(url)) 
+        for ( String taggedSentence : IndexManager.getInstance().getAllNerTaggedSentencesFromArticle(url)) {
         	entities.addAll(getEntities(searcher.mergeTagsInSentences(taggedSentence)));
+        }
         
         return entities;
     }
@@ -738,7 +739,7 @@ public class IndexManager {
      * @param mergedTaggedSentence
      * @return
      */
-    private List<String> getEntities(List<String> mergedTaggedSentence){
+    public static List<String> getEntities(List<String> mergedTaggedSentence){
         
         List<String> entities = new ArrayList<String>();
         for (String entity :  mergedTaggedSentence) {

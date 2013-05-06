@@ -31,9 +31,8 @@ threshold = 0.9
 window = 10
 
 [refiner]
-url = jdbc:mysql://139.18.2.235:5555/dbrecords
-username = liverdf 
-password = YOUR_PASSWORD
+; full index for eval only
+evalIndex = /Users/gerb/Development/workspaces/experimental/rdflivenews/news/100percent/index
 ; use the super class or the sub class as types for a pattern; SUPER_CLASS or SUB_CLASS
 typing = SUPER_CLASS
 ; possible ALL,PERSON,NONE

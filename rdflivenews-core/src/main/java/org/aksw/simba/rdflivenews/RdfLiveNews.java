@@ -26,6 +26,8 @@ import org.aksw.simba.rdflivenews.pattern.clustering.merging.DefaultClusterMerge
 import org.aksw.simba.rdflivenews.pattern.comparator.PatternSupportSetComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
+import org.aksw.simba.rdflivenews.pattern.linking.Linker;
+import org.aksw.simba.rdflivenews.pattern.linking.impl.SimpleLinker;
 import org.aksw.simba.rdflivenews.pattern.mapping.DbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
@@ -243,6 +245,8 @@ public class RdfLiveNews {
             // 8. Mapping to DBpedia
             start = System.currentTimeMillis();
             
+//            Linker linker = new SimpleLinker();
+//            linker.link(clusters, propertyLabels, threshold);
             DbpediaMapper mapper = new DefaultDbpediaMapper();
             mapper.map(clusters);
             

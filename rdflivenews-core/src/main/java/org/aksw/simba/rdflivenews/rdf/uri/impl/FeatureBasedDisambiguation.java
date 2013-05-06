@@ -4,7 +4,12 @@
  */
 package org.aksw.simba.rdflivenews.rdf.uri.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +25,10 @@ import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneBoaManager;
 import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneDbpediaManager;
 import org.aksw.simba.rdflivenews.rdf.uri.Disambiguation;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.ini4j.InvalidFileFormatException;
 
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
@@ -41,19 +49,66 @@ public class FeatureBasedDisambiguation implements Disambiguation {
     public LuceneBoaManager boaManager = new LuceneBoaManager();
 	private Map<String,Map<String,Integer>> contextEntityCache = new HashMap<>();
 	private Map<String,List<String>> uriCandidatesCache = new HashMap<>();
+	private Map<String,List<String>> uriLabelCandidatesCache = new HashMap<>();
 	private Map<String,Double> aprioriScoreCache = new HashMap<>();
 	
-	public Frequency score = new Frequency();
-	public Frequency apriori = new Frequency();
-	public Frequency local = new Frequency();
-	public Frequency global = new Frequency();
-	public Frequency stringsim = new Frequency();
+	public Set<String> possibleSubjectUris = null;
+	public Set<String> possibleObjectUris = null;
 	
 	 DecimalFormat df = new DecimalFormat("#.###");
+	private Map<String,String> uriToLabels = new HashMap<String,String>();
+	private Map<Set<String>,List<DisambiguationEntity>> urisToPossibleEntities = new HashMap<Set<String>,List<DisambiguationEntity>>();
+	private static final String URI_CACHE_DIR = RdfLiveNews.DATA_DIRECTORY + "evaluation/uris.ser";
+	private static final String CONTEXT_CACHE_DIR = RdfLiveNews.DATA_DIRECTORY + "evaluation/context.ser";
+	private static final String APRIORI_CACHE_DIR = RdfLiveNews.DATA_DIRECTORY + "evaluation/apriori.ser";
+	
 
     public FeatureBasedDisambiguation(LuceneDbpediaManager luceneDbpediaManager) {
     	this.dbpediaManager = luceneDbpediaManager;
+    	
+		try {
+			
+			if ( new File(URI_CACHE_DIR).exists() )
+				this.uriCandidatesCache = (Map<String, List<String>>) SerializationUtils.deserialize(new FileInputStream(new File(URI_CACHE_DIR)));
+			
+			System.out.println("Loading of uri cache done.");
+			
+			if ( new File(CONTEXT_CACHE_DIR).exists() )
+				this.contextEntityCache = (Map<String, Map<String, Integer>>) SerializationUtils.deserialize(new FileInputStream(new File(CONTEXT_CACHE_DIR)));
+			
+			System.out.println("Loading of context cache done.");
+			
+			if ( new File(APRIORI_CACHE_DIR).exists() )
+				this.aprioriScoreCache = (Map<String, Double>) SerializationUtils.deserialize(new FileInputStream(new File(APRIORI_CACHE_DIR)));
+			
+			System.out.println("Loading of apriori cache done.");
+		}	
+		catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+    	}
 	}
+    
+    public void serializeCache() {
+    	
+    	try {
+    		
+    		System.out.println("Starting to write cache files .. DON'T QUIT!");
+    		
+//    		if ( !new File(URI_CACHE_DIR).exists() )
+    			SerializationUtils.serialize((Serializable) this.uriCandidatesCache, new FileOutputStream(new File(URI_CACHE_DIR)));
+//    		if ( !new File(CONTEXT_CACHE_DIR).exists() )
+    			SerializationUtils.serialize((Serializable) this.contextEntityCache, new FileOutputStream(new File(CONTEXT_CACHE_DIR)));
+//    		if ( !new File(APRIORI_CACHE_DIR).exists() )
+    			SerializationUtils.serialize((Serializable) this.aprioriScoreCache, new FileOutputStream(new File(APRIORI_CACHE_DIR)));
+    			
+    		System.out.println("Done writing cache files.");
+		}
+    	catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 
 	/**
      * Check for URIs that contain entry as substring
@@ -61,10 +116,16 @@ public class FeatureBasedDisambiguation implements Disambiguation {
      * @param label Label of entity
      * @return List of mapping URIs. Score is 1 (perfect match)
      */
-    public List<String> getUriCandidates(String label) {
+    public List<String> getUriSurfaceFormCandidates(String label) {
 
     	if ( !this.uriCandidatesCache.containsKey(label) ) this.uriCandidatesCache.put(label,dbpediaManager.getUriForSurfaceForm(label));
     	return this.uriCandidatesCache.get(label);
+    }
+    
+    public List<String> getUriLabelCandidates(String label) {
+
+    	if ( !this.uriLabelCandidatesCache.containsKey(label) ) this.uriLabelCandidatesCache.put(label,dbpediaManager.getUriForLabel(label));
+    	return this.uriLabelCandidatesCache.get(label);
     }
 
     /**
@@ -80,70 +141,116 @@ public class FeatureBasedDisambiguation implements Disambiguation {
     }
 
     @Override
-    public String getUri(String label, String secondEntity, List<String> contextEntitiesInArticle) {
+    public String getUri(String label, String refinedLabel, String secondEntity, List<String> contextEntitiesInArticle, boolean isSubject) {
     	
-    	List<String> uris = getUriCandidates(StringUtils.countMatches(label, ".") > 1 ? label.replace(".", "") : label);
+//    	Set<String> uris = new HashSet<String>(getUriCandidates(StringUtils.countMatches(label, ".") > 1 ? label.replace(".", "") : label));
+//    	Set<String> uris = new HashSet<String>(getUriSurfaceFormCandidates(refinedLabel.replaceAll(" [A-Z]\\. ", " ")));
+//    	uris.addAll(getUriSurfaceFormCandidates(StringUtils.countMatches(refinedLabel, ".") > 1 ? refinedLabel.replace(".", "") : refinedLabel));
+//    	uris.addAll(getUriSurfaceFormCandidates(refinedLabel.replaceAll(" [A-z]+ ", " ")));
+//    	uris.addAll(getUriSurfaceFormCandidates(label));
+//    	uris.addAll(getUriLabelCandidates(label));
+//    	
+    	long start = System.currentTimeMillis();
+    	Set<String> uris = new HashSet<String>(getUriSurfaceFormCandidates(refinedLabel));
+    	uris.addAll(getUriSurfaceFormCandidates(label));
+    	String[] parts = refinedLabel.split(" ");
+    	if ( parts.length == 3 ) {
+//    		uris.addAll(getUriLabelCandidates(parts[0] + " " + parts[2]));
+    		uris.addAll(getUriSurfaceFormCandidates(parts[0] + " " + parts[2]));
+    	}
+//    	System.out.println("SurfaceForms: " + (System.currentTimeMillis() -start));
     	
-//    	for ( String s : uris )System.out.println(label + " " + s);
+//    	uris.addAll(getUriLabelCandidates(refinedLabel));
+//    	uris.addAll(getUriLabelCandidates(label));
+    	
+    	if ( isSubject ) this.possibleSubjectUris = uris;
+    	else this.possibleObjectUris = uris;
     	
         // if we dont find uri candidates, we need to generate our own based on dbpedia style
         if (uris.isEmpty()) 
-            return Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label.replace(" ", "_"), Encoding.UTF_8);
+        	// cahnge this to NO URL FOUND
+            return Constants.NON_GOOD_URL_FOUND;
+            		//Constants.RDF_LIVE_NEWS_RESOURCE_PREFIX + Encoder.urlEncode(label.replace(" ", "_"), Encoding.UTF_8);
         else {
             
-            Map<String,List<Double>> urlsToScores = new HashMap<>();
-            double contextGlobalMax = 0D;
-            double contextLocalMax = 0D;
-            double aprioriMax = 0D;
+        	if ( !this.urisToPossibleEntities.containsKey(uris) ) {
+        		
+        		List<DisambiguationEntity> possibleEntities = new ArrayList<DisambiguationEntity>();
+                
+                for (String u : uris) {
+                	
+                	start = System.currentTimeMillis();
+                	double[] contextScore	= getContextScore(u, secondEntity, contextEntitiesInArticle);
+//                	System.out.println("Context: " + (System.currentTimeMillis() -start));
+                	
+                	DisambiguationEntity entity = new DisambiguationEntity();
+                	entity.uri = u;
+                	start = System.currentTimeMillis();
+                	entity.apriori = getAprioriScore(u);
+//                	System.out.println("Apriori: " + (System.currentTimeMillis() -start));
+                	entity.contextLocal = contextScore[1];
+                	entity.contextGlobal = contextScore[0];
+                	start = System.currentTimeMillis();
+                	entity.stringsim = getStringSimilarityScore(label, u);
+//                	System.out.println("StringSim: " + (System.currentTimeMillis() -start));
+                	
+                	possibleEntities.add(entity);
+                }
+                
+        		this.urisToPossibleEntities.put(uris, possibleEntities);
+        	}
             
-            for (String u : uris) {
-            	
-            	double[] contextScore	= getContextScore(u, secondEntity, contextEntitiesInArticle);
-            	double aprioriScore		= getAprioriScore(u);
-            	urlsToScores.put(u, Arrays.asList(contextScore[0], contextScore[1], aprioriScore, getStringSimilarityScore(label, u)));
-            	contextGlobalMax = Math.max(contextGlobalMax, contextScore[0]);
-            	contextLocalMax = Math.max(contextLocalMax, contextScore[1]);
-            	aprioriMax = Math.max(aprioriMax, aprioriScore);
-            }
-            	
             double max = 0, score;
             String uri = "";
             
-            for ( Map.Entry<String, List<Double>> scoreEntry : urlsToScores.entrySet() ) {
+        	DescriptiveStatistics apriori = new DescriptiveStatistics();
+        	DescriptiveStatistics local = new DescriptiveStatistics();
+        	DescriptiveStatistics global = new DescriptiveStatistics();
+        	DescriptiveStatistics stringsim = new DescriptiveStatistics();
+        	Frequency scoreDistribution = new Frequency();
+            
+            for ( DisambiguationEntity entity : this.urisToPossibleEntities.get(uris) ) {
             	
-            	Double contextGlobal = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextGlobal") * (scoreEntry.getValue().get(0) / contextGlobalMax));
-            	Double contextLocal = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextLocal") * (scoreEntry.getValue().get(1) / contextLocalMax));
-            	Double apriori = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "apriori") * (scoreEntry.getValue().get(2) / aprioriMax));
-            	Double stringsim = (RdfLiveNews.CONFIG.getDoubleSetting("refiner", "stringsim") * (scoreEntry.getValue().get(3)));
+            	Double apri = entity.apriori * RdfLiveNews.CONFIG.getDoubleSetting("refiner", "apriori");
+            	Double loc  = entity.contextLocal * RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextLocal");
+            	Double glob = entity.contextGlobal * RdfLiveNews.CONFIG.getDoubleSetting("refiner", "contextGlobal");
+            	Double str  = entity.stringsim * RdfLiveNews.CONFIG.getDoubleSetting("refiner", "stringsim");
             	
-//            	System.out.println("Global: " + contextGlobal + " Local:"+ contextLocal +" Apriori:" + apriori + " Stringsim:" + stringsim);
+            	apriori.addValue(apri);
+            	local.addValue(loc);
+            	global.addValue(glob);
+            	stringsim.addValue(str);
             	
-            	contextGlobal = contextGlobal.isNaN() || contextGlobal.isInfinite() ? 0 : contextGlobal;
-            	apriori = apriori.isNaN() || apriori.isInfinite() ? 0 : apriori;
-            	stringsim = stringsim.isNaN() || stringsim.isInfinite() ? 0 : stringsim;
-            	contextLocal = contextLocal.isNaN() || contextLocal.isInfinite() ? 0 : contextLocal;
+            	Double contextGlobal = (glob - global.getMin()) / (global.getMax() - global.getMin());
+            	Double contextLocal = (loc - local.getMin()) / (local.getMax() - local.getMin());
+            	Double aprioriScore = (apri - apriori.getMin()) / (apriori.getMax() - apriori.getMin());
+            	Double stringsimScore = (str - stringsim.getMin()) / (stringsim.getMax() - stringsim.getMin());
             	
-            	score = (apriori + contextGlobal + stringsim + contextLocal) / 4;
+            	contextGlobal	= contextGlobal.isNaN() || contextGlobal.isInfinite() ? 0 : contextGlobal;
+            	aprioriScore	= aprioriScore.isNaN() || aprioriScore.isInfinite() ? 0 : aprioriScore;
+            	stringsimScore	= stringsimScore.isNaN() || stringsimScore.isInfinite() ? 0 : stringsimScore;
+            	contextLocal	= contextLocal.isNaN() || contextLocal.isInfinite() ? 0 : contextLocal;
             	
-            	this.apriori.addValue(df.format(apriori));
-            	this.local.addValue(df.format(contextLocal));
-            	this.global.addValue(df.format(contextGlobal));
-            	this.stringsim.addValue(df.format(stringsim));
-            	this.score.addValue(df.format(score));
+            	score = (aprioriScore + contextGlobal + stringsimScore + contextLocal) / 4;
             	
-//            	if ( score > 1 ) System.out.println(
-//            			RdfLiveNews.CONFIG.getDoubleSetting("refiner", "apriori") + "*" + apriori +  "\t" +
-//            			RdfLiveNews.CONFIG.getDoubleSetting("refiner", "context") + "*" + context  + "\t "+ 
-//            			RdfLiveNews.CONFIG.getDoubleSetting("refiner", "stringsim") + "*" + stringsim + "\t");
-                
+//            	System.out.println(score +" " + entity.uri + "\t"+  apriori + "\t" + contextGlobal + "\t" + stringsim + "\t" + contextLocal + "\n");
+//            	scoreDistribution.addValue(String.format("%.2f", score));
+//            	System.out.println(scoreDistribution);
+            	
                 if (score >= max) {
                 	
-//                	System.out.println(label + "  " +  uri +  "    " + score);
-                	
                     max = score;
-                    uri = scoreEntry.getKey();
+                    uri = entity.uri;
                 }
             }
+            
+//            System.out.println(this.apriori);
+//            System.out.println("------------------------");
+//            System.out.println(this.stringsim);
+//            System.out.println("------------------------");
+//            System.out.println(this.local);
+//            System.out.println("------------------------");
+//            System.out.println(this.global);
             
             if ( max < RdfLiveNews.CONFIG.getDoubleSetting("refiner", "urlScoreThreshold") ) return Constants.NON_GOOD_URL_FOUND;
             return uri;
@@ -154,12 +261,21 @@ public class FeatureBasedDisambiguation implements Disambiguation {
 		
     	AbstractStringMetric metric = new QGramsDistance();
     	double max = 0D;
-    	for ( String surfaceForm : this.dbpediaManager.getSurfaceFormsForUri(uri)) {
-    		
-    		double sim = metric.getSimilarity(label, surfaceForm);
-//    		System.out.println(label + " " + surfaceForm + " " +sim);
-    		max = Math.max(max, sim);
-    	}
+    	
+//    	System.out.println(uri);
+    	
+//    	for ( String surfaceForm : this.dbpediaManager.getSurfaceFormsForUri(uri)) {
+//    		
+//    		System.out.println("\t" + surfaceForm);
+//    		
+//    		double sim = metric.getSimilarity(label, surfaceForm);
+//    		if (label.equals("New York Giants") ) System.out.println("\t" + label + " " + surfaceForm + " " +sim);
+//    		max = Math.max(max, sim);
+//    	}
+    	
+    	if ( !this.uriToLabels.containsKey(uri) ) this.uriToLabels .put(uri, this.dbpediaManager.getLabelForUri(uri));
+    	max = metric.getSimilarity(label, this.uriToLabels.get(uri));
+    	
 //    	System.out.println(max);
 		return max;
 	}
@@ -196,7 +312,7 @@ public class FeatureBasedDisambiguation implements Disambiguation {
     @Override
 	public String getUri(String label, String secondEntity) {
 		
-		return getUri(label, secondEntity, new ArrayList<String>());
+		return getUri(label, label, secondEntity, new ArrayList<String>(), true);
 	}
     
 	public static void main(String[] args) throws InvalidFileFormatException, IOException {
@@ -210,10 +326,10 @@ public class FeatureBasedDisambiguation implements Disambiguation {
 //        System.out.println(uriRetrieval.getUri("D.C.".toLowerCase(), Arrays.asList("Family Research Council", "D.C.", "Cathy Lanier", "The Washington Examiner", "FBI")));
 //        System.out.println(uriRetrieval.getUri("Washington, D.C.", Arrays.asList("Family Research Council", "D.C.", "Cathy Lanier", "The Washington Examiner", "FBI")));
 //        System.out.println(uriRetrieval.getUri("Washington, D.C.".toLowerCase(), Arrays.asList("Family Research Council", "D.C.", "Cathy Lanier", "The Washington Examiner", "FBI")));
-        System.out.println(uriRetrieval.getUri("Pitt", "", Arrays.asList("Fight Club", "Angelina Jolie")));
-        System.out.println(uriRetrieval.getUri("Pitt".toLowerCase(), "", Arrays.asList("Fight Club", "Angelina Jolie")));
-        System.out.println(uriRetrieval.getUri("Brad Pitt", "", Arrays.asList("Fight Club", "Angelina Jolie")));
-        System.out.println(uriRetrieval.getUri("Brad Pitt".toLowerCase(), "", Arrays.asList("Fight Club", "Angelina Jolie")));
+        System.out.println(uriRetrieval.getUri("Pitt", "Pitt", "", Arrays.asList("Fight Club", "Angelina Jolie"), true));
+        System.out.println(uriRetrieval.getUri("Pitt", "Pitt".toLowerCase(), "", Arrays.asList("Fight Club", "Angelina Jolie"), true));
+        System.out.println(uriRetrieval.getUri("Pitt", "Brad Pitt", "", Arrays.asList("Fight Club", "Angelina Jolie"), true));
+        System.out.println(uriRetrieval.getUri("Pitt", "Brad Pitt".toLowerCase(), "", Arrays.asList("Fight Club", "Angelina Jolie"), true));
         
 //        Shaquille O’Neal
 //        Shaquille O'Neal
