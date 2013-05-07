@@ -3,36 +3,26 @@
  */
 package org.aksw.simba.rdflivenews.rdf.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.github.gerbsen.encoding.Encoder.Encoding;
+import com.github.gerbsen.file.BufferedFileWriter;
+import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
+import com.github.gerbsen.rdf.JenaUtil;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.entity.Entity;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
-import org.aksw.simba.rdflivenews.pair.Pair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.DatatypePropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
-import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.parser.NxParser;
+import virtuoso.jena.driver.VirtGraph;
 
-//import virtuoso.jena.driver.VirtGraph;
-
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileReader;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.rdf.JenaUtil;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
+import java.util.*;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -360,15 +350,15 @@ public class SimpleRdfExtraction implements RdfExtraction {
 		String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
 		String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "type");
 		
-//		VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
-//		
-//		OntModel model = JenaUtil.loadModelFromFile(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl");
-//		StmtIterator iter = model.listStatements();
-//		
-//		while ( iter.hasNext() ) {
-//			
-//			com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
-//			remoteGraph.add(t);
-//		}
+		VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
+		
+		OntModel model = JenaUtil.loadModelFromFile(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl");
+		StmtIterator iter = model.listStatements();
+		
+		while ( iter.hasNext() ) {
+			
+			com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
+			remoteGraph.add(t);
+		}
 	}
 }
