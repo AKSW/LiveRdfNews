@@ -28,11 +28,11 @@ public class TestRDFExtraction {
         Cluster<Pattern> c1 = new Cluster<Pattern>();
         Pattern p1 = new DefaultPattern();
 
-        EntityPair pair = new EntityPair(new Entity("Houston Airport", "http://dbpedia.org/ontology/Organisation"), new Entity("Marlene McClinton", "http://dbpedia.org/ontology/Person"), 82400)   ;
+        EntityPair pair = new EntityPair(new Entity("Houston Airports", "http://dbpedia.org/ontology/Organisation"), new Entity("Marlene McClinton", "http://dbpedia.org/ontology/Person"), 82400)   ;
         pair.getFirstEntity().setUri("http://dbpedia.org/resource/George_Bush_Intercontinental_Airport");
         pair.getSecondEntity().setUri("http://rdflivenews.aksw.org/resource/Marlene_McClinton");
 
-        p1.setExampleSentence("This is an example sentence!");
+        p1.setExampleSentence("... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...");
         p1.setFavouriteTypeFirstEntity("http://dbpedia.org/ontology/Place");
         p1.setFavouriteTypeSecondEntity("http://dbpedia.org/ontology/Person");
         p1.setNaturalLanguageRepresentation("this is a pattern");
@@ -43,7 +43,7 @@ public class TestRDFExtraction {
         c1.setName("this Is A Name");
         c1.setRdfsDomain("http://dbpedia.org/ontology/Place");
         c1.setRdfsRange("http://dbpedia.org/ontology/Person");
-        c1.setUri("http://rdflivenews.aksw.org/ontology/thisIsAName");
+        c1.setUri("http://rdflivenews.aksw.org/ontology/spokesperson");
         c1.add(p1);
 
         clusters.add(c1);
