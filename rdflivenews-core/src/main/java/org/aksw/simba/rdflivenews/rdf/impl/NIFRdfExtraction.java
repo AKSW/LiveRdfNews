@@ -4,9 +4,7 @@
 package org.aksw.simba.rdflivenews.rdf.impl;
 
 import com.github.gerbsen.rdf.JenaUtil;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.ObjectProperty;
-import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
@@ -21,8 +19,10 @@ import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.apache.log4j.Logger;
 import virtuoso.jena.driver.VirtGraph;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -34,10 +34,11 @@ public class NIFRdfExtraction implements RdfExtraction {
 
     public static final String BASE = "http://rdflivenews.aksw.org/extraction/";
 
-    public OntModel model = ModelFactory.createOntologyModel();
+
     public final String output_file;
     public boolean testing = false;
 
+    public Map<String, OntModel> source2ModelMap = new HashMap<String, OntModel>();
 
     private static Map<String, String> prefixes = new HashMap<String, String>();
 
@@ -45,14 +46,11 @@ public class NIFRdfExtraction implements RdfExtraction {
 
         output_file = (RdfLiveNews.DATA_DIRECTORY != null) ? RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl" : "normal.ttl";
 
-        model.setNsPrefix("rdf", RDF.getURI());
-        model.setNsPrefix("owl", OWL.getURI());
-        model.setNsPrefix("dbpedia", "http://dbpedia.org/resource/");
-        model.setNsPrefix("rln-ont", "http://rdflivenews.aksw.org/ontology/");
-        model.setNsPrefix("dbpedia", "http://rdflivenews.aksw.org/resource/");
-        NIFNamespaces.addNifPrefix(model);
+
     }
 
+    public static int errorCount =0 ;
+    public static int totalPairs =0 ;
     @Override
     public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
         List<Triple> triples = new ArrayList<Triple>();
@@ -60,19 +58,45 @@ public class NIFRdfExtraction implements RdfExtraction {
         for (Cluster<Pattern> cluster : clusters) {
             for (Pattern pattern : cluster) {
                 for (EntityPair pair : pattern.getLearnedFromEntities()) {
+                    try{
                     extractRdfFromEntityPair(pair, cluster, pattern);
+                    }catch (Exception e){
+                        logger.error("An error ("+(++errorCount)+" of "+totalPairs+ ") occurred, continuing",e);
+                    }finally {
+                        totalPairs++;
+                    }
                 }
             }
         }
 
+        OntModel total = ModelFactory.createOntologyModel();
+        for (String sourceUrlNoHttp : source2ModelMap.keySet()) {
+            OntModel m = source2ModelMap.get(sourceUrlNoHttp);
+            total.add(m);
+            File f = new File("results/" + sourceUrlNoHttp);
+            try {
+                if (f.getParent() != null) {
+                    new File(f.getParent()).mkdirs();
+                }
+                m.write(new FileWriter(f), "N3");
+            } catch (IOException ioe) {
+                logger.error("couldn't write to " + f.toString(), ioe);
+            }
+        }
+
         try {
-            model.write(new FileWriter(output_file), "N3");
+            total.write(new FileWriter(output_file), "N3");
+            if (testing) {
+                StringWriter sw = new StringWriter();
+                total.write(sw, "N3");
+                System.out.println(sw.toString());
+            }
         } catch (IOException ioe) {
-            System.out.println("couldn't write to " + output_file);
-            ioe.printStackTrace();
+            logger.error("couldn't write to " + output_file, ioe);
         }
         return triples;
     }
+
 
     public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) {
         if (!pair.hasValidUris()) {
@@ -81,17 +105,6 @@ public class NIFRdfExtraction implements RdfExtraction {
         }
 
         if (testing || check(pair, cluster, pattern)) {
-
-            Individual subject = model.createIndividual(pair.getFirstEntity().getUri(), model.createClass(cluster.getRdfsDomain()));
-            Individual object = model.createIndividual(pair.getSecondEntity().getUri(), model.createClass(cluster.getRdfsRange()));
-            ObjectProperty op = model.createObjectProperty(cluster.getUri());
-
-            //TODO what are refined labels?
-            subject.setLabel(pair.getFirstEntity().getLabel(), "en");
-            object.setLabel(pair.getSecondEntity().getLabel(), "en");
-
-            //add the connection between subject and object
-            subject.addProperty(op, object);
 
 
             Set<String[]> extractions = new HashSet<String[]>();
@@ -104,17 +117,37 @@ public class NIFRdfExtraction implements RdfExtraction {
 
             // extraction
             for (String[] extraction : extractions) {
-
+                //get basic info
                 String text = extraction[0];
                 String sourceUrl = extraction[1];
-                String date = extraction[2];
-
                 if (sourceUrl.contains("#")) {
                     logger.info("contains #: " + sourceUrl);
                     sourceUrl = sourceUrl.substring(0, sourceUrl.indexOf('#'));
                 }
-                //cut http:// and use it as the context URI
-                String prefix = BASE + sourceUrl.substring("http://".length()) + "#";
+                String date = extraction[2];
+                String sourceUrlNoHttp = sourceUrl.substring("http://".length());
+
+                //make a model
+                OntModel model = ModelFactory.createOntologyModel();
+                setPrefixes(model);
+
+
+                OntClass subjectClass = model.createClass(cluster.getRdfsDomain());
+                OntClass objectClass = model.createClass(cluster.getRdfsRange());
+                Individual subject = model.createIndividual(pair.getFirstEntity().getUri(), subjectClass);
+                Individual object = model.createIndividual(pair.getSecondEntity().getUri(), objectClass);
+
+                ObjectProperty op = model.createObjectProperty(cluster.getUri());
+
+                //TODO what are refined labels?
+                subject.setLabel(pair.getFirstEntity().getLabel(), "en");
+                object.setLabel(pair.getSecondEntity().getLabel(), "en");
+
+                //add the connection between subject and object
+                subject.addProperty(op, object);
+
+                //use it as the context URI
+                String prefix = BASE + sourceUrlNoHttp + "#";
 
                 //context
                 Individual context = model.createIndividual(prefix + "char=0,", NIFOntClasses.RFC5147String.getOntClass(model));
@@ -122,20 +155,39 @@ public class NIFRdfExtraction implements RdfExtraction {
                 context.addOntClass(NIFOntClasses.String.getOntClass(model));
                 context.addProperty(NIFObjectProperties.referenceContext.getObjectProperty(model), context);
                 context.addProperty(NIFDatatypeProperties.isString.getDatatypeProperty(model), text);
+                context.addProperty(NIFObjectProperties.sourceUrl.getObjectProperty(model), model.createIndividual(sourceUrl,OWL.Thing));
 
                 //generate URI for the object and subject
                 Individual subjectString = assignURItoString(text, prefix, pair.getFirstEntity().getLabel(), context, model);
                 Individual objectString = assignURItoString(text, prefix, pair.getSecondEntity().getLabel(), context, model);
 
+                String itsrdfns = "http://www.w3.org/2005/11/its/rdf#";
+                ObjectProperty taIdentRef = model.createObjectProperty(itsrdfns + "taIdentRef");
+                AnnotationProperty taClassRef = model.createAnnotationProperty(itsrdfns + "taClassRef");
+                //TODO
+                AnnotationProperty taPropRef = model.createAnnotationProperty(itsrdfns + "taPropRef");
+
+                subjectString.addProperty(taIdentRef, subject);
+                subjectString.addProperty(taClassRef, subjectClass);
+
+                objectString.addProperty(taIdentRef, object);
+                objectString.addProperty(taClassRef, objectClass);
+
                 //TODO get Label for the property
                 //Individual subjectString = assignURItoString(text, prefix, pair.getFirstEntity().getLabel(), context, model);
+
+                if (source2ModelMap.containsKey(sourceUrl)) {
+                    source2ModelMap.get(sourceUrlNoHttp).add(model);
+                } else {
+                    source2ModelMap.put(sourceUrlNoHttp, model);
+                }
             }
         }
     }
 
 
     public static int doubletteCounter = 0;
-    public static int totalCounter = 0;
+    public static int totalUriCounter = 0;
     public static int notFoundCounter = 0;
 
     private Individual assignURItoString(String text, String prefix, String surfaceform, Individual context, OntModel m) {
@@ -144,7 +196,7 @@ public class NIFRdfExtraction implements RdfExtraction {
         } else if (!text.contains(surfaceform)) {
             logger.error("no occurrence within the text, happened " + (++notFoundCounter) + " times already: " + context.getURI());
         }
-        logger.info("Total: " + (++totalCounter) + " notfound: " + notFoundCounter + " doublettes: " + doubletteCounter);
+        logger.info("Total: " + (++totalUriCounter) + " notfound: " + notFoundCounter + " doublettes: " + doubletteCounter);
 
         int beginIndex = text.indexOf(surfaceform);
         int endIndex = beginIndex + surfaceform.length();
@@ -159,8 +211,18 @@ public class NIFRdfExtraction implements RdfExtraction {
         return retval;
     }
 
-    private boolean check(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) {
+    private void setPrefixes(OntModel model) {
+        model.setNsPrefix("rdf", RDF.getURI());
+        model.setNsPrefix("owl", OWL.getURI());
+        model.setNsPrefix("dbpedia", "http://dbpedia.org/resource/");
+        model.setNsPrefix("dbo", "http://dbpedia.org/ontology/");
+        model.setNsPrefix("rln-ont", "http://rdflivenews.aksw.org/ontology/");
+        model.setNsPrefix("rln-res", "http://rdflivenews.aksw.org/resource/");
+        model.setNsPrefix("itsrdf", "http://www.w3.org/2005/11/its/rdf#");
+        NIFNamespaces.addNifPrefix(model);
+    }
 
+    private boolean check(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) {
         if (testing) {
             return true;
         }

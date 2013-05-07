@@ -9,62 +9,118 @@ import com.hp.hpl.jena.ontology.OntModel;
  */
 public enum NIFObjectProperties {
 
-/* TODO add label -> $do.comment */
-nextWordTrans,
+    /**
+     * TODO add label -> see nif:nextWord 
+     */
+    nextWordTrans,
 
-/* TODO add label -> $do.comment */
-subString,
+    /**
+     * TODO add label -> TODO add comment
+     */
+    subString,
 
-/* TODO add label -> $do.comment */
-previousWord,
+    /**
+     * source URL -> The URL the context was extracted from, e.g. the blog or news article url. Doesn't matter whether it is HTML or XML or plain text. rdfs:range is foaf:Document, if the string comes form another NIF String, please use nif:convertedFrom
+     */
+    sourceUrl,
 
-/* reference context -> $do.comment */
-referenceContext,
+    /**
+     * TODO add label -> see nif:nextWord 
+     */
+    previousWord,
 
-/* TODO add label -> $do.comment */
-superString,
+    /**
+     * reference context -> The context a string occurs in. This property is functional in the validation model (nif-core-val.ttl). Each String instance should only have one reference context.
+     */
+    referenceContext,
 
-/* TODO add label -> $do.comment */
-previousWordTrans,
+    /**
+     * TODO add label -> TODO add comment
+     */
+    superString,
 
-/* TODO add label -> $do.comment */
-previousSentence,
+    /**
+     * TODO add label -> see nif:nextWord 
+     */
+    previousWordTrans,
 
-/* olia link -> $do.comment */
-oliaLink,
+    /**
+     * converted from -> The URL this string was converted from
+     */
+    convertedFrom,
 
-/* TODO add label -> $do.comment */
-superStringTrans,
+    /**
+     * TODO add label -> see nif:nextSentence 
+     */
+    previousSentence,
 
-/* TODO add label -> $do.comment */
-nextWord,
+    /**
+     * olia link -> This property links a string to a URI from one of the OLiA Annotation model, e.g. http://purl.org/olia/penn.owl#NNP 
+     */
+    oliaLink,
 
-/* TODO add label -> $do.comment */
-nextSentenceTrans,
+    /**
+     * has first word -> This property links sentences to their first word. Itsi
+     */
+    firstWord,
 
-/* TODO add label -> $do.comment */
-subStringTrans,
+    /**
+     * TODO add label -> TODO add comment
+     */
+    superStringTrans,
 
-/* TODO add label -> $do.comment */
-nextSentence;
+    /**
+     * TODO add label -> This property (and the others) can be used to traverse words, it can not be assumed that no gaps between words exist, i.e. string adjacency is not mandatory. 
+     */
+    nextWord,
 
-String uri;
+    /**
+     * TODO add label -> see nif:nextSentence
+     */
+    nextSentenceTrans,
 
-NIFObjectProperties() {
-this.uri = NIFNamespaces.NIF + name();
-}
+    /**
+     * has first word -> This property links sentences to their last word.
+     */
+    lastWord,
 
-public String getUri() {
-return uri;
-}
+    /**
+     * TODO add label -> TODO add comment
+     */
+    subStringTrans,
 
-@Override
-public String toString() {
-return "nif:" + name();
-}
+    /**
+     * TODO add label -> This property links words to their sentence.
+     */
+    sentence,
+
+    /**
+     * has word -> This property links sentences to their words.
+     */
+    word,
+
+    /**
+     * TODO add label -> This property (and the others) can be used to traverse nif:Sentences, it can not be assumed that no gaps or whitespaces between Sentences exist, i.e. string adjacency is not mandatory. 
+     */
+    nextSentence;
+
+    String uri;
+
+    NIFObjectProperties() {
+        this.uri = NIFNamespaces.NIF + name();
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    @Override
+    public String toString() {
+        return "nif:" + name();
+    }
 
 
-public ObjectProperty getObjectProperty(OntModel model) {
-return model.createObjectProperty(getUri());
-}
+    public ObjectProperty getObjectProperty(OntModel model) {
+        return model.createObjectProperty(getUri());
+    }
 }

@@ -14,57 +14,79 @@ public enum NIFOntClasses {
 // Despite these being values in Java, they are classes in OWL.
 // Hence the initial capital.
 
-/* TODO add label -> TODO */
-Phrase,
+    /**
+     * TODO add label -> TODO
+     */
+    Phrase,
 
-/* TODO add label -> TODO */
-Sentence,
+    /**
+     * TODO add label -> TODO
+     */
+    Sentence,
 
-/* RFC 5147 string -> TODO */
-RFC5147String,
+    /**
+     * RFC 5147 string -> TODO
+     */
+    RFC5147String,
 
-/* String -> TODO */
-String,
+    /**
+     * String -> TODO
+     */
+    String,
 
-/* TODO add label -> TODO */
-Word,
+    /**
+     * TODO add label -> TODO
+     */
+    Word,
 
-/* Offset based string -> TODO */
-OffsetBasedString,
+    /**
+     * Offset based string -> TODO add comment
+     */
+    OffsetBasedString,
 
-/* Context hash based string -> TODO */
-ContextHashBasedString,
+    /**
+     * Context hash based string -> TODO
+     */
+    ContextHashBasedString,
 
-/* Structure -> A structure is a more or less arbitrary label for a partitioning of a string. We don not follow a strict approach for what a word, phrase, sentence, paragraph is.  */
-Structure,
+    /**
+     * Structure -> A structure is a more or less arbitrary label for a partitioning of a string. We don not follow a strict approach for what a word, phrase, sentence, paragraph is. 
+     */
+    Structure,
 
-/* HTML String -> A subspecialisation of String.
- */
-HTMLString,
+    /**
+     * HTML String -> A subspecialisation of String. 
+    
+     */
+    HTMLString,
 
-/* XPath string -> TODO */
-XPathString,
+    /**
+     * XPath string -> TODO add comment
+     */
+    XPathString,
 
-/* Context -> TODO */
-Context;
+    /**
+     * Context -> TODO
+     */
+    Context;
 
 
-String uri;
+    String uri;
 
-NIFOntClasses() {
-this.uri = NIFNamespaces.NIF + name();
-}
+    NIFOntClasses() {
+        this.uri = NIFNamespaces.NIF + name();
+    }
 
-public String getUri() {
-return uri;
-}
+    public String getUri() {
+        return uri;
+    }
 
-@Override
-public String toString() {
-return "nif:" + name();
-}
+    @Override
+    public String toString() {
+        return "nif:" + name();
+    }
 
-public OntClass getOntClass(OntModel model) {
-return model.createClass(getUri());
-}
+    public OntClass getOntClass(OntModel model) {
+        return model.createClass(getUri());
+    }
 }
