@@ -25,7 +25,6 @@
         </plugins>
     </build>
 
-<<<<<<< Updated upstream
     <dependencies>
         <dependency>
             <groupId>de.jetwick</groupId>

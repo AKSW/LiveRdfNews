@@ -82,7 +82,7 @@ public class DisambiguationEvaluation {
         
         loadGoldStandard();
 //        runEvaluationGridSearch();
-        runEvaluationHillClimbing();
+//        runEvaluationHillClimbing();
         debugEvaluation();
 //        System.out.println("Score");
 //        for ( Entry<Comparable<?>, Long> e : ((FeatureBasedDisambiguation)disambiguation).score.sortByValue()){
