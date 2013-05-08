@@ -11,7 +11,6 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.XSD;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.index.Extraction;
@@ -37,40 +36,37 @@ import java.util.*;
 public class NIFRdfExtraction implements RdfExtraction {
     private Logger logger = Logger.getLogger(getClass());
 
-
     public static final String BASE = "http://rdflivenews.aksw.org/extraction/";
-
-
+    public final String data_dir;
     public final String output_file;
     public boolean testing = false;
 
     public Map<String, OntModel> source2ModelMap = new HashMap<String, OntModel>();
 
-    private static Map<String, String> prefixes = new HashMap<String, String>();
-
     public NIFRdfExtraction() {
 
         output_file = (RdfLiveNews.DATA_DIRECTORY != null) ? RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl" : "normal.ttl";
+        data_dir = (RdfLiveNews.DATA_DIRECTORY != null) ? RdfLiveNews.DATA_DIRECTORY + "rdf/" : "results/";
 
 
     }
 
     public static int errorCount = 0;
     public static int totalPairs = 0;
-    
-	private boolean isSayCluster(Cluster<Pattern> cluster) {
 
-		return cluster.getName().startsWith("said")
-				|| cluster.getName().contains("said");
-	}
+    private boolean isSayCluster(Cluster<Pattern> cluster) {
+
+        return cluster.getName().startsWith("said")
+                || cluster.getName().contains("said");
+    }
 
     @Override
     public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
         List<Triple> triples = new ArrayList<Triple>();
 
         for (Cluster<Pattern> cluster : clusters) {
-        	if (!isSayCluster(cluster)) {
-        		for (Pattern pattern : cluster) {
+            if (!isSayCluster(cluster)) {
+                for (Pattern pattern : cluster) {
                     for (EntityPair pair : pattern.getLearnedFromEntities()) {
                         totalPairs++;
                         try {
@@ -81,15 +77,15 @@ public class NIFRdfExtraction implements RdfExtraction {
                         }
                     }
                 }
-        	}
+            }
         }
 
         OntModel total = ModelFactory.createOntologyModel();
         for (String sourceUrlNoHttp : source2ModelMap.keySet()) {
-        	
+
             OntModel m = source2ModelMap.get(sourceUrlNoHttp);
             total.add(m);
-            File f = new File(RdfLiveNews.DATA_DIRECTORY + "rdf/" + sourceUrlNoHttp);
+            File f = new File(data_dir + sourceUrlNoHttp);
             try {
                 if (f.getParent() != null) {
                     new File(f.getParent()).mkdirs();
@@ -119,20 +115,19 @@ public class NIFRdfExtraction implements RdfExtraction {
             logger.debug("NON VALID URIS: \n" + pair);
             return;
         }
-        
+
         if (testing || check(pair, cluster, pattern)) {
-        	
+
             Set<Extraction> extractions = new HashSet<Extraction>();
             if (testing) {
-            	
-            	String url = "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm";
-            	String text = "... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...";
-            	String date = "1307916000000";
-            	
+
+                String url = "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm";
+                String text = "... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...";
+                String date = "1307916000000";
+
                 extractions.add(new Extraction(url, text, date));
-            } 
-            else {
-            	extractions = IndexManager.getInstance().getTextArticleDateAndArticleUrl(pair.getLuceneSentenceIds());
+            } else {
+                extractions = IndexManager.getInstance().getTextArticleDateAndArticleUrl(pair.getLuceneSentenceIds());
             }
 
             // extraction
@@ -140,14 +135,17 @@ public class NIFRdfExtraction implements RdfExtraction {
 
 
                 //get basic info
-                String sentence = extraction.text;
                 String sourceUrl = extraction.url;
                 if (sourceUrl.contains("#")) {
                     logger.info("contains #: " + sourceUrl);
                     sourceUrl = sourceUrl.substring(0, sourceUrl.indexOf('#'));
                 }
                 String date = extraction.date;
-                String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(sentence, "UTF-8");
+                String sentence = extraction.text;
+
+
+                String normSent = (sentence.length() > 200) ? sentence.substring(0, 200) : sentence;
+                String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(normSent, "UTF-8");
 
                 logger.info(sentence);
                 logger.info(sourceUrl);
@@ -190,19 +188,20 @@ public class NIFRdfExtraction implements RdfExtraction {
                 context.addProperty(NIFDatatypeProperties.isString.getDatatypeProperty(model), sentence);
                 Individual sourceUrlIndividual = model.createIndividual(sourceUrl, OWL.Thing);
                 context.addProperty(NIFObjectProperties.sourceUrl.getObjectProperty(model), sourceUrlIndividual);
+
+                /*******************************************************************
+                 * Finally, we succeed in creating ISO conform dateTime strings!
+                 *******************************************************************/
+                DateTimeFormatter formatter = ISODateTimeFormat.dateTimeNoMillis();
+                XSDDateTime now = new XSDDateTime(Calendar.getInstance());
                 try {
-                    //TODO
-                    sourceUrlIndividual.addProperty(DCTerms.created, new Date(date).toString());
+                    sourceUrlIndividual.addProperty(DCTerms.created, formatter.print(new Long(date).longValue()), now.getNarrowedDatatype());
+
                 } catch (Exception exception) {
                     logger.debug("date parsing not working: " + date, exception);
                 }
-
-                DateTimeFormatter formatter = ISODateTimeFormat.dateTimeNoMillis();
                 DateTime dt = new DateTime();
-                XSDDateTime now = new XSDDateTime(Calendar.getInstance());
-                context.addProperty(DCTerms.created,  dt.toString(formatter), now.getNarrowedDatatype());
-                //String jtdate = "2010-01-01T12:00:00+01:00";
-                //System.out.println(parser2.parseDateTime(jtdate));
+                context.addProperty(DCTerms.created, dt.toString(formatter), now.getNarrowedDatatype());
 
 
                 //prepare the sentence:
@@ -302,7 +301,7 @@ public class NIFRdfExtraction implements RdfExtraction {
                 .equals(cluster.getRdfsRange()));
 
         if (!check) {
-            System.out.println("WRONG D/R: " + pattern.getNaturalLanguageRepresentationWithTags());
+            logger.error("WRONG D/R: " + pattern.getNaturalLanguageRepresentationWithTags());
         }
         return check;
     }
@@ -317,9 +316,9 @@ public class NIFRdfExtraction implements RdfExtraction {
 
         VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
 
-        for ( File file : FileUtils.listFiles(FileUtils.getFile(RdfLiveNews.DATA_DIRECTORY + "rdf/"), new String[] {"n3"},true)) {
-        	
-        	OntModel model = JenaUtil.loadModelFromFile(file.getAbsolutePath());
+        for (File file : FileUtils.listFiles(FileUtils.getFile(RdfLiveNews.DATA_DIRECTORY + "rdf/"), new String[]{"n3"}, true)) {
+
+            OntModel model = JenaUtil.loadModelFromFile(file.getAbsolutePath());
             StmtIterator iter = model.listStatements();
 
             while (iter.hasNext()) {
