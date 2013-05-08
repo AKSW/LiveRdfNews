@@ -32,6 +32,11 @@
 			<version>6.1.6</version>
 		</dependency>
 		<dependency>
+			<groupId>com.openlink.virtuoso</groupId>
+			<artifactId>virtjdbc3</artifactId>
+			<version>6.1.2</version>
+		</dependency>
+		<dependency>
 			<groupId>de.jetwick</groupId>
 			<artifactId>snacktory</artifactId>
 			<version>1.1-SNAPSHOT</version>

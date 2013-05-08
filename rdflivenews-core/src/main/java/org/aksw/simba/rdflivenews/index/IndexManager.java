@@ -617,7 +617,8 @@ public class IndexManager {
     public Set<Integer> getNonDuplicateSentences() {
 
     	IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);    	
-    	TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, true);
+    	TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, true);
+//    	TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, true);
         LuceneManager.query(searcher, NumericRangeQuery.newIntRange(
         		Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Constants.NOT_DUPLICATE_SENTENCE, true, true), collector);
     	
@@ -664,9 +665,9 @@ public class IndexManager {
         LuceneManager.closeIndexWriter(this.writer);
     }
 
-    public Set<String[]> getTextArticleDateAndArticleUrl(Set<Integer> documentIds) {
+    public Set<Extraction> getTextArticleDateAndArticleUrl(Set<Integer> documentIds) {
 
-        Set<String[]> values = new HashSet<String[]>();
+        Set<Extraction> values = new HashSet<Extraction>();
         
         try {
             
@@ -681,12 +682,12 @@ public class IndexManager {
             for (ScoreDoc doc : collector.topDocs().scoreDocs ) {
                 
                 Document document = LuceneManager.getDocumentByNumber(reader, doc.doc);
-                String[] extractions = new String[] {"","",""};
-                extractions[0] = document.get(Constants.LUCENE_FIELD_TEXT);
-                extractions[1] = document.get(Constants.LUCENE_FIELD_EXTRACTION_DATE);
-                extractions[2] = document.get(Constants.LUCENE_FIELD_URL);
+                Extraction extraction = new Extraction();
+                extraction.text = document.get(Constants.LUCENE_FIELD_TEXT);
+                extraction.date = document.get(Constants.LUCENE_FIELD_EXTRACTION_DATE);
+                extraction.url  = document.get(Constants.LUCENE_FIELD_URL);
                 
-                values.add(extractions);
+                values.add(extraction);
             }
             reader.close();
         }
