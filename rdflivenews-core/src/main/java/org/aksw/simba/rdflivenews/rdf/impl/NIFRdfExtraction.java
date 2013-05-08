@@ -19,6 +19,7 @@ import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -28,6 +29,8 @@ import virtuoso.jena.driver.VirtGraph;
 
 import java.io.*;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -110,7 +113,7 @@ public class NIFRdfExtraction implements RdfExtraction {
     }
 
 
-    public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) throws UnsupportedEncodingException {
+    public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         if (!pair.hasValidUris()) {
             logger.debug("NON VALID URIS: \n" + pair);
             return;
@@ -145,6 +148,7 @@ public class NIFRdfExtraction implements RdfExtraction {
 
 
                 String normSent = (sentence.length() > 200) ? sentence.substring(0, 200) : sentence;
+                normSent = DigestUtils.md5Hex(sentence);
                 String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(normSent, "UTF-8");
 
                 logger.info(sentence);
