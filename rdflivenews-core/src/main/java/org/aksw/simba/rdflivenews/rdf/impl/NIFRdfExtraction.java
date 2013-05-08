@@ -14,11 +14,13 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.XSD;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
+import org.aksw.simba.rdflivenews.index.Extraction;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.pair.EntityPair;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -55,30 +57,39 @@ public class NIFRdfExtraction implements RdfExtraction {
 
     public static int errorCount = 0;
     public static int totalPairs = 0;
+    
+	private boolean isSayCluster(Cluster<Pattern> cluster) {
+
+		return cluster.getName().startsWith("said")
+				|| cluster.getName().contains("said");
+	}
 
     @Override
     public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
         List<Triple> triples = new ArrayList<Triple>();
 
         for (Cluster<Pattern> cluster : clusters) {
-            for (Pattern pattern : cluster) {
-                for (EntityPair pair : pattern.getLearnedFromEntities()) {
-                    totalPairs++;
-                    try {
-                        extractRdfFromEntityPair(pair, cluster, pattern);
-                    } catch (Exception e) {
-                        logger.error("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing", e);
-                        System.out.println("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing");
+        	if (!isSayCluster(cluster)) {
+        		for (Pattern pattern : cluster) {
+                    for (EntityPair pair : pattern.getLearnedFromEntities()) {
+                        totalPairs++;
+                        try {
+                            extractRdfFromEntityPair(pair, cluster, pattern);
+                        } catch (Exception e) {
+                            logger.error("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing", e);
+                            System.out.println("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing");
+                        }
                     }
                 }
-            }
+        	}
         }
 
         OntModel total = ModelFactory.createOntologyModel();
         for (String sourceUrlNoHttp : source2ModelMap.keySet()) {
+        	
             OntModel m = source2ModelMap.get(sourceUrlNoHttp);
             total.add(m);
-            File f = new File("results/" + sourceUrlNoHttp);
+            File f = new File(RdfLiveNews.DATA_DIRECTORY + "rdf/" + sourceUrlNoHttp);
             try {
                 if (f.getParent() != null) {
                     new File(f.getParent()).mkdirs();
@@ -105,32 +116,37 @@ public class NIFRdfExtraction implements RdfExtraction {
 
     public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) throws UnsupportedEncodingException {
         if (!pair.hasValidUris()) {
-            logger.warn("NON VALID URIS: \n" + pair);
+            logger.debug("NON VALID URIS: \n" + pair);
             return;
         }
-
+        
         if (testing || check(pair, cluster, pattern)) {
-
-            Set<String[]> extractions = new HashSet<String[]>();
+        	
+            Set<Extraction> extractions = new HashSet<Extraction>();
             if (testing) {
-                extractions.add(new String[]{"... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...", "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm", "348795349"});
-            } else {
-                IndexManager.getInstance()
-                        .getTextArticleDateAndArticleUrl(pair.getLuceneSentenceIds());
+            	
+            	String url = "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm";
+            	String text = "... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...";
+            	String date = "1307916000000";
+            	
+                extractions.add(new Extraction(url, text, date));
+            } 
+            else {
+            	extractions = IndexManager.getInstance().getTextArticleDateAndArticleUrl(pair.getLuceneSentenceIds());
             }
 
             // extraction
-            for (String[] extraction : extractions) {
+            for (Extraction extraction : extractions) {
 
 
                 //get basic info
-                String sentence = extraction[0];
-                String sourceUrl = extraction[1];
+                String sentence = extraction.text;
+                String sourceUrl = extraction.url;
                 if (sourceUrl.contains("#")) {
                     logger.info("contains #: " + sourceUrl);
                     sourceUrl = sourceUrl.substring(0, sourceUrl.indexOf('#'));
                 }
-                String date = extraction[2];
+                String date = extraction.date;
                 String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(sentence, "UTF-8");
 
                 logger.info(sentence);
@@ -294,20 +310,23 @@ public class NIFRdfExtraction implements RdfExtraction {
     @Override
     public void uploadRdf() {
 
-        String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
-        String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
-        String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
-        String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "type");
+        String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "graph");
+        String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
+        String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
+        String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
 
         VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
 
-        OntModel model = JenaUtil.loadModelFromFile(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl");
-        StmtIterator iter = model.listStatements();
+        for ( File file : FileUtils.listFiles(FileUtils.getFile(RdfLiveNews.DATA_DIRECTORY + "rdf/"), new String[] {"n3"},true)) {
+        	
+        	OntModel model = JenaUtil.loadModelFromFile(file.getAbsolutePath());
+            StmtIterator iter = model.listStatements();
 
-        while (iter.hasNext()) {
+            while (iter.hasNext()) {
 
-            com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
-            remoteGraph.add(t);
+                com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
+                remoteGraph.add(t);
+            }
         }
     }
 }

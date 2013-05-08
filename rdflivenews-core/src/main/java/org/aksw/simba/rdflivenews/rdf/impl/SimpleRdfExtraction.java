@@ -226,24 +226,24 @@ public class SimpleRdfExtraction implements RdfExtraction {
 						Constants.RDF_LIVE_NEWS_ONTOLOGY_DATATYPE_OBJECT,
 						datatypeObjectUri)).append("\n");
 
-		for (String[] extraction : IndexManager.getInstance()
-				.getTextArticleDateAndArticleUrl(t.getSentenceId())) {
-
-			// write the object label
-			buffer.append(
-					String.format("<%s> <%s> \"%s\"@en .", datatypeObjectUri,
-							Constants.RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE,
-							extraction[0])).append("\n");
-			buffer.append(
-					String.format("<%s> <%s> <%s> .", extractionUri,
-							Constants.RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE_URL,
-							extraction[1])).append("\n");
-			buffer.append(
-					String.format("<%s> <%s> \"%s\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .",
-							extractionUri,
-							Constants.RDF_LIVE_NEWS_ONTOLOGY_EXTRACTION_DATE,
-							extraction[2])).append("\n");
-		}
+//		for (String[] extraction : IndexManager.getInstance()
+//				.getTextArticleDateAndArticleUrl(t.getSentenceId())) {
+//
+//			// write the object label
+//			buffer.append(
+//					String.format("<%s> <%s> \"%s\"@en .", datatypeObjectUri,
+//							Constants.RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE,
+//							extraction[0])).append("\n");
+//			buffer.append(
+//					String.format("<%s> <%s> <%s> .", extractionUri,
+//							Constants.RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE_URL,
+//							extraction[1])).append("\n");
+//			buffer.append(
+//					String.format("<%s> <%s> \"%s\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .",
+//							extractionUri,
+//							Constants.RDF_LIVE_NEWS_ONTOLOGY_EXTRACTION_DATE,
+//							extraction[2])).append("\n");
+//		}
 
 		// every concept in the say sentence except the subject
 		for (String mention : t.getMentions()) {
@@ -312,24 +312,24 @@ public class SimpleRdfExtraction implements RdfExtraction {
 
 		// add the text, the article url and the extraction date to the
 		// extraction
-		for (String[] extraction : IndexManager.getInstance()
-				.getTextArticleDateAndArticleUrl(t.getSentenceId())) {
-
-			// write the object label
-			buffer.append(
-					String.format("<%s> <%s> \"%s\"@en .", extractionUri,
-							Constants.RDF_LIVE_NEWS_ONTOLOGY_FOUND_IN_SENTENCE,
-							extraction[0])).append("\n");
-			buffer.append(
-					String.format("<%s> <%s> <%s> .", extractionUri,
-							Constants.RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE_URL,
-							extraction[2])).append("\n");
-			buffer.append(
-					String.format("<%s><%s> \"%s\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .",
-							extractionUri,
-							Constants.RDF_LIVE_NEWS_ONTOLOGY_EXTRACTION_DATE,
-							extraction[1])).append("\n");
-		}
+//		for (String[] extraction : IndexManager.getInstance()
+//				.getTextArticleDateAndArticleUrl(t.getSentenceId())) {
+//
+//			// write the object label
+//			buffer.append(
+//					String.format("<%s> <%s> \"%s\"@en .", extractionUri,
+//							Constants.RDF_LIVE_NEWS_ONTOLOGY_FOUND_IN_SENTENCE,
+//							extraction[0])).append("\n");
+//			buffer.append(
+//					String.format("<%s> <%s> <%s> .", extractionUri,
+//							Constants.RDF_LIVE_NEWS_ONTOLOGY_HAS_SOURCE_URL,
+//							extraction[2])).append("\n");
+//			buffer.append(
+//					String.format("<%s><%s> \"%s\"^^<http://www.w3.org/2001/XMLSchema#dateTime> .",
+//							extractionUri,
+//							Constants.RDF_LIVE_NEWS_ONTOLOGY_EXTRACTION_DATE,
+//							extraction[1])).append("\n");
+//		}
 
 		extractionCount++;
 

@@ -33,6 +33,7 @@ import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThread
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.SimilarityGeneratorManager;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
+import org.aksw.simba.rdflivenews.rdf.impl.NIFRdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.SimpleRdfExtraction;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
@@ -57,7 +58,7 @@ public class RdfLiveNews {
     public static Set<Cluster<Pattern>> clusters;
     
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
-        
+
         init();
         run();
     }
@@ -66,7 +67,7 @@ public class RdfLiveNews {
 
 //        System.out.print("Resetting documents to non duplicate ... ");
 //        we only need to do this, if the deduplication is running again
-        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
+//        IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
         Statistics stats = new Statistics();
         
         // we need this to be an instance variable because we need to save the similarities which we computed for each iteration
@@ -91,9 +92,11 @@ public class RdfLiveNews {
             
             // mark the duplicate sentences in the index, we dont want to use them to search patterns
 //            Deduplication deduplication = (Deduplication) ReflectionManager.newInstance(RdfLiveNews.CONFIG.getStringSetting("classes", "deduplication"));
-//            deduplication.runDeduplication(ITERATION, ITERATION + 1, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
+//            deduplication.runDeduplication(ITERATION, 40/*ITERATION + 1*/, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
 //            Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentenceIdsForIteration(ITERATION);
             Set<Integer> currentNonDuplicateSentenceIds = IndexManager.getInstance().getNonDuplicateSentences();
+            
+//            Set<Integer> currentNonDuplicateSentenceIds = deduplication.runDeduplication(ITERATION, 40/*ITERATION + 1*/, RdfLiveNews.CONFIG.getIntegerSetting("deduplication", "window"));
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             System.out.println(String.format("Finished deduplication with %s sentences in %s!", currentNonDuplicateSentenceIds.size(), TimeUtil.convertMilliSeconds(System.currentTimeMillis() - start)));
@@ -106,7 +109,7 @@ public class RdfLiveNews {
             System.out.println("Starting NER & POS tagging of " + currentNonDuplicateSentenceIds.size() + " non duplicate sentences!");
             start = System.currentTimeMillis();
 //            if you have not yet tagged all sentences in the index you need to uncomment this
-            if (ITERATION > 30) tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
+//            if (ITERATION > 30) tagger.annotateSentencesInIndex(currentNonDuplicateSentenceIds);
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
 
@@ -229,7 +232,7 @@ public class RdfLiveNews {
             start = System.currentTimeMillis();
             
             // use the patterns to extract rdf from news text
-            RdfExtraction rdfExtractor = new SimpleRdfExtraction();
+            RdfExtraction rdfExtractor = new NIFRdfExtraction();
             rdfExtractor.extractRdf(clusters);
             rdfExtractor.uploadRdf();
             
