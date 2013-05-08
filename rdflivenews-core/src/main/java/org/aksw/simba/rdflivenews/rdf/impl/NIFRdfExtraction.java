@@ -4,11 +4,14 @@
 package org.aksw.simba.rdflivenews.rdf.impl;
 
 import com.github.gerbsen.rdf.JenaUtil;
+import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.XSD;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.index.IndexManager;
@@ -17,12 +20,13 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import virtuoso.jena.driver.VirtGraph;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -49,8 +53,9 @@ public class NIFRdfExtraction implements RdfExtraction {
 
     }
 
-    public static int errorCount =0 ;
-    public static int totalPairs =0 ;
+    public static int errorCount = 0;
+    public static int totalPairs = 0;
+
     @Override
     public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
         List<Triple> triples = new ArrayList<Triple>();
@@ -58,12 +63,12 @@ public class NIFRdfExtraction implements RdfExtraction {
         for (Cluster<Pattern> cluster : clusters) {
             for (Pattern pattern : cluster) {
                 for (EntityPair pair : pattern.getLearnedFromEntities()) {
-                    try{
-                    extractRdfFromEntityPair(pair, cluster, pattern);
-                    }catch (Exception e){
-                        logger.error("An error ("+(++errorCount)+" of "+totalPairs+ ") occurred, continuing",e);
-                    }finally {
-                        totalPairs++;
+                    totalPairs++;
+                    try {
+                        extractRdfFromEntityPair(pair, cluster, pattern);
+                    } catch (Exception e) {
+                        logger.error("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing", e);
+                        System.out.println("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing");
                     }
                 }
             }
@@ -98,7 +103,7 @@ public class NIFRdfExtraction implements RdfExtraction {
     }
 
 
-    public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) {
+    public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) throws UnsupportedEncodingException {
         if (!pair.hasValidUris()) {
             logger.warn("NON VALID URIS: \n" + pair);
             return;
@@ -106,10 +111,9 @@ public class NIFRdfExtraction implements RdfExtraction {
 
         if (testing || check(pair, cluster, pattern)) {
 
-
             Set<String[]> extractions = new HashSet<String[]>();
             if (testing) {
-                extractions.add(new String[]{"... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...", "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm", ""});
+                extractions.add(new String[]{"... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...", "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm", "348795349"});
             } else {
                 IndexManager.getInstance()
                         .getTextArticleDateAndArticleUrl(pair.getLuceneSentenceIds());
@@ -118,14 +122,14 @@ public class NIFRdfExtraction implements RdfExtraction {
             // extraction
             for (String[] extraction : extractions) {
                 //get basic info
-                String text = extraction[0];
+                String sentence = extraction[0];
                 String sourceUrl = extraction[1];
                 if (sourceUrl.contains("#")) {
                     logger.info("contains #: " + sourceUrl);
                     sourceUrl = sourceUrl.substring(0, sourceUrl.indexOf('#'));
                 }
                 String date = extraction[2];
-                String sourceUrlNoHttp = sourceUrl.substring("http://".length());
+                String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(sentence, "UTF-8");
 
                 //make a model
                 OntModel model = ModelFactory.createOntologyModel();
@@ -139,53 +143,82 @@ public class NIFRdfExtraction implements RdfExtraction {
 
                 ObjectProperty op = model.createObjectProperty(cluster.getUri());
 
-                //TODO what are refined labels?
-                subject.setLabel(pair.getFirstEntity().getLabel(), "en");
-                object.setLabel(pair.getSecondEntity().getLabel(), "en");
+                //assign refined labels if possible
+                subject.setLabel((pair.getFirstEntity().getRefinedLabel() == null) ? pair.getFirstEntity().getLabel() : pair.getFirstEntity().getRefinedLabel(), "en");
+                object.setLabel((pair.getSecondEntity().getRefinedLabel() == null) ? pair.getSecondEntity().getLabel() : pair.getSecondEntity().getRefinedLabel(), "en");
 
                 //add the connection between subject and object
                 subject.addProperty(op, object);
 
+
                 //use it as the context URI
-                String prefix = BASE + sourceUrlNoHttp + "#";
+                String prefix = BASE + sourceUrlNoHttpWithSentence + "#";
 
                 //context
                 Individual context = model.createIndividual(prefix + "char=0,", NIFOntClasses.RFC5147String.getOntClass(model));
                 context.addOntClass(NIFOntClasses.Context.getOntClass(model));
                 context.addOntClass(NIFOntClasses.String.getOntClass(model));
                 context.addProperty(NIFObjectProperties.referenceContext.getObjectProperty(model), context);
-                context.addProperty(NIFDatatypeProperties.isString.getDatatypeProperty(model), text);
-                context.addProperty(NIFObjectProperties.sourceUrl.getObjectProperty(model), model.createIndividual(sourceUrl,OWL.Thing));
+                context.addProperty(NIFDatatypeProperties.isString.getDatatypeProperty(model), sentence);
+                Individual sourceUrlIndividual = model.createIndividual(sourceUrl, OWL.Thing);
+                context.addProperty(NIFObjectProperties.sourceUrl.getObjectProperty(model), sourceUrlIndividual);
+                try {
+                    //TODO
+                    sourceUrlIndividual.addProperty(DCTerms.created, new Date(date).toString());
+                } catch (Exception exception) {
+                    logger.debug("date parsing not working: " + date, exception);
+                }
+
+                DateTimeFormatter formatter = ISODateTimeFormat.dateTimeNoMillis();
+                DateTime dt = new DateTime();
+                XSDDateTime now = new XSDDateTime(Calendar.getInstance());
+                context.addProperty(DCTerms.created,  dt.toString(formatter), now.getNarrowedDatatype());
+                //String jtdate = "2010-01-01T12:00:00+01:00";
+                //System.out.println(parser2.parseDateTime(jtdate));
+
+
+                //prepare the sentence:
+                String propertySurfaceForm = pattern.getNaturalLanguageRepresentation();
+                int propertyBeginIndex = sentence.indexOf(propertySurfaceForm);
+                int propertyEndIndex = propertyBeginIndex + pattern.getNaturalLanguageRepresentation().length();
+                Individual propertyNIFString = assignURI(prefix, propertySurfaceForm, context, model, propertyBeginIndex, propertyEndIndex);
+
 
                 //generate URI for the object and subject
-                Individual subjectString = assignURItoString(text, prefix, pair.getFirstEntity().getLabel(), context, model);
-                Individual objectString = assignURItoString(text, prefix, pair.getSecondEntity().getLabel(), context, model);
+                int bi = sentence.substring(0, propertyBeginIndex).lastIndexOf(pair.getFirstEntity().getLabel());
+                int ei = bi + pair.getFirstEntity().getLabel().length();
+                Individual subjectNIFString = assignURI(prefix, pair.getFirstEntity().getLabel(), context, model, bi, ei);
 
+
+                bi = sentence.substring(propertyBeginIndex).indexOf(pair.getSecondEntity().getLabel());
+                ei = bi + pair.getSecondEntity().getLabel().length();
+                Individual objectNIFString = assignURI(prefix, pair.getSecondEntity().getLabel(), context, model, bi, ei);
+
+                // connect them
                 String itsrdfns = "http://www.w3.org/2005/11/its/rdf#";
                 ObjectProperty taIdentRef = model.createObjectProperty(itsrdfns + "taIdentRef");
                 AnnotationProperty taClassRef = model.createAnnotationProperty(itsrdfns + "taClassRef");
-                //TODO
                 AnnotationProperty taPropRef = model.createAnnotationProperty(itsrdfns + "taPropRef");
 
-                subjectString.addProperty(taIdentRef, subject);
-                subjectString.addProperty(taClassRef, subjectClass);
+                subjectNIFString.addProperty(taIdentRef, subject);
+                subjectNIFString.addProperty(taClassRef, subjectClass);
 
-                objectString.addProperty(taIdentRef, object);
-                objectString.addProperty(taClassRef, objectClass);
+                objectNIFString.addProperty(taIdentRef, object);
+                objectNIFString.addProperty(taClassRef, objectClass);
 
-                //TODO get Label for the property
-                //Individual subjectString = assignURItoString(text, prefix, pair.getFirstEntity().getLabel(), context, model);
+                propertyNIFString.addProperty(taPropRef, op);
 
                 if (source2ModelMap.containsKey(sourceUrl)) {
-                    source2ModelMap.get(sourceUrlNoHttp).add(model);
+                    source2ModelMap.get(sourceUrlNoHttpWithSentence).add(model);
                 } else {
-                    source2ModelMap.put(sourceUrlNoHttp, model);
+                    source2ModelMap.put(sourceUrlNoHttpWithSentence, model);
                 }
             }
         }
     }
 
 
+    /*
     public static int doubletteCounter = 0;
     public static int totalUriCounter = 0;
     public static int notFoundCounter = 0;
@@ -200,11 +233,15 @@ public class NIFRdfExtraction implements RdfExtraction {
 
         int beginIndex = text.indexOf(surfaceform);
         int endIndex = beginIndex + surfaceform.length();
+
+        return assignURI(prefix, surfaceform, context, m, beginIndex, endIndex);
+    }
+   */
+
+    private Individual assignURI(String prefix, String surfaceform, Individual context, OntModel m, int beginIndex, int endIndex) {
         Individual retval = m.createIndividual(prefix + "char=" + beginIndex + "," + endIndex, NIFOntClasses.RFC5147String.getOntClass(m));
         retval.addOntClass(NIFOntClasses.String.getOntClass(m));
-
         retval.addProperty(NIFObjectProperties.referenceContext.getObjectProperty(m), context);
-
         retval.addLiteral(NIFDatatypeProperties.anchorOf.getDatatypeProperty(m), surfaceform);
         retval.addLiteral(NIFDatatypeProperties.beginIndex.getDatatypeProperty(m), beginIndex);
         retval.addLiteral(NIFDatatypeProperties.endIndex.getDatatypeProperty(m), endIndex);

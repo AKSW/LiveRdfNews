@@ -35,7 +35,7 @@ public class TestRDFExtraction {
         p1.setExampleSentence("... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...");
         p1.setFavouriteTypeFirstEntity("http://dbpedia.org/ontology/Place");
         p1.setFavouriteTypeSecondEntity("http://dbpedia.org/ontology/Person");
-        p1.setNaturalLanguageRepresentation("this is a pattern");
+        p1.setNaturalLanguageRepresentation(" spokesperson ");
         p1.setScore(0.8);
         p1.addLearnedFromEntities(pair);
 
