@@ -121,6 +121,8 @@ public class NIFRdfExtraction implements RdfExtraction {
 
             // extraction
             for (String[] extraction : extractions) {
+
+
                 //get basic info
                 String sentence = extraction[0];
                 String sourceUrl = extraction[1];
@@ -131,13 +133,23 @@ public class NIFRdfExtraction implements RdfExtraction {
                 String date = extraction[2];
                 String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(sentence, "UTF-8");
 
+                logger.info(sentence);
+                logger.info(sourceUrl);
+                logger.info(date);
+
+
                 //make a model
                 OntModel model = ModelFactory.createOntologyModel();
                 setPrefixes(model);
 
 
+                logger.info(cluster.getRdfsDomain());
+                logger.info(cluster.getRdfsRange());
                 OntClass subjectClass = model.createClass(cluster.getRdfsDomain());
-                OntClass objectClass = model.createClass(cluster.getRdfsRange());
+                OntClass objectClass = model.createClass();
+
+                logger.info(pair.getFirstEntity().toString());
+                logger.info(pair.getSecondEntity().toString());
                 Individual subject = model.createIndividual(pair.getFirstEntity().getUri(), subjectClass);
                 Individual object = model.createIndividual(pair.getSecondEntity().getUri(), objectClass);
 
