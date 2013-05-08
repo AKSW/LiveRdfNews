@@ -29,7 +29,6 @@ import virtuoso.jena.driver.VirtGraph;
 
 import java.io.*;
 import java.net.URLEncoder;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -84,18 +83,24 @@ public class NIFRdfExtraction implements RdfExtraction {
         }
 
         OntModel total = ModelFactory.createOntologyModel();
+        setPrefixes(total);
         for (String sourceUrlNoHttp : source2ModelMap.keySet()) {
 
             OntModel m = source2ModelMap.get(sourceUrlNoHttp);
             total.add(m);
-            File f = new File(data_dir + sourceUrlNoHttp);
+
+            String path = new File(data_dir + sourceUrlNoHttp).getParent();
+            String name = new File(data_dir + sourceUrlNoHttp).getName();
+
+
             try {
+                File f = new File(path + "/" + URLEncoder.encode(name, "UTF-8"));
                 if (f.getParent() != null) {
                     new File(f.getParent()).mkdirs();
                 }
                 m.write(new FileWriter(f), "N3");
             } catch (IOException ioe) {
-                logger.error("couldn't write to " + f.toString(), ioe);
+                logger.error("couldn't write to " + path + "/" + name, ioe);
             }
         }
 
@@ -124,7 +129,7 @@ public class NIFRdfExtraction implements RdfExtraction {
             Set<Extraction> extractions = new HashSet<Extraction>();
             if (testing) {
 
-                String url = "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm";
+                String url = "http://www.usatoday.com/money/industries/energy/environment/2010-02-03-windpower_N.htm?test=ee&aa=bb";
                 String text = "... costs of the Wi-Fi system , '' explains Houston Airports spokesperson Marlene McClinton , `` And charges ...";
                 String date = "1307916000000";
 
@@ -163,8 +168,8 @@ public class NIFRdfExtraction implements RdfExtraction {
 
                 logger.info(cluster.getRdfsDomain());
                 logger.info(cluster.getRdfsRange());
-                OntClass subjectClass = model.createClass(cluster.getRdfsDomain());
-                OntClass objectClass = model.createClass();
+                OntClass subjectClass = model.createClass((cluster.getRdfsDomain() == null) ? OWL.Thing.toString() : cluster.getRdfsDomain());
+                OntClass objectClass = model.createClass((cluster.getRdfsDomain() == null) ? OWL.Thing.toString() : cluster.getRdfsDomain());
 
                 logger.info(pair.getFirstEntity().toString());
                 logger.info(pair.getSecondEntity().toString());
@@ -174,8 +179,8 @@ public class NIFRdfExtraction implements RdfExtraction {
                 ObjectProperty op = model.createObjectProperty(cluster.getUri());
 
                 //assign refined labels if possible
-                subject.setLabel((pair.getFirstEntity().getRefinedLabel() == null) ? pair.getFirstEntity().getLabel() : pair.getFirstEntity().getRefinedLabel(), "en");
-                object.setLabel((pair.getSecondEntity().getRefinedLabel() == null) ? pair.getSecondEntity().getLabel() : pair.getSecondEntity().getRefinedLabel(), "en");
+                subject.setLabel((pair.getFirstEntity().getRefinedLabel() == null || pair.getFirstEntity().getRefinedLabel().isEmpty()) ? pair.getFirstEntity().getLabel() : pair.getFirstEntity().getRefinedLabel(), "en");
+                object.setLabel((pair.getSecondEntity().getRefinedLabel() == null || pair.getSecondEntity().getRefinedLabel().isEmpty()) ? pair.getSecondEntity().getLabel() : pair.getSecondEntity().getRefinedLabel(), "en");
 
                 //add the connection between subject and object
                 subject.addProperty(op, object);
