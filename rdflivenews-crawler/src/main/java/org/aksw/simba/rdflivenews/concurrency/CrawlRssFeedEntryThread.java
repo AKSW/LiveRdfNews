@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.crawler.ArticleCrawlerThread;
+import org.aksw.simba.rdflivenews.rss.RssFeed;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -16,9 +17,9 @@ import org.aksw.simba.rdflivenews.crawler.ArticleCrawlerThread;
  */
 public class CrawlRssFeedEntryThread implements Runnable {
 
-    private BlockingQueue<String> queue = null;
+    private BlockingQueue<RssFeed> queue = null;
     
-    public CrawlRssFeedEntryThread(BlockingQueue<String> queue) {
+    public CrawlRssFeedEntryThread(BlockingQueue<RssFeed> queue) {
 
         this.queue = queue;
     }

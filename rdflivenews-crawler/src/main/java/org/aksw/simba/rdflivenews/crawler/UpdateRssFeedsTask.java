@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 
 import org.aksw.simba.rdflivenews.concurrency.RssDirectoryReader;
+import org.aksw.simba.rdflivenews.rss.RssFeed;
 import org.apache.log4j.Logger;
 
 import com.sun.syndication.io.FeedException;
@@ -22,7 +23,7 @@ public class UpdateRssFeedsTask extends TimerTask {
     private Logger logger               = Logger.getLogger(UpdateRssFeedsTask.class);
     private RssDirectoryReader reader   = null;
     
-    public UpdateRssFeedsTask(BlockingQueue<String> queue) {
+    public UpdateRssFeedsTask(BlockingQueue<RssFeed> queue) {
 
         this.reader = new RssDirectoryReader(queue);
     }

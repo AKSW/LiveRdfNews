@@ -16,6 +16,7 @@ import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
 import org.aksw.simba.rdflivenews.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
+import org.aksw.simba.rdflivenews.rss.RssFeed;
 import org.apache.log4j.Logger;
 
 import de.jetwick.snacktory.HtmlFetcher;
@@ -31,9 +32,9 @@ public class ArticleCrawlerThread extends Thread {
     private HtmlFetcher fetcher         = new HtmlFetcher();
     private DateFormat format           = new SimpleDateFormat("yyyy/MM/dd");
     private Logger logger               = Logger.getLogger(ArticleCrawlerThread.class);
-    private BlockingQueue<String> queue = null;
+    private BlockingQueue<RssFeed> queue = null;
     
-    public ArticleCrawlerThread(BlockingQueue<String> queue) {
+    public ArticleCrawlerThread(BlockingQueue<RssFeed> queue) {
 
         this.queue  = queue;
     }
@@ -47,18 +48,18 @@ public class ArticleCrawlerThread extends Thread {
         while (true) {
 
             // if there is an uri on the queue the try to crawl the rss entry
-            String uri = null;
+            RssFeed feed = null;
             try {
                 
-                uri = queue.take();
+                feed = queue.take();
             }
             catch (InterruptedException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
                 
-            logger.debug("Starting to crawl uri: " + uri);
-            List<Sentence> sentences = crawlArticle(uri);
+            logger.debug("Starting to crawl uri: " + feed.link);
+            List<Sentence> sentences = crawlArticle(feed);
             
             if ( sentences != null ) IndexManager.getInstance().addSentences(sentences);    
             
@@ -77,10 +78,10 @@ public class ArticleCrawlerThread extends Thread {
     /**
      * Returns a new article or null if we could not generate it.
      * 
-     * @param url
+     * @param feed
      * @return
      */
-    public List<Sentence> crawlArticle(String url) {
+    public List<Sentence> crawlArticle(RssFeed feed) {
         
         // we need to save every article to the db because we need to know if 
         // we have crawled this article before
@@ -88,7 +89,7 @@ public class ArticleCrawlerThread extends Thread {
         
         try {
             
-            JResult res = fetcher.fetchAndExtract(url, RdfLiveNewsCrawler.CONFIG.getIntegerSetting("crawl", "timeout"), true);
+            JResult res = fetcher.fetchAndExtract(feed.link, RdfLiveNewsCrawler.CONFIG.getIntegerSetting("crawl", "timeout"), true);
             
             // some articles are read protected so they only show a small warning
             if ( res.getText() != null && res.getText().length() > 1000 ) {
@@ -100,10 +101,10 @@ public class ArticleCrawlerThread extends Thread {
                 for ( String sentenceText : parsedSentence) {
                     
                     Sentence sentence = new Sentence();
-                    sentence.setArticleUrl(url);
+                    sentence.setArticleUrl(feed.link);
                     sentence.setText(sentenceText);
                     sentence.setTimeSliceID(RdfLiveNewsCrawler.TIME_SLICE_ID);
-                    sentence.setExtractionDate(this.parseDate(res.getDate()));
+                    sentence.setExtractionDate(feed.publishedDate != null ? feed.publishedDate : this.parseDate(res.getDate()));
                     
                     sentences.add(sentence);
                 }
@@ -113,15 +114,15 @@ public class ArticleCrawlerThread extends Thread {
         }
         catch (IllegalArgumentException iae) {
             
-            logger.debug("Error crawling html from url: " + url, iae);
+            logger.debug("Error crawling html from url: " + feed, iae);
         }
         catch (FileNotFoundException iae) {
             
-            logger.debug("Error crawling html from url: " + url, iae);
+            logger.debug("Error crawling html from url: " + feed, iae);
         }
         catch (Exception e) {
             
-            logger.debug("Error crawling html from url: " + url, e);
+            logger.debug("Error crawling html from url: " + feed, e);
         }
         
         return null;

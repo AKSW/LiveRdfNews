@@ -16,6 +16,7 @@ import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.index.IndexManager;
+import org.aksw.simba.rdflivenews.rss.RssFeed;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.IndexSearcher;
@@ -39,14 +40,14 @@ public class RssDirectoryReader {
 
     private List<String> rssFeeds           = null;
     private Logger logger                   = Logger.getLogger(getClass());
-    private BlockingQueue<String> queue     = null;
+    private BlockingQueue<RssFeed> queue     = null;
     private IndexSearcher searcher			= null;
 
     /**
      * Reads the list of urls from the rss-list.txt file
      * @param queue 
      */
-    public RssDirectoryReader(BlockingQueue<String> queue) {
+    public RssDirectoryReader(BlockingQueue<RssFeed> queue) {
 
         try {
 
@@ -67,8 +68,8 @@ public class RssDirectoryReader {
         RdfLiveNewsCrawler.CONFIG = new Config(new Ini(RdfLiveNewsCrawler.class.getClassLoader().getResourceAsStream("newscrawler-config.ini")));
         RdfLiveNews.CONFIG = new Config(new Ini(RdfLiveNews.class.getClassLoader().getResourceAsStream("rdflivenews-config.ini")));
         IndexManager.getInstance();
-		RssDirectoryReader reader = new RssDirectoryReader(
-				new LinkedBlockingQueue<String>());
+		RssDirectoryReader reader = new RssDirectoryReader(new LinkedBlockingQueue<RssFeed>());
+		
 		for (String feedUrl : reader.rssFeeds) {
 
 			try {
@@ -97,7 +98,7 @@ public class RssDirectoryReader {
             logger.info("Getting article urls from feed: " + feedUrl);
 
             XmlReader reader = null;
-            String link = "";
+            RssFeed rssFeed = new RssFeed();
 
             try {
 
@@ -108,27 +109,29 @@ public class RssDirectoryReader {
                     
                     SyndEntry entry = syndEntryIterator.next();
                     
-                    link = entry.getUri();
-                    if ( !link.startsWith("http://") ) link = entry.getLink();
-                    if ( link.startsWith("http://") ) {
+                    rssFeed.link = entry.getUri();
+                    rssFeed.publishedDate = entry.getPublishedDate();
+                    
+                    if ( !rssFeed.link.startsWith("http://") ) rssFeed.link = entry.getLink();
+                    if ( rssFeed.link.startsWith("http://") ) {
 
                         // we only want to add the uri if the uri is not already
                         // in the queue or in the database
-                        if (!this.queue.contains(link) && IndexManager.getInstance().isNewArticle(searcher, link)) {
+                        if (!this.queue.contains(rssFeed.link) && IndexManager.getInstance().isNewArticle(searcher, rssFeed.link)) {
 
-                            this.queue.put(link);
-                            this.logger.info("Added new article URL: " + link);
+                            this.queue.put(rssFeed);
+                            this.logger.info("Added new article URL: " + rssFeed.link);
                         }
                         else {
                             
-                            logger.info("Article already known... skipping: " + link);
+                            logger.info("Article already known... skipping: " + rssFeed.link);
                         }
                     }
                 }
             }
             catch (NullPointerException npe) {
                 
-                logger.debug("Error parsing feed: " + feedUrl + " and url: " + link, npe);
+                logger.debug("Error parsing feed: " + feedUrl + " and url: " + rssFeed.link, npe);
             }
             catch (IOException uhe) {
 

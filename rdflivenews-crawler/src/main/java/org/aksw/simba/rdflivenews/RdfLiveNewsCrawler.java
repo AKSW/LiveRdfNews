@@ -14,6 +14,7 @@ import org.aksw.simba.rdflivenews.concurrency.ShutdownThread;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.crawler.UpdateRssFeedsTask;
 import org.aksw.simba.rdflivenews.index.IndexManager;
+import org.aksw.simba.rdflivenews.rss.RssFeed;
 import org.aksw.simba.rdflivenews.statistics.StatisticsTask;
 import org.apache.log4j.Logger;
 import org.ini4j.Ini;
@@ -28,7 +29,7 @@ public class RdfLiveNewsCrawler {
     public static Integer TIME_SLICE_ID = -1;
     public static Config CONFIG = null;
     private static Logger logger = Logger.getLogger(RdfLiveNewsCrawler.class);
-    public static BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
+    public static BlockingQueue<RssFeed> queue = new LinkedBlockingQueue<RssFeed>();
     
     /**
      * @param args
