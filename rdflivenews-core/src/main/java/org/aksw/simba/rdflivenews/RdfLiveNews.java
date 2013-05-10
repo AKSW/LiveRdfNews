@@ -17,7 +17,6 @@ import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.cluster.labeling.ClusterLabeler;
 import org.aksw.simba.rdflivenews.cluster.labeling.DefaultClusterLabeling;
 import org.aksw.simba.rdflivenews.config.Config;
-import org.aksw.simba.rdflivenews.deduplication.Deduplication;
 import org.aksw.simba.rdflivenews.index.Extraction;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
@@ -30,16 +29,12 @@ import org.aksw.simba.rdflivenews.pattern.comparator.PatternSupportSetComparator
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
 import org.aksw.simba.rdflivenews.pattern.linking.Linker;
-import org.aksw.simba.rdflivenews.pattern.linking.impl.SimpleLinker;
-import org.aksw.simba.rdflivenews.pattern.mapping.DbpediaMapper;
-import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
 import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.SimilarityGeneratorManager;
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.NIFRdfExtraction;
-import org.aksw.simba.rdflivenews.rdf.impl.SimpleRdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
@@ -55,6 +50,8 @@ import com.github.gerbsen.file.BufferedFileWriter;
 import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.lucene.LuceneManager;
 import com.github.gerbsen.time.TimeUtil;
+import de.uni_leipzig.simba.data.Mapping;
+import org.aksw.simba.rdflivenews.pattern.linking.impl.LimesLinker;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -262,13 +259,10 @@ public class RdfLiveNews {
 //            DbpediaMapper mapper = new DefaultDbpediaMapper();
 //            mapper.map(clusters);
             
-            Linker linker = new SimpleLinker();
-            for ( Map.Entry<Cluster<Pattern>,Set<String>> entry : linker.link(clusters, 0.2).entrySet()) {
-            	
-            	System.out.println(entry.getKey().getUri() + ": " + entry.getKey().getName());
-            	for ( String s : entry.getValue()) System.out.println("\t" + s);
-            	System.out.println();
-            }
+            Linker linker = new LimesLinker();
+            Mapping m = linker.link(clusters, 0.2);
+            System.out.println(m);
+            
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             

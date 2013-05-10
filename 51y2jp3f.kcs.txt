@@ -1,0 +1,20 @@
+﻿implemented linking
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# You are currently rebasing.
+#   (all conflicts fixed: run "git rebase --continue")
+#
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#	modified:   rdflivenews-core/src/main/java/org/aksw/simba/rdflivenews/cluster/Cluster.java
+#	modified:   rdflivenews-core/src/main/java/org/aksw/simba/rdflivenews/pattern/linking/Linker.java
+#	modified:   rdflivenews-core/src/main/java/org/aksw/simba/rdflivenews/pattern/linking/impl/SimpleLinker.java
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	test/
+#	us.stackdump
+

@@ -4,8 +4,7 @@
  */
 package org.aksw.simba.rdflivenews.pattern.linking;
 
-import java.util.List;
-import java.util.Map;
+import de.uni_leipzig.simba.data.Mapping;
 import java.util.Set;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
@@ -19,5 +18,5 @@ public interface Linker {
      * these properties and the patterns
      * 
      */
-    public Map<Cluster<Pattern>, Set<String>> link(Set<Cluster<Pattern>> clusters, double threshold);
+    public Mapping link(Set<Cluster<Pattern>> clusters, double threshold);
 }

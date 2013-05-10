@@ -20,11 +20,10 @@ import org.aksw.simba.rdflivenews.pattern.linking.Linker;
  *
  * @author ngonga
  */
-public class SimpleLinker implements Linker {
+public class SimpleLinker  {
 
     public static final String endpoint = "http://dbpedia.org/sparql";
-
-    @Override
+    
     public Map<Cluster<Pattern>, Set<String>> link(Set<Cluster<Pattern>> clusters, double threshold) {
         return link(clusters, getDBpediaPropertyLabels(), threshold);
     }
@@ -86,32 +85,32 @@ public class SimpleLinker implements Linker {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println(map);
         return map;
     }
-    
+
     public static void main(String[] args) {
-    	
-    	RdfLiveNews.init();
-		
-    	List<String> names = Arrays.asList("manager",
-    	", director of",
-    	"director",
-    	", the director of",
-    	"campaign manager");
-    	
-    	Cluster<Pattern> c = new Cluster<Pattern>();
-    	for (String s : names) {
-    		
-    		c.add(new DefaultPattern(s,s));
-    	}
-    	DefaultClusterLabeling labeler = new DefaultClusterLabeling();
-    	
-    	Set<Cluster<Pattern>> set = new HashSet<Cluster<Pattern>>();
-    	set.add(c);
-    	
-    	labeler.labelCluster(set);
-    	
-    	SimpleLinker linker = new SimpleLinker();
-    	linker.link(set, 0.0);
-	}
+
+        RdfLiveNews.init();
+
+        List<String> names = Arrays.asList("manager",
+                ", director of",
+                "director",
+                ", the director of",
+                "campaign manager");
+
+        Cluster<Pattern> c = new Cluster<Pattern>();
+        for (String s : names) {
+            c.add(new DefaultPattern(s, s));
+        }
+        DefaultClusterLabeling labeler = new DefaultClusterLabeling();
+
+        Set<Cluster<Pattern>> set = new HashSet<Cluster<Pattern>>();
+        set.add(c);
+        
+        labeler.labelCluster(set);
+        System.out.println(c.getName());
+        SimpleLinker linker = new SimpleLinker();
+        System.out.println(linker.link(set, 0.8));        
+    }
 }
