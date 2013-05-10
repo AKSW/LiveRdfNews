@@ -31,17 +31,10 @@
 <!-- 			<artifactId>virt_jena</artifactId> -->
 <!-- 			<version>6.1.6</version> -->
 <!-- 		</dependency> -->
-
-        <dependency>
-            <groupId>de.uni_leipzig.simba.limes</groupId>
-            <artifactId>LIMES</artifactId>
-            <version>0.6RC2</version>
-        </dependency>
         <dependency>
             <groupId>de.uni_leipzig.simba.limes</groupId>
             <artifactId>limes-core</artifactId>
-            <version>0.6-SNAPSHOT</version>
-            <type>pom</type>
+            <version>0.6</version>
         </dependency>
         <dependency>
             <groupId>com.openlink.virtuoso</groupId>
@@ -52,11 +45,6 @@
             <groupId>de.jetwick</groupId>
             <artifactId>snacktory</artifactId>
             <version>1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -128,6 +116,11 @@
             <groupId>org.openrdf</groupId>
             <artifactId>sesame</artifactId>
             <version>2.6.3</version>
+        </dependency>
+        <dependency>
+        	<groupId>com.github.gerbsen</groupId>
+        	<artifactId>utk</artifactId>
+        	<version>1.0.5</version>
         </dependency>
     </dependencies>
 </project>
