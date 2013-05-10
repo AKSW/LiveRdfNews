@@ -37,9 +37,27 @@
             <url>http://maven.aksw.org/archiva/repository/internal</url>
             <releases />
         </repository>
+        <repository>
+            <id>maven.aksw.snapshots</id>
+            <name>University Leipzig, AKSW Maven2 Repository</name>
+            <url>http://maven.aksw.org/archiva/repository/snapshots</url>
+            <snapshots />
+        </repository>
+        
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>de.uni_leipzig.simba.limes</groupId>
+            <artifactId>LIMES</artifactId>
+            <version>0.6RC2</version>
+        </dependency>
+        <dependency>
+            <groupId>de.uni_leipzig.simba.limes</groupId>
+            <artifactId>limes-core</artifactId>
+            <version>0.6-SNAPSHOT</version>
+            <type>pom</type>
+        </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
