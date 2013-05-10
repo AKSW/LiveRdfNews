@@ -167,7 +167,8 @@ public class NIFRdfExtraction implements RdfExtraction {
 
                 String normSent = (sentence.length() > 200) ? sentence.substring(0, 200) : sentence;
                 normSent = DigestUtils.md5Hex(sentence);
-                String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(normSent, "UTF-8");
+                String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + normSent;
+                //String sourceUrlNoHttpWithSentence = sourceUrl.substring("http://".length()) + "/" + URLEncoder.encode(normSent, "UTF-8");
 
                 logger.info(sentence);
                 logger.info(sourceUrl);
@@ -257,7 +258,7 @@ public class NIFRdfExtraction implements RdfExtraction {
 
                 propertyNIFString.addProperty(taPropRef, op);
 
-                if (source2ModelMap.containsKey(sourceUrl)) {
+                if (source2ModelMap.containsKey(sourceUrlNoHttpWithSentence)) {
                     source2ModelMap.get(sourceUrlNoHttpWithSentence).add(model);
                 } else {
                     source2ModelMap.put(sourceUrlNoHttpWithSentence, model);
