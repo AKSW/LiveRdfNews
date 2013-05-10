@@ -86,7 +86,7 @@ public class NIFRdfExtraction implements RdfExtraction {
                     	
                         totalPairs++;
                         try {
-                            extractRdfFromEntityPair(pair, cluster, pattern);
+                            extractRdfFromEntityPair(pair, cluster, pattern, triples);
                         } catch (Exception e) {
                             logger.error("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing", e);
                             System.out.println("An error (" + (++errorCount) + " of " + totalPairs + ") occurred, continuing");
@@ -131,7 +131,7 @@ public class NIFRdfExtraction implements RdfExtraction {
     }
 
 
-    public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    public void extractRdfFromEntityPair(EntityPair pair, Cluster<Pattern> cluster, Pattern pattern, List<Triple> triples) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         if (!pair.hasValidUris()) {
             logger.debug("NON VALID URIS: \n" + pair);
             return;

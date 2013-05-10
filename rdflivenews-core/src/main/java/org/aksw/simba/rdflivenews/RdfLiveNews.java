@@ -6,9 +6,11 @@ package org.aksw.simba.rdflivenews;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.cluster.Cluster;
@@ -16,6 +18,7 @@ import org.aksw.simba.rdflivenews.cluster.labeling.ClusterLabeler;
 import org.aksw.simba.rdflivenews.cluster.labeling.DefaultClusterLabeling;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.deduplication.Deduplication;
+import org.aksw.simba.rdflivenews.index.Extraction;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.pattern.Pattern;
@@ -26,6 +29,8 @@ import org.aksw.simba.rdflivenews.pattern.clustering.merging.DefaultClusterMerge
 import org.aksw.simba.rdflivenews.pattern.comparator.PatternSupportSetComparator;
 import org.aksw.simba.rdflivenews.pattern.filter.PatternFilter;
 import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
+import org.aksw.simba.rdflivenews.pattern.linking.Linker;
+import org.aksw.simba.rdflivenews.pattern.linking.impl.SimpleLinker;
 import org.aksw.simba.rdflivenews.pattern.mapping.DbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.mapping.impl.DefaultDbpediaMapper;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
@@ -35,13 +40,19 @@ import org.aksw.simba.rdflivenews.pattern.similarity.generator.impl.SimilarityGe
 import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.NIFRdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.impl.SimpleRdfExtraction;
+import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
+import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
+import com.github.gerbsen.encoding.Encoder.Encoding;
+import com.github.gerbsen.file.BufferedFileWriter;
+import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.github.gerbsen.lucene.LuceneManager;
 import com.github.gerbsen.time.TimeUtil;
 
@@ -233,8 +244,10 @@ public class RdfLiveNews {
             
             // use the patterns to extract rdf from news text
             RdfExtraction rdfExtractor = new NIFRdfExtraction();
-            rdfExtractor.extractRdf(clusters);
+//            RdfExtraction rdfExtractor = new SimpleRdfExtraction();
+            List<Triple> triples = rdfExtractor.extractRdf(clusters);
             rdfExtractor.uploadRdf();
+//            writeEvalData(triples);
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             
@@ -246,8 +259,16 @@ public class RdfLiveNews {
             // 8. Mapping to DBpedia
             start = System.currentTimeMillis();
             
-            DbpediaMapper mapper = new DefaultDbpediaMapper();
-            mapper.map(clusters);
+//            DbpediaMapper mapper = new DefaultDbpediaMapper();
+//            mapper.map(clusters);
+            
+            Linker linker = new SimpleLinker();
+            for ( Map.Entry<Cluster<Pattern>,Set<String>> entry : linker.link(clusters, 0.2).entrySet()) {
+            	
+            	System.out.println(entry.getKey().getUri() + ": " + entry.getKey().getName());
+            	for ( String s : entry.getValue()) System.out.println("\t" + s);
+            	System.out.println();
+            }
             
             Statistics.durationPerIteration.get(ITERATION).add(System.currentTimeMillis() - start);
             
@@ -291,6 +312,38 @@ public class RdfLiveNews {
 			e.printStackTrace();
 		}
     }
+    
+    private static void writeEvalData(List<Triple> triples) {
+
+    	for ( Integer clusterMinSize : Arrays.asList(1, 2, 3, 4, 5) ) {
+
+    		Collections.shuffle(triples);
+            int maxWrittenTriples = 200;
+            int writtenTriples = 0;
+            BufferedFileWriter writer = new BufferedFileWriter(RdfLiveNews.DATA_DIRECTORY + "evaluation/rlneval_triple_" + clusterMinSize + "_c_min_size_" + clusterMinSize+".tsv", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+            for ( int tripleIndex = 0 ; tripleIndex < triples.size() && writtenTriples < maxWrittenTriples ; tripleIndex++) {
+
+            	ObjectPropertyTriple triple = (ObjectPropertyTriple) triples.get(tripleIndex);
+            	if ( triple.cluster.size() >= clusterMinSize ) {
+
+            		List<String> line = new ArrayList<String>();
+                	line.add(triple.getSubjectUri());
+                	line.add(triple.getSubjectLabel());
+                	line.add(triple.getPropertyType());
+                	line.add(triple.getObject());
+                	line.add(triple.getObjectLabel());
+                	List<Set<Extraction>> list = Arrays.asList(IndexManager.getInstance().getTextArticleDateAndArticleUrl(triple.getSentenceId()));
+                	Extraction x1 = list.get(0).iterator().next();
+                	line.add(x1.text);
+
+                	writer.write(StringUtils.join(line, "\t"));
+                	writtenTriples++;
+            	}
+            }
+
+            writer.close();
+    	}
+	}
     
 private static void test() {
         

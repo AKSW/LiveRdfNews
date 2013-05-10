@@ -3,6 +3,8 @@ package org.aksw.simba.rdflivenews.rdf.triple;
 import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
+import org.aksw.simba.rdflivenews.cluster.Cluster;
+import org.aksw.simba.rdflivenews.pattern.Pattern;
 
 import edu.stanford.nlp.util.StringUtils;
 
@@ -13,6 +15,7 @@ public class ObjectPropertyTriple extends AbstractTriple {
     private String objectLabel;
     private String refinedSubjectLabel;
     private String refinedObjectLabel;
+    public Cluster<Pattern> cluster;
     
     public ObjectPropertyTriple(String subjectLabel, String subjectUri, String patternLabel, String objectLabel, String objectUri, Set<Integer> id) {
 

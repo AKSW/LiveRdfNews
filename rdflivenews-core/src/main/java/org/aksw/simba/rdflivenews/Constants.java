@@ -136,7 +136,7 @@ public class Constants {
             new HashSet<String>(Arrays.asList( "i", "a", "about", "an", "and", "are", "as", "at", "be", "by", "for", "from",
                                                                 "how", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "``",
                                                                 "was", "what", "when", "where", "who", "will", "with", "the", "'s", "did", "&",
-                                                                "have", "has", "had", "were", "'", "'ll", ",", "-LRB-", "-RRB-","-lrb-", "-rrb-", "''", "--", "-", ":", ";", "..."));
+                                                                "have", "has", "had", "were", "'", "'ll", ",", "-LRB-", "-RRB-","-lrb-", "-rrb-", ",", "''", "--", "-", ":", ";", "..."));
     
     public static final Set<String> WEEK_DAYS = 
             new HashSet<String>(Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"));

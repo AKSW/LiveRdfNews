@@ -20,7 +20,6 @@ import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.DatatypePropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
-import virtuoso.jena.driver.VirtGraph;
 
 import java.util.*;
 
@@ -53,6 +52,10 @@ public class SimpleRdfExtraction implements RdfExtraction {
 		prefixes.put("dbpedia-owl", Constants.DBPEDIA_ONTOLOGY_PREFIX);
 		prefixes.put("dbpedia-res", Constants.DBPEDIA_RESOURCE_PREFIX);
 	}
+	
+	Set<String> tokens = new HashSet<String>(Arrays.asList("asked", "reported", "said", "said that", 
+			", '' said", "tells", "noted that", "told", "said of", "said in", "calls", 
+			"said ,", "announced", ", told", ", '' says", ", said", "called", "says", "says that", "said on"));
 
 	@Override
 	public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
@@ -70,107 +73,88 @@ public class SimpleRdfExtraction implements RdfExtraction {
 
 		for (Cluster<Pattern> cluster : clusters) {
 			// we need to process quotations differently
-			if (!isSayCluster(cluster)) {
-				for (Pattern pattern : cluster) {
+			for (Pattern pattern : cluster) {
+				if (!isSayClusterPattern(pattern)) {
 					for (EntityPair pair : pattern.getLearnedFromEntities()) {
 						if (pair.hasValidUris()) {
 
-							if (RdfLiveNews.CONFIG.getBooleanSetting(
-									"extraction", "enforceCorrectTypes")) {
+							if (RdfLiveNews.CONFIG.getBooleanSetting("extraction", "enforceCorrectTypes")) {
 
 								if (pair.getFirstEntity().getType()
 										.equals(cluster.getRdfsDomain())
 										&& pair.getSecondEntity().getType()
 												.equals(cluster.getRdfsRange())) {
 
-									ObjectPropertyTriple t = new ObjectPropertyTriple(
-											pair.getFirstEntity().getLabel(),
-											pair.getFirstEntity().getUri(),
+									ObjectPropertyTriple t = new ObjectPropertyTriple(pair.getFirstEntity().getLabel(), pair.getFirstEntity().getUri(),
 											pattern.getNaturalLanguageRepresentation(),
-											pair.getSecondEntity().getLabel(),
-											pair.getSecondEntity().getUri(),
-											pair.getLuceneSentenceIds());
+											pair.getSecondEntity().getLabel(), pair.getSecondEntity().getUri(), pair.getLuceneSentenceIds());
 									//
-									t.setRefinedSubjectLabel(pair
-											.getFirstEntity().getRefinedLabel());
-									t.setRefinedObjectLabel(pair
-											.getSecondEntity()
-											.getRefinedLabel());
+									t.setRefinedSubjectLabel(pair.getFirstEntity().getRefinedLabel());
+									t.setRefinedObjectLabel(pair.getSecondEntity().getRefinedLabel());
 									t.setPropertyType(cluster.getUri());
+									t.cluster = cluster;
 									//
 									printObjectTriple(t);
 									triples.add(t);
 								}
-							} else {
-								ObjectPropertyTriple t = new ObjectPropertyTriple(
-										pair.getFirstEntity().getLabel(),
-										pair.getFirstEntity().getUri(),
+							}
+							else {
+								ObjectPropertyTriple t = new ObjectPropertyTriple(pair.getFirstEntity().getLabel(), pair.getFirstEntity().getUri(),
 										pattern.getNaturalLanguageRepresentation(),
-										pair.getSecondEntity().getLabel(), pair
-												.getSecondEntity().getUri(),
-										pair.getLuceneSentenceIds());
+										pair.getSecondEntity().getLabel(), pair.getSecondEntity().getUri(), pair.getLuceneSentenceIds());
 								//
-								t.setRefinedSubjectLabel(pair.getFirstEntity()
-										.getRefinedLabel());
-								t.setRefinedObjectLabel(pair.getSecondEntity()
-										.getRefinedLabel());
+								t.setRefinedSubjectLabel(pair.getFirstEntity().getRefinedLabel());
+								t.setRefinedObjectLabel(pair.getSecondEntity().getRefinedLabel());
 								t.setPropertyType(cluster.getUri());
+								t.cluster = cluster;
 								//
 								printObjectTriple(t);
 								triples.add(t);
 							}
-							// else {
-
-							// System.out.println("WRONG D/R: " +
-							// pattern.getNaturalLanguageRepresentationWithTags());
-							// }
-						} else {
-
-//							System.out.println("NON VALID URIS: \n" + pair);
-						}
+						} 
 					}
 				}
-			}
-			// this is only for quotes
-			else {
-
-				for (Pattern pattern : cluster) {
-					for (EntityPair pair : pattern.getLearnedFromEntities()) {
-						if (pair.hasValidUris()) {
-
-							// if (
-							// pair.getFirstEntity().getType().equals(cluster.getRdfsDomain())
-							// &&
-							// pair.getSecondEntity().getType().equals(cluster.getRdfsRange()))
-							// {a
-
-							DatatypePropertyTriple t = new DatatypePropertyTriple(
-									pair.getFirstEntity().getLabel(), pair
-											.getFirstEntity().getUri(),
-									pattern.getNaturalLanguageRepresentation(),
-									pair.getSecondEntity().getLabel(),
-									pair.getLuceneSentenceIds());
-							//
-							t.setRefinedSubjectLabel(pair.getFirstEntity()
-									.getRefinedLabel());
-							t.setPropertyType(cluster.getUri());
-							//
-							printDatatypeTriple(t);
-							triples.add(t);
-							// }
-							// else {
-
-							// System.out.println("WRONG D/R: " +
-							// pattern.getNaturalLanguageRepresentationWithTags());
-							// }
-						} else {
-
-//							System.out.println("NON VALID URIS: \n" + pair);
-						}
+					
+//					// this is only for quotes
+//					else {
+//							for (EntityPair pair : pattern.getLearnedFromEntities()) {
+//								if (pair.hasValidUris()) {
+//
+//									// if (
+//									// pair.getFirstEntity().getType().equals(cluster.getRdfsDomain())
+//									// &&
+//									// pair.getSecondEntity().getType().equals(cluster.getRdfsRange()))
+//									// {a
+//
+//									DatatypePropertyTriple t = new DatatypePropertyTriple(
+//											pair.getFirstEntity().getLabel(), pair
+//													.getFirstEntity().getUri(),
+//											pattern.getNaturalLanguageRepresentation(),
+//											pair.getSecondEntity().getLabel(),
+//											pair.getLuceneSentenceIds());
+//									//
+//									t.setRefinedSubjectLabel(pair.getFirstEntity()
+//											.getRefinedLabel());
+//									t.setPropertyType(cluster.getUri());
+//									//
+////									printDatatypeTriple(t);
+////									triples.add(t);
+//									// }
+//									// else {
+//
+//									// System.out.println("WRONG D/R: " +
+//									// pattern.getNaturalLanguageRepresentationWithTags());
+//									// }
+//								} else {
+//
+////									System.out.println("NON VALID URIS: \n" + pair);
+//								}
+//							}
+//						}
 					}
-				}
 			}
-		}
+			
+//		}
 		normalTripleWriter.close();
 		sayTripleWriter.close();
 
@@ -269,10 +253,9 @@ public class SimpleRdfExtraction implements RdfExtraction {
 
 	}
 
-	private boolean isSayCluster(Cluster<Pattern> cluster) {
+	private boolean isSayClusterPattern(Pattern pattern) {
 
-		return cluster.getName().startsWith("said")
-				|| cluster.getName().contains("said");
+		return tokens.contains(pattern.getNaturalLanguageRepresentation());
 	}
 
 	private static void printObjectTriple(ObjectPropertyTriple t) {
@@ -350,15 +333,15 @@ public class SimpleRdfExtraction implements RdfExtraction {
 		String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
 		String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "type");
 		
-		VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
+//		VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
 		
-		OntModel model = JenaUtil.loadModelFromFile(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl");
-		StmtIterator iter = model.listStatements();
-		
-		while ( iter.hasNext() ) {
-			
-			com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
-			remoteGraph.add(t);
-		}
+//		OntModel model = JenaUtil.loadModelFromFile(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl");
+//		StmtIterator iter = model.listStatements();
+//		
+//		while ( iter.hasNext() ) {
+//			
+//			com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
+//			remoteGraph.add(t);
+//		}
 	}
 }
