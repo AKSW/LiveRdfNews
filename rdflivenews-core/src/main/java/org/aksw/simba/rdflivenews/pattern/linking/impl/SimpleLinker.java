@@ -62,7 +62,7 @@ public class SimpleLinker implements Linker {
      */
     public static Map<String, Set<String>> getDBpediaPropertyLabels() {
         String query = "SELECT ?p ?l WHERE {?p a <http://www.w3.org/2002/07/owl#DatatypeProperty>. "
-                + "?p <http://www.w3.org/2000/01/rdf-schema#> ?l} ";
+                + "?p <http://www.w3.org/2000/01/rdf-schema#label> ?l} ";
         Map<String, Set<String>> map = new HashMap<String, Set<String>>();
         try {
             Query sparqlQuery = QueryFactory.create(query, Syntax.syntaxARQ);
@@ -85,5 +85,10 @@ public class SimpleLinker implements Linker {
             e.printStackTrace();
         }
         return map;
+    }
+    
+    public static void main(String args[])
+    {
+        System.out.println(getDBpediaPropertyLabels());
     }
 }
