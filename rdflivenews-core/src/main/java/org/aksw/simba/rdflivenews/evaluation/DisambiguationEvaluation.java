@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
@@ -141,6 +142,8 @@ public class DisambiguationEvaluation {
 
 	private static void loadGoldStandard() throws IOException {
 
+		Set<String> told = new HashSet<String>();
+		
         for (String line : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated_gold.txt"))) {
             
             String[] lineParts = line.replace("______", "___ ___").split("___");
@@ -154,9 +157,15 @@ public class DisambiguationEvaluation {
                 
                 DatatypePropertyTriple triple = new DatatypePropertyTriple(lineParts[1], lineParts[2], lineParts[3], lineParts[5], new HashSet<Integer>(Arrays.asList(Integer.valueOf(lineParts[7]))));
                 GOLD_STANDARD_SAY_TRIPLES.put(triple.getKey(), triple);
+                told.add(triple.getPatternLabel());
             }
             else throw new RuntimeException("WOWOWW: " + line);
         }
+        
+//        System.out.println(String.format("Set<String> tokens = Arrays.asList(\"%s\");", StringUtils.join(told, "\", \"")));
+//        
+//        System.out.println(told);
+//        System.exit(0);
     }
 	
 	private static void runEvaluationGridSearch() throws UnsupportedEncodingException {

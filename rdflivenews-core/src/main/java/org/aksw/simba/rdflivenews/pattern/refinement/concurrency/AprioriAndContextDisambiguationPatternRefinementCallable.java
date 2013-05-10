@@ -68,7 +68,7 @@ public class AprioriAndContextDisambiguationPatternRefinementCallable implements
      * @see java.util.concurrent.Callable#call()
      */
     public Pattern call() {
-
+    	
         this.init();
         
         for ( EntityPair pair : pattern.getLearnedFromEntities() ) {

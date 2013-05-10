@@ -6,8 +6,10 @@ package org.aksw.simba.rdflivenews.rdf.impl;
 import com.github.gerbsen.rdf.JenaUtil;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.*;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.DCTerms;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -21,11 +23,19 @@ import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.HiddenFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import virtuoso.jena.driver.VirtGraph;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParseException;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -45,31 +55,35 @@ public class NIFRdfExtraction implements RdfExtraction {
 
     public Map<String, OntModel> source2ModelMap = new HashMap<String, OntModel>();
 
+    private static Map<String, String> prefixes = new HashMap<String, String>();
+    
+    Set<String> tokens = new HashSet<String>(Arrays.asList("asked", "reported", "said", "said that", 
+			", '' said", "tells", "noted that", "told", "said of", "said in", "calls", 
+			"said ,", "announced", ", told", ", '' says", ", said", "called", "says", "says that", "said on"));
+
     public NIFRdfExtraction() {
 
         output_file = (RdfLiveNews.DATA_DIRECTORY != null) ? RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl" : "normal.ttl";
         data_dir = (RdfLiveNews.DATA_DIRECTORY != null) ? RdfLiveNews.DATA_DIRECTORY + "rdf/" : "results/";
-
-
     }
 
     public static int errorCount = 0;
     public static int totalPairs = 0;
+    
+	private boolean isSayClusterPattern(Pattern pattern) {
 
-    private boolean isSayCluster(Cluster<Pattern> cluster) {
-
-        return cluster.getName().startsWith("said")
-                || cluster.getName().contains("said");
-    }
+		return tokens.contains(pattern.getNaturalLanguageRepresentation());
+	}
 
     @Override
     public List<Triple> extractRdf(Set<Cluster<Pattern>> clusters) {
         List<Triple> triples = new ArrayList<Triple>();
 
         for (Cluster<Pattern> cluster : clusters) {
-            if (!isSayCluster(cluster)) {
-                for (Pattern pattern : cluster) {
+    		for (Pattern pattern : cluster) {
+    			if (!isSayClusterPattern(pattern)) {
                     for (EntityPair pair : pattern.getLearnedFromEntities()) {
+                    	
                         totalPairs++;
                         try {
                             extractRdfFromEntityPair(pair, cluster, pattern);
@@ -81,7 +95,7 @@ public class NIFRdfExtraction implements RdfExtraction {
                 }
             }
         }
-
+        
         OntModel total = ModelFactory.createOntologyModel();
         setPrefixes(total);
         for (String sourceUrlNoHttp : source2ModelMap.keySet()) {
@@ -106,12 +120,11 @@ public class NIFRdfExtraction implements RdfExtraction {
 
         try {
             total.write(new FileWriter(output_file), "N3");
-            if (testing) {
-                StringWriter sw = new StringWriter();
-                total.write(sw, "N3");
-                System.out.println(sw.toString());
-            }
-        } catch (IOException ioe) {
+            StringWriter sw = new StringWriter();
+            total.write(sw, "N3");
+            if (testing) System.out.println(sw.toString());
+        }
+        catch (IOException ioe) {
             logger.error("couldn't write to " + output_file, ioe);
         }
         return triples;
@@ -125,7 +138,7 @@ public class NIFRdfExtraction implements RdfExtraction {
         }
 
         if (testing || check(pair, cluster, pattern)) {
-
+        	
             Set<Extraction> extractions = new HashSet<Extraction>();
             if (testing) {
 
@@ -315,26 +328,68 @@ public class NIFRdfExtraction implements RdfExtraction {
         return check;
     }
 
+//    @Override
+//    public void uploadRdf() {
+//
+//        try {
+//        	
+//        	String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "graph");
+//            String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
+//            String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
+//            String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
+//
+//            System.out.println("Server" + server);
+//            
+//            VirtGraph remoteGraph = new VirtGraph(graph, server.replace("charset=UTF-8", ""), username, password);
+//            
+//            Model m = ModelFactory.createMemModelMaker().createDefaultModel();
+//			m.read(new FileInputStream(new File(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl")),"","N3");
+//			
+//			StmtIterator iter = m.listStatements();
+//
+//	        while (iter.hasNext()) {
+//
+//	            com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
+//	            remoteGraph.add(t);
+//	        }
+//	        remoteGraph.close();
+//		}
+//        catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    }
     @Override
     public void uploadRdf() {
+	
+		RepositoryConnection con = null;
 
-        String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "graph");
-        String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
-        String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
-        String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
+		try {
+			
+			String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "graph");
+            String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
+            String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
+            String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
+       
+            Repository myRepository = new virtuoso.sesame2.driver.VirtuosoRepository(server,username,password);
 
-        VirtGraph remoteGraph = new VirtGraph(graph, server, username, password);
+            myRepository.initialize();
+            
+//			Repository repository = new VirtuosoRepository(server, username, password);
+			con = myRepository.getConnection();
+//			con = repository.getConnection();
+			con.add(new File(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl"), graph, RDFFormat.TURTLE);
+			con.close();
+		} 
+		catch (RepositoryException | RDFParseException | IOException e) {
 
-        for (File file : FileUtils.listFiles(FileUtils.getFile(RdfLiveNews.DATA_DIRECTORY + "rdf/"), new String[]{"n3"}, true)) {
-
-            OntModel model = JenaUtil.loadModelFromFile(file.getAbsolutePath());
-            StmtIterator iter = model.listStatements();
-
-            while (iter.hasNext()) {
-
-                com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
-                remoteGraph.add(t);
-            }
-        }
-    }
+			e.printStackTrace();
+		} 
+}
+    
+    public static void main(String[] args) {
+    	RdfLiveNews.init();
+    	NIFRdfExtraction ex = new NIFRdfExtraction();
+    	ex.uploadRdf();
+	}
 }

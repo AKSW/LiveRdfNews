@@ -617,8 +617,8 @@ public class IndexManager {
     public Set<Integer> getNonDuplicateSentences() {
 
     	IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);    	
-    	TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, true);
-//    	TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, true);
+//    	TopScoreDocCollector collector = TopScoreDocCollector.create(10_000, true);
+    	TopScoreDocCollector collector = TopScoreDocCollector.create(20_000_000, true);
         LuceneManager.query(searcher, NumericRangeQuery.newIntRange(
         		Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Constants.NOT_DUPLICATE_SENTENCE, true, true), collector);
     	
