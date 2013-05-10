@@ -20,7 +20,15 @@ public class Cluster<T> implements Iterable<T>, Set<T> {
     private String uri = "";
     private String rdfsRange = "";
     private String rdfsDomain = "";
-    
+    private String dbpediaUri = "";
+
+    public String getDbpediaUri() {
+        return dbpediaUri;
+    }
+
+    public void setDbpediaUri(String dbpediaUri) {
+        this.dbpediaUri = dbpediaUri;
+    }
     
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()

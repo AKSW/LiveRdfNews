@@ -19,5 +19,5 @@ public interface Linker {
      * these properties and the patterns
      * 
      */
-    public Map<Cluster, Set<String>> link(List<Cluster> clusters, Set<String> propertyLabels, double threshold);
+    public Map<Cluster, Set<String>> link(List<Cluster> clusters, double threshold);
 }
