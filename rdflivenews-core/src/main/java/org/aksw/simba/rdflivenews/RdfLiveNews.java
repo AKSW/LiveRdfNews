@@ -260,7 +260,7 @@ public class RdfLiveNews {
 //            mapper.map(clusters);
             
             Linker linker = new LimesLinker();
-            Mapping m = linker.link(clusters, 0.2);
+            Mapping m = linker.link(clusters, 0.6);
             System.out.println(m);
             
             

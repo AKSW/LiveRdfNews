@@ -23,7 +23,7 @@ import org.aksw.simba.rdflivenews.pattern.linking.Linker;
  * @author ngonga
  */
 public class LimesLinker implements Linker {
-    public static final String endpoint = "http://dbpedia.org/sparql";
+    public static final String endpoint = "http://live.dbpedia.org/sparql";
 
     @Override
     public Mapping link(Set<Cluster<org.aksw.simba.rdflivenews.pattern.Pattern>> clusters, double threshold) {
