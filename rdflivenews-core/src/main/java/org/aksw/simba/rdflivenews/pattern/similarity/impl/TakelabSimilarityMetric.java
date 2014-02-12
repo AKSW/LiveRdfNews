@@ -7,10 +7,9 @@ import java.util.Scanner;
 
 import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
+import org.aksw.simba.rdflivenews.util.MavenUtil;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
-
-import com.github.gerbsen.maven.MavenUtil;
 
 /**
  * @author Tommaso Soru <tsoru@informatik.uni-leipzig.de>

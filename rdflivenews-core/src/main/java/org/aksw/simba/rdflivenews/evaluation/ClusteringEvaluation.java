@@ -29,14 +29,14 @@ import org.aksw.simba.rdflivenews.pattern.similarity.SimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramAndWordnetSimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.QGramSimilarityMetric;
 import org.aksw.simba.rdflivenews.pattern.similarity.impl.WordnetSimilarityMetric;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.FileUtil;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet;
 import org.aksw.simba.rdflivenews.wordnet.Wordnet.WordnetSimilarity;
-import org.apache.commons.io.FileUtils;
 import org.ini4j.Ini;
-
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.apache.commons.io.FileUtils;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -415,30 +415,23 @@ public class ClusteringEvaluation {
 
     private static void initializePatternClassLabels() {
     	
-    	try {
-    		
-    		Set<String> cluster = new HashSet<String>();
-    		int j = 0;
-			for ( String s : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "/evaluation/gs_clusters.txt"))){
-				
-				if ( !s.isEmpty() ) cluster.add(s);
-				else {
-					if ( cluster.size() > 1 ) classToPattern.put(cluster.iterator().next(), cluster);
-					else j++;
-					cluster = new HashSet<>();
-				}
-			}
-			// add the last one
-			if ( cluster.size() > 1 )  classToPattern.put(cluster.iterator().next(), cluster);
-			else j++;
+		Set<String> cluster = new HashSet<String>();
+		int j = 0;
+		for ( String s : FileUtil.readFileInList(RdfLiveNews.DATA_DIRECTORY + "/evaluation/gs_clusters.txt", null, null)){
 			
+			if ( !s.isEmpty() ) cluster.add(s);
+			else {
+				if ( cluster.size() > 1 ) classToPattern.put(cluster.iterator().next(), cluster);
+				else j++;
+				cluster = new HashSet<>();
+			}
+		}
+		// add the last one
+		if ( cluster.size() > 1 )  classToPattern.put(cluster.iterator().next(), cluster);
+		else j++;
+		
 //			System.out.println(classToPattern.size());
 //			System.exit(1);
-		}
-    	catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
         
         patternKeys = new ArrayList<String>(classToPattern.keySet());
     }

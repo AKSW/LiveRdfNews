@@ -11,6 +11,7 @@ import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.nlp.NaturalLanguageTagger;
 import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
 import org.aksw.simba.rdflivenews.nlp.pos.StanfordNLPPartOfSpeechTagger;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
@@ -21,7 +22,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.TermQuery;
 
-import com.github.gerbsen.lucene.LuceneManager;
 
 
 /**

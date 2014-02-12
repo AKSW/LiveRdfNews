@@ -12,13 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.MavenUtil;
+import org.aksw.simba.rdflivenews.util.PageRank;
 import org.apache.commons.io.FileUtils;
-
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.maven.MavenUtil;
-import com.github.gerbsen.www.pagerank.PageRank;
 
 /**
  * @author gerb

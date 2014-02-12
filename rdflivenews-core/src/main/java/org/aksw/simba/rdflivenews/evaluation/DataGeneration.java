@@ -23,14 +23,12 @@ import org.aksw.simba.rdflivenews.pattern.filter.impl.DefaultPatternFilter;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefinementManager;
 import org.aksw.simba.rdflivenews.pattern.refinement.PatternRefiner;
 import org.aksw.simba.rdflivenews.pattern.search.concurrency.PatternSearchThreadManager;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
-
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>

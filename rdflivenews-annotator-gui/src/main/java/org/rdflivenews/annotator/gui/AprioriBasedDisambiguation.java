@@ -12,8 +12,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.github.gerbsen.encoding.Encoder;
-import com.github.gerbsen.encoding.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.Encoder;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+
 
 /**
  *

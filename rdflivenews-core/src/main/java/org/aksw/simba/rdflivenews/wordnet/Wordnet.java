@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.rdflivenews.wordnet;
 
+import cern.colt.Arrays;
 import edu.cmu.lti.lexical_db.ILexicalDatabase;
 import edu.cmu.lti.lexical_db.NictWordNet;
 import edu.cmu.lti.ws4j.RelatednessCalculator;
@@ -13,6 +14,7 @@ import edu.cmu.lti.ws4j.impl.Lin;
 import edu.cmu.lti.ws4j.impl.Path;
 import edu.cmu.lti.ws4j.impl.Resnik;
 import edu.cmu.lti.ws4j.impl.WuPalmer;
+import edu.cmu.lti.ws4j.util.MatrixCalculator;
 import edu.cmu.lti.ws4j.util.WS4JConfiguration;
 
 
@@ -35,9 +37,10 @@ public class Wordnet {
         
 //        LEACOCK_CHODOROW (new LeacockChodorow(db)),
 //        LEST             (new Lesk(db)),
-        WU_PALMER        (new WuPalmer(db)), 
 //        RESNIK           (new Resnik(db)),  
-//        JIANG_CONRATH    (new JiangConrath(db)), 
+//        JIANG_CONRATH    (new JiangConrath(db)),
+    	
+    	WU_PALMER        (new WuPalmer(db)), 
         LIN              (new Lin(db)), 
         PATH             (new Path(db));
 
@@ -94,8 +97,8 @@ public class Wordnet {
     public static void main(String[] args) {
 
 //      String[] one = new String[] {"dog","cat","company"};  
-        String[] one = new String[] {"spokesman", "spokeswoman"};
-        String[] two = new String[] {"man", "woman"};
+        String[] one = new String[] {"tall"};
+        String[] two = new String[] {"height"};
 //        String[] two = new String[] {"dog","cat","company","yellow","say", "firm", "brown"};
         
         Wordnet w = new Wordnet();
@@ -103,20 +106,17 @@ public class Wordnet {
         WS4JConfiguration.getInstance().setMFS(true);
         for ( WordnetSimilarity rc : WordnetSimilarity.values() ) {
 
-            System.out.println(rc.relatednessCalculator.getClass().getSimpleName() + ":" );
-            
             long start = System.currentTimeMillis();
-//            System.out.println(rc.getClass().getSimpleName() + ":" + w.getWordnetSimilarity("car", "car", rc));
-            System.out.println(rc.getClass().getSimpleName() + ":" + w.getWordnetSimilarity("spokesman", "spokesperson", rc));
-//            System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("man", "woman"));
-//            System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("tree", "company"));
+//          System.out.println(rc.getClass().getSimpleName() + ":" + w.getWordnetSimilarity("car", "car", rc));
+//          System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("man", "woman"));
+//          System.out.println(rc.getClass().getSimpleName() + ":" + rc.calcRelatednessOfWords("tree", "company"));
             
-            
-//            for ( int i = 0; i < 20 ; i++ ) {
-//                MatrixCalculator.getSimilarityMatrix(two, two, rc.relatednessCalculator);
-//            }
+            System.out.println(rc.relatednessCalculator.getClass().getSimpleName() + ":" + w.getWordnetSimilarity("tall", "height", rc));
             System.out.println("Took: " + (System.currentTimeMillis() - start) + "ms");
+            
+//            for ( double[] arr : MatrixCalculator.getSimilarityMatrix(one, two, rc.relatednessCalculator)) {
+//            	System.out.println(Arrays.toString(arr));
+//            }
         }
     }
-    
 }

@@ -14,9 +14,9 @@ import java.util.Set;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.DETERMINER_TYPE;
 import org.aksw.simba.rdflivenews.pattern.refinement.type.TypeDeterminer;
+import org.aksw.simba.rdflivenews.util.JenaUtil;
+import org.aksw.simba.rdflivenews.util.MavenUtil;
 
-import com.github.gerbsen.maven.MavenUtil;
-import com.github.gerbsen.rdf.JenaUtil;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;

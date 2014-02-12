@@ -34,8 +34,6 @@ import org.apache.lucene.util.Version;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
-import com.github.gerbsen.lucene.LuceneManager;
-
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>

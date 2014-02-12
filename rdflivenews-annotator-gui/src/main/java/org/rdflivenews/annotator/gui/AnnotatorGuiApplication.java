@@ -24,6 +24,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
 import org.apache.commons.io.FileUtils;
 import org.rdflivenews.annotator.gui.AutocompleteWidget.SelectionListener;
 import org.rdflivenews.annotator.gui.SolrIndex.SolrItem;
@@ -32,8 +34,6 @@ import org.ini4j.Config;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;

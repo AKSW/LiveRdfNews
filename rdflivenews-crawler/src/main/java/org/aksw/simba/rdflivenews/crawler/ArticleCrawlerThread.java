@@ -3,7 +3,10 @@
  */
 package org.aksw.simba.rdflivenews.crawler;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,6 +20,9 @@ import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.index.Sentence;
 import org.aksw.simba.rdflivenews.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
 import org.aksw.simba.rdflivenews.rss.RssFeed;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
 import org.apache.log4j.Logger;
 
 import de.jetwick.snacktory.HtmlFetcher;
@@ -94,6 +100,8 @@ public class ArticleCrawlerThread extends Thread {
             // some articles are read protected so they only show a small warning
             if ( res.getText() != null && res.getText().length() > 1000 ) {
 
+            	this.writePlainText(res);
+            	
                 // create the list with the correct size, no need to expand
                 List<String> parsedSentence = StanfordNLPSentenceBoundaryDisambiguation.getSentences(res.getText());
                 sentences = new ArrayList<Sentence>(parsedSentence.size());
@@ -128,7 +136,26 @@ public class ArticleCrawlerThread extends Thread {
         return null;
     }
     
-    /**
+    private void writePlainText(JResult res) {
+    
+    	try {
+    		
+    		SimpleDateFormat f = new SimpleDateFormat("MMddyyyy");
+    		String filename = RdfLiveNewsCrawler.CONFIG.getStringSetting("general", "data-directory") + new URL(res.getUrl()).getHost() + "/" + f.format(new Date()) + "/";
+    		System.out.println(filename);
+			new File(filename).mkdirs();
+			
+			BufferedFileWriter w = new BufferedFileWriter(filename + res.getUrl().hashCode() + ".txt", Encoding.UTF_8, WRITER_WRITE_MODE.OVERRIDE);
+			w.write(res.getText());
+			w.close();
+		}
+    	catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
      * 
      * @param date
      * @return

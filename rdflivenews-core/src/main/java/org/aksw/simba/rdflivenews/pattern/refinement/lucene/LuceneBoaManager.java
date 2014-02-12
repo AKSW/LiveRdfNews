@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.util.Frequency;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
@@ -16,8 +18,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 
-import com.github.gerbsen.lucene.LuceneManager;
-import com.github.gerbsen.math.Frequency;
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *

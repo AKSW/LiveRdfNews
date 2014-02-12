@@ -20,8 +20,7 @@ import org.aksw.simba.rdflivenews.pattern.refinement.type.DefaultTypeDeterminer.
 import org.aksw.simba.rdflivenews.pattern.refinement.type.TypeDeterminer;
 import org.aksw.simba.rdflivenews.rdf.uri.Disambiguation;
 import org.aksw.simba.rdflivenews.rdf.uri.impl.FeatureBasedDisambiguation;
-
-import com.github.gerbsen.math.Frequency;
+import org.aksw.simba.rdflivenews.util.Frequency;
 
 
 /**

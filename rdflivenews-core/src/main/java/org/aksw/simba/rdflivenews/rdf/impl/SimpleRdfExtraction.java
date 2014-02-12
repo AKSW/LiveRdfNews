@@ -3,12 +3,9 @@
  */
 package org.aksw.simba.rdflivenews.rdf.impl;
 
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.rdf.JenaUtil;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.cluster.Cluster;
@@ -20,6 +17,9 @@ import org.aksw.simba.rdflivenews.rdf.RdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.DatatypePropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
 
 import java.util.*;
 

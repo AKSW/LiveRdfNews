@@ -19,11 +19,10 @@ import org.aksw.simba.rdflivenews.pattern.clustering.impl.BorderFlowPatternClust
 import org.aksw.simba.rdflivenews.pattern.clustering.merging.ClusterMerger;
 import org.aksw.simba.rdflivenews.pattern.clustering.merging.DefaultClusterMerger;
 import org.aksw.simba.rdflivenews.pattern.similarity.Similarity;
+import org.aksw.simba.rdflivenews.util.FileUtil;
 import org.apache.commons.io.FileUtils;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
-
-import com.github.gerbsen.maven.MavenUtil;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -63,7 +62,7 @@ public class PatternClusteringTest extends TestCase {
        PatternClustering clustering = new BorderFlowPatternClustering();
        Set<Similarity> similarities = new HashSet<Similarity>();
        
-       for ( String line : FileUtils.readLines(new File("/Users/gerb/test/pattern-sim.txt"))) {
+	   for ( String line : FileUtil.readFileInList(RdfLiveNews.DATA_DIRECTORY + "/Users/gerb/test/pattern-sim.txt", null, null)){
 //           for ( String line : FileUtils.readLines(new File("/Users/gerb/test/10percent/sim-patterns-nlr-QGramSimilarityMetric-0.5.tsv"))) {
            
            String[] lineParts = line.split("\t");

@@ -51,7 +51,7 @@ public class FeedParserTest extends TestCase {
 
         RdfLiveNews.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/rdflivenews-config.ini")));
         RdfLiveNewsCrawler.CONFIG = new Config(new Ini(File.class.getResourceAsStream("/newscrawler-config.ini")));
-        RssDirectoryReader reader = new RssDirectoryReader(new LinkedBlockingQueue<String>());
+//        RssDirectoryReader reader = new RssDirectoryReader(new LinkedBlockingQueue<String>());
      
 //        try {
 //            

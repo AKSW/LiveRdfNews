@@ -3,7 +3,6 @@
  */
 package org.aksw.simba.rdflivenews.rdf.impl;
 
-import com.github.gerbsen.rdf.JenaUtil;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.ontology.*;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -31,11 +30,6 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
 
 import java.io.*;
 import java.net.URLEncoder;
@@ -329,68 +323,15 @@ public class NIFRdfExtraction implements RdfExtraction {
         return check;
     }
 
-//    @Override
-//    public void uploadRdf() {
-//
-//        try {
-//        	
-//        	String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "graph");
-//            String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
-//            String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
-//            String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
-//
-//            System.out.println("Server" + server);
-//            
-//            VirtGraph remoteGraph = new VirtGraph(graph, server.replace("charset=UTF-8", ""), username, password);
-//            
-//            Model m = ModelFactory.createMemModelMaker().createDefaultModel();
-//			m.read(new FileInputStream(new File(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl")),"","N3");
-//			
-//			StmtIterator iter = m.listStatements();
-//
-//	        while (iter.hasNext()) {
-//
-//	            com.hp.hpl.jena.graph.Triple t = iter.next().asTriple();
-//	            remoteGraph.add(t);
-//	        }
-//	        remoteGraph.close();
-//		}
-//        catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//    }
-    @Override
-    public void uploadRdf() {
-	
-		RepositoryConnection con = null;
-
-		try {
-			
-			String graph = RdfLiveNews.CONFIG.getStringSetting("sparql", "graph");
-            String server = RdfLiveNews.CONFIG.getStringSetting("sparql", "uploadServer");
-            String username = RdfLiveNews.CONFIG.getStringSetting("sparql", "username");
-            String password = RdfLiveNews.CONFIG.getStringSetting("sparql", "password");
-       
-            Repository myRepository = new virtuoso.sesame2.driver.VirtuosoRepository(server,username,password);
-
-            myRepository.initialize();
-            
-//			Repository repository = new VirtuosoRepository(server, username, password);
-			con = myRepository.getConnection();
-//			con = repository.getConnection();
-			con.add(new File(RdfLiveNews.DATA_DIRECTORY + "rdf/normal.ttl"), graph, RDFFormat.TURTLE);
-			con.close();
-		} 
-		catch (RepositoryException | RDFParseException | IOException e) {
-
-			e.printStackTrace();
-		} 
-}
-    
     public static void main(String[] args) {
     	RdfLiveNews.init();
     	NIFRdfExtraction ex = new NIFRdfExtraction();
     	ex.uploadRdf();
+	}
+
+	@Override
+	public void uploadRdf() {
+		// TODO Auto-generated method stub
+		
 	}
 }

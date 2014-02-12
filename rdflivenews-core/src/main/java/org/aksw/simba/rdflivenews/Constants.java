@@ -184,4 +184,6 @@ public class Constants {
     public static final Object RDF_LIVE_NEWS_ONTOLOGY_MENTIONS = RDF_LIVE_NEWS_ONTOLOGY_PREFIX + "mentions";
 
 	public static final String NON_GOOD_URL_FOUND = "no url with score above threshold found";
+
+	public static final String NEW_LINE_SEPARATOR = "\n";
 }

@@ -145,26 +145,26 @@ public class BorderFlowPatternClustering implements PatternClustering {
     
     private static void testThreshold() throws IOException {
         
-        Set<Similarity> test = new HashSet<Similarity>();        
-        for (String line : FileUtils.readLines(new File("/Users/gerb/Development/workspaces/experimental/rdflivenews/similarity/sim-WordnetSimilarityMetric-0.5.tsv"))) {
-            
-            String[] lineParts = line.split("\t");
-            test.add(new Similarity(new DefaultPattern(lineParts[0]), new DefaultPattern(lineParts[1]), Double.valueOf(lineParts[2])));
-        }
-        
-        PatternClustering pc = new BorderFlowPatternClustering();
-        Set<Cluster<Pattern>> clusters = pc.clusterPatterns(test , 0.5);
-        for(Cluster<Pattern> cp: clusters)
-        {
-            if ( cp.size() > 1) {
-
-                for(Pattern pattern: cp)
-                {
-                    System.out.print(pattern.getNaturalLanguageRepresentation()+"\t");
-                }
-                System.out.print("\n");
-            }
-        }
+//        Set<Similarity> test = new HashSet<Similarity>();        
+//        for (String line : FileUtils.readLines(new File("/Users/gerb/Development/workspaces/experimental/rdflivenews/similarity/sim-WordnetSimilarityMetric-0.5.tsv"))) {
+//            
+//            String[] lineParts = line.split("\t");
+//            test.add(new Similarity(new DefaultPattern(lineParts[0]), new DefaultPattern(lineParts[1]), Double.valueOf(lineParts[2])));
+//        }
+//        
+//        PatternClustering pc = new BorderFlowPatternClustering();
+//        Set<Cluster<Pattern>> clusters = pc.clusterPatterns(test , 0.5);
+//        for(Cluster<Pattern> cp: clusters)
+//        {
+//            if ( cp.size() > 1) {
+//
+//                for(Pattern pattern: cp)
+//                {
+//                    System.out.print(pattern.getNaturalLanguageRepresentation()+"\t");
+//                }
+//                System.out.print("\n");
+//            }
+//        }
     }
 
     /**

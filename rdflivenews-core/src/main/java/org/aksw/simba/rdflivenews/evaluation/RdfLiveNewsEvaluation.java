@@ -35,13 +35,13 @@ import org.aksw.simba.rdflivenews.rdf.impl.SimpleRdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.DatatypePropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.FileUtil;
 import org.apache.commons.io.FileUtils;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
-
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
@@ -147,7 +147,7 @@ public class RdfLiveNewsEvaluation {
 
     private static void loadGoldStandard() throws IOException {
 
-        for (String line : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated.txt"))) {
+    	for ( String line : FileUtil.readFileInList(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated.txt", null, null)){
             
             String[] lineParts = line.replace("______", "___ ___").split("___");
             if (lineParts[0].equals("NORMAL")) {

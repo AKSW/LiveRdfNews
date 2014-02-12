@@ -14,13 +14,13 @@ import org.aksw.simba.rdflivenews.pattern.Pattern;
 import org.aksw.simba.rdflivenews.pattern.search.PatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
 import org.aksw.simba.rdflivenews.pattern.search.impl.PartOfSpeechTagPatternSearcher;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.TermQuery;
 
-import com.github.gerbsen.lucene.LuceneManager;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>

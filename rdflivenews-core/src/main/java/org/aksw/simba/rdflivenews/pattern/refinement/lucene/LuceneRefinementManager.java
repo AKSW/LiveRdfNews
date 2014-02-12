@@ -8,6 +8,9 @@ import java.util.Set;
 
 import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
+import org.aksw.simba.rdflivenews.util.Encoder;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -16,9 +19,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 
-import com.github.gerbsen.encoding.Encoder;
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.lucene.LuceneManager;
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>
  *

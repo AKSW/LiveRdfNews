@@ -1,151 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.aksw</groupId>
-    <artifactId>rdflivenews</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<groupId>org.aksw</groupId>
+	<artifactId>rdflivenews</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-    <name>rdflivenews</name>
-    <url>http://maven.apache.org</url>
+	<name>rdflivenews</name>
+	<url>http://maven.apache.org</url>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-    <modules>
-        <module>rdflivenews-gui</module>
-        <module>rdflivenews-core</module>
-        <module>rdflivenews-crawler</module>
-        <module>rdflivenews-annotator-gui</module>
-    </modules>
+	<modules>
+		<!-- <module>rdflivenews-gui</module> -->
+		<module>rdflivenews-core</module>
+		<!-- <module>rdflivenews-crawler</module> -->
+		<!-- <module>rdflivenews-annotator-gui</module> -->
+	</modules>
 
-    <repositories>
-        <repository>
-            <id>karussell_snapshots</id>
-            <url>https://github.com/karussell/mvnrepo/raw/master/snapshots/</url>
-        </repository>
-        <repository>
-            <id>gerb_snapshots</id>
-            <url>https://raw.github.com/gerbsen/maven-repo/master/snapshots/</url>
-        </repository>
-        <repository>
-            <id>maven.aksw.internal</id>
-            <name>University Leipzig, AKSW Maven2 Repository</name>
-            <url>http://maven.aksw.org/archiva/repository/internal</url>
-            <releases />
-        </repository>
-        <repository>
-            <id>maven.aksw.snapshots</id>
-            <name>University Leipzig, AKSW Maven2 Repository</name>
-            <url>http://maven.aksw.org/archiva/repository/snapshots</url>
-            <snapshots />
-        </repository>
-        
-    </repositories>
+	<repositories>
+		<repository>
+			<id>karussell_snapshots</id>
+			<url>https://github.com/karussell/mvnrepo/raw/master/snapshots/</url>
+		</repository>
+		<!-- <repository> -->
+		<!-- <id>gerb_snapshots</id> -->
+		<!-- <url>https://raw.github.com/gerbsen/maven-repo/master/snapshots/</url> -->
+		<!-- </repository> -->
+		<repository>
+			<id>maven.aksw.internal</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/internal</url>
+			<releases />
+		</repository>
+		<repository>
+			<id>maven.aksw.snapshots</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<snapshots />
+		</repository>
+	</repositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>de.uni_leipzig.simba.limes</groupId>
-            <artifactId>LIMES</artifactId>
-            <version>0.6RC2</version>
-        </dependency>
-        <dependency>
-            <groupId>de.uni_leipzig.simba.limes</groupId>
-            <artifactId>limes-core</artifactId>
-            <version>0.6-SNAPSHOT</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queries</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-common</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queryparser</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.aksw</groupId>
-            <artifactId>border-flow</artifactId>
-            <version>0.4</version>
-        </dependency>
-        <dependency> 
-            <groupId>gnu.getopt</groupId>
-            <artifactId>java-getopt</artifactId>
-            <version>1.0.13</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ini4j</groupId>
-            <artifactId>ini4j</artifactId>
-            <version>0.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.gerbsen</groupId>
-            <artifactId>utk</artifactId>
-            <version>1.0.5</version>
-<!--             <exclusions> -->
-<!--             	<exclusion> -->
-<!--             		<artifactId>commons-io</artifactId> -->
-<!--             		<groupId>commons-io</groupId> -->
-<!--             	</exclusion> -->
-<!--             </exclusions> -->
-        </dependency>
-                
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>com.google.collections</groupId>
+			<artifactId>google-collections</artifactId>
+			<version>1.0</version>
+		</dependency>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
-                    <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
-                        <compilerArgument></compilerArgument>
-                    </configuration>
-                </plugin>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+		<dependency>
+			<groupId>gnu.getopt</groupId>
+			<artifactId>java-getopt</artifactId>
+			<version>1.0.13</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ini4j</groupId>
+			<artifactId>ini4j</artifactId>
+			<version>0.5.2</version>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>com.github.gerbsen</groupId> -->
+		<!-- <artifactId>utk</artifactId> -->
+		<!-- <version>1.0.5</version> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <artifactId>commons-io</artifactId> -->
+		<!-- <groupId>commons-io</groupId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- </dependency> -->
+
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+						<compilerArgument></compilerArgument>
+					</configuration>
+				</plugin>
 				<!-- <plugin> -->
 				<!-- <groupId>org.codehaus.mojo</groupId> -->
 				<!-- <artifactId>exec-maven-plugin</artifactId> -->
 				<!-- </plugin> -->
-            </plugins>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

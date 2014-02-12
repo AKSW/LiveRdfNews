@@ -11,9 +11,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.github.gerbsen.map.MapUtil;
-import com.github.gerbsen.maven.MavenUtil;
-import com.github.gerbsen.rdf.JenaUtil;
+import org.aksw.simba.rdflivenews.util.JenaUtil;
+import org.aksw.simba.rdflivenews.util.MapUtil;
+import org.aksw.simba.rdflivenews.util.MavenUtil;
+
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 

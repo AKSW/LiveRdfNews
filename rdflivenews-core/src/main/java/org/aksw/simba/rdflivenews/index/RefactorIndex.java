@@ -16,6 +16,7 @@ import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.nlp.ner.StanfordNLPNamedEntityRecognition;
 import org.aksw.simba.rdflivenews.nlp.pos.StanfordNLPPartOfSpeechTagger;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
@@ -34,9 +35,6 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.util.Version;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
-
-import com.github.gerbsen.lucene.LuceneManager;
-import com.github.gerbsen.math.MathUtil;
 
 /**
  * @author Daniel Gerber <dgerber@informatik.uni-leipzig.de>

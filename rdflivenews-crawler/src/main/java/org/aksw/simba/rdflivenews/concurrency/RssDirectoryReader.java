@@ -17,14 +17,14 @@ import org.aksw.simba.rdflivenews.RdfLiveNewsCrawler;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.index.IndexManager;
 import org.aksw.simba.rdflivenews.rss.RssFeed;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
+import org.aksw.simba.rdflivenews.util.MavenUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.IndexSearcher;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
-import com.github.gerbsen.lucene.LuceneManager;
-import com.github.gerbsen.maven.MavenUtil;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
@@ -117,7 +117,7 @@ public class RssDirectoryReader {
 
                         // we only want to add the uri if the uri is not already
                         // in the queue or in the database
-                        if (!this.queue.contains(rssFeed.link) && IndexManager.getInstance().isNewArticle(searcher, rssFeed.link)) {
+                        if (!this.queue.contains(rssFeed.link) && IndexManager.getInstance().isNewArticleNotClosing(searcher, rssFeed.link)) {
 
                             this.queue.put(rssFeed);
                             this.logger.info("Added new article URL: " + rssFeed.link);

@@ -31,12 +31,12 @@ import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.aksw.simba.rdflivenews.rdf.uri.Disambiguation;
 import org.aksw.simba.rdflivenews.rdf.uri.impl.FeatureBasedDisambiguation;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.FileUtil;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.MathUtil;
 import org.apache.commons.io.FileUtils;
-
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.math.MathUtil;
 
 import edu.stanford.nlp.util.StringUtils;
 
@@ -82,6 +82,7 @@ public class DisambiguationEvaluation {
         List<DisambiguationEvaluationResult> results = new ArrayList<>();
         
         loadGoldStandard();
+        System.out.println(GOLD_STANDARD_TRIPLES.size());
 //        runEvaluationGridSearch();
 //        runEvaluationHillClimbing();
         debugEvaluation();
@@ -144,14 +145,17 @@ public class DisambiguationEvaluation {
 
 		Set<String> told = new HashSet<String>();
 		
-        for (String line : FileUtils.readLines(new File(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated_gold.txt"))) {
+    	for ( String line : FileUtil.readFileInList(RdfLiveNews.DATA_DIRECTORY + "goldstandard/patterns_annotated_GS.txt", null, null)){
             
+        	if (GOLD_STANDARD_TRIPLES.size() == 500) break;
+        	
             String[] lineParts = line.replace("______", "___ ___").split("___");
             if (lineParts[0].equals("NORMAL")) {
                 
                 ObjectPropertyTriple triple = new ObjectPropertyTriple(lineParts[1], lineParts[2], lineParts[3], lineParts[4], lineParts[5], new HashSet<Integer>(Arrays.asList(Integer.valueOf(lineParts[7]))));
 //                if ( GOLD_STANDARD_TRIPLES.containsKey(triple.getKey())) System.out.println(triple.getKey());
-                GOLD_STANDARD_TRIPLES.put(triple.getKey(), triple);
+                GOLD_STANDARD_TRIPLES.put(line.hashCode()+""+ new Random().nextDouble(), triple);
+//                GOLD_STANDARD_TRIPLES.put(triple.getKey(), triple);
             }
             else if (lineParts[0].equals("SAY")) {
                 

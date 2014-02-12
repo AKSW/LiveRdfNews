@@ -38,19 +38,19 @@ import org.aksw.simba.rdflivenews.rdf.impl.NIFRdfExtraction;
 import org.aksw.simba.rdflivenews.rdf.triple.ObjectPropertyTriple;
 import org.aksw.simba.rdflivenews.rdf.triple.Triple;
 import org.aksw.simba.rdflivenews.statistics.Statistics;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter;
+import org.aksw.simba.rdflivenews.util.BufferedFileWriter.WRITER_WRITE_MODE;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
 import org.aksw.simba.rdflivenews.util.ReflectionManager;
+import org.aksw.simba.rdflivenews.util.TimeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.file.BufferedFileWriter;
-import com.github.gerbsen.file.BufferedFileWriter.WRITER_WRITE_MODE;
-import com.github.gerbsen.lucene.LuceneManager;
-import com.github.gerbsen.time.TimeUtil;
 import de.uni_leipzig.simba.data.Mapping;
+
 import org.aksw.simba.rdflivenews.pattern.linking.impl.LimesLinker;
 
 /**
@@ -68,7 +68,25 @@ public class RdfLiveNews {
     public static void main(String[] args) throws InvalidFileFormatException, IOException {
 
         init();
-        run();
+//        run();
+        test();
+    }
+    
+    private static void test() {
+    	
+//    	IndexManager.getInstance().setDocumentsToNonDuplicateSentences();
+    	
+    	System.out.println("ITERATION\tNR. OF ARTICLES");
+    	for ( ; ITERATION <= IndexManager.getInstance().getHighestTimeSliceId() ; ITERATION++ ) {
+    		
+    		Set<String> articleUrls = IndexManager.getInstance().getArticleUrlsForIteration(ITERATION);
+    		
+    		int sentences = 0;
+    		for ( String url : articleUrls ) {
+    			sentences += IndexManager.getInstance().getAllSentencesFromArticle(url).size();
+    		}
+    		System.out.println(ITERATION + "\t" + articleUrls.size() + "\t" + sentences);
+    	}
     }
     
     private static void run() {
@@ -338,30 +356,4 @@ public class RdfLiveNews {
             writer.close();
     	}
 	}
-    
-private static void test() {
-        
-        IndexManager.getInstance();
-        IndexSearcher searcher = LuceneManager.openIndexSearcher(IndexManager.INDEX);
-        
-        Set<String> urls = new HashSet<>();
-        
-        for (int i = 0; i < 1000 ; i++) {
-        
-            Document doc = LuceneManager.getDocumentByNumber(searcher.getIndexReader(), i);
-            String url = doc.get(Constants.LUCENE_FIELD_URL);
-            
-            if ( !urls.contains(url) ) {
-                
-                urls.add(url);
-                
-                System.out.println(url);
-                
-                for ( String s : IndexManager.getInstance().getAllSentencesFromArticle(url)) {
-                    
-                    System.out.println(s);
-                }
-            }
-        }
-    }
 }

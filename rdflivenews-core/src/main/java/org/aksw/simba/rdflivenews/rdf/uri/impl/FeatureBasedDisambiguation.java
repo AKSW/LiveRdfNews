@@ -20,15 +20,14 @@ import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneBoaManager;
 import org.aksw.simba.rdflivenews.pattern.refinement.lucene.LuceneDbpediaManager;
 import org.aksw.simba.rdflivenews.rdf.uri.Disambiguation;
+import org.aksw.simba.rdflivenews.util.Encoder;
+import org.aksw.simba.rdflivenews.util.Encoder.Encoding;
+import org.aksw.simba.rdflivenews.util.Frequency;
 import org.apache.commons.lang3.StringUtils;
 import org.ini4j.InvalidFileFormatException;
 
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.QGramsDistance;
-
-import com.github.gerbsen.encoding.Encoder;
-import com.github.gerbsen.encoding.Encoder.Encoding;
-import com.github.gerbsen.math.Frequency;
 
 /**
  *

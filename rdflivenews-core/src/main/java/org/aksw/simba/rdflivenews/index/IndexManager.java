@@ -14,6 +14,7 @@ import org.aksw.simba.rdflivenews.Constants;
 import org.aksw.simba.rdflivenews.RdfLiveNews;
 import org.aksw.simba.rdflivenews.config.Config;
 import org.aksw.simba.rdflivenews.pattern.search.impl.NamedEntityTagPatternSearcher;
+import org.aksw.simba.rdflivenews.util.LuceneManager;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
@@ -41,8 +42,6 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
-
-import com.github.gerbsen.lucene.LuceneManager;
 
 /**
  * 
@@ -145,6 +144,17 @@ public class IndexManager {
         
         LuceneManager.closeIndexReader(searcher.getIndexReader());
         LuceneManager.closeIndexSearcher(searcher);
+        
+        if ( hits != null && hits.length != 0 ) return false;
+        
+        return true;
+    }
+    
+    public synchronized boolean isNewArticleNotClosing(IndexSearcher searcher, String url) {
+        
+        TopScoreDocCollector collector = TopScoreDocCollector.create(1, false);
+        LuceneManager.query(searcher, new TermQuery(new Term(Constants.LUCENE_FIELD_URL, url)), collector);
+        ScoreDoc[] hits = collector.topDocs().scoreDocs;
         
         if ( hits != null && hits.length != 0 ) return false;
         
@@ -608,6 +618,31 @@ public class IndexManager {
         LuceneManager.closeIndexSearcher(searcher);
         
         return nonDuplicateSentencesUntilIteration;
+    }
+    
+    public Set<String> getArticleUrlsForIteration(int iteration) {
+
+        Query timeSlice = NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_TIME_SLICE, iteration, iteration, true, true); 
+        Query duplicate = NumericRangeQuery.newIntRange(Constants.LUCENE_FIELD_DUPLICATE_IN_TIME_SLICE, Constants.NOT_DUPLICATE_SENTENCE, Constants.NOT_DUPLICATE_SENTENCE, true, true); 
+        
+        BooleanQuery query = new BooleanQuery();
+        query.add(new BooleanClause(timeSlice, Occur.MUST));
+        query.add(new BooleanClause(duplicate, Occur.MUST));
+        
+        IndexSearcher searcher = LuceneManager.openIndexSearcher(INDEX);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(5_000_000, false);
+        LuceneManager.query(searcher, query, collector);
+        
+        Set<String> articleUrls = new HashSet<>();
+        
+        // add the primary key of each document to the list
+        for ( ScoreDoc doc : collector.topDocs().scoreDocs )
+            articleUrls.add(LuceneManager.getDocumentByNumber(searcher.getIndexReader(), doc.doc).get(Constants.LUCENE_FIELD_URL));
+        
+        LuceneManager.closeIndexReader(searcher.getIndexReader());
+        LuceneManager.closeIndexSearcher(searcher);
+        
+        return articleUrls;
     }
     
     /**
